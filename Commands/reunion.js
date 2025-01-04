@@ -1,7 +1,7 @@
 import {Client, CommandInteraction, SlashCommandStringOption} from 'discord.js';
 import events from "events";
 import readline from 'readline';
-import { changeValueFromFile } from '../Fonctions/scripts';
+import { changeValueFromFile } from '../Fonctions/scripts.js';
 import fs from "fs";
 
 const description = "Avec cette commande vous pouvez récupérer la prochaine reunion planifié, ainsi qu'en planifié une vous même, avec le paramètre date_reunion";
