@@ -3,6 +3,28 @@ import { changeValueFromFile } from "../Fonctions/scripts.js";
 import dotenv from "dotenv";
 
 dotenv.config();
+const handleRun = async (version,args,message) =>
+{
+    if(args.length === 0)
+    {
+        args = [null];
+    }
+    let {option, jsonData} = changeValueFromFile("lien_recap",message,"lienOnedrive", async (ancienneValeur,value,message,jsonData) => {
+        const jsonMisAjour = JSON.stringify(jsonData,null,4);
+        fs.writeFileSync("JSON/data.json", jsonMisAjour);
+
+        await message.reply(`Le lien du recap a bien été modifié! (${ancienneValeur}->${value})`);
+    }, args,version);
+    console.log("here")
+    console.log(option,jsonData);
+    if(option === null) 
+    {
+        console.log("here")
+        const lienOnedrive = jsonData.lienOnedrive;
+        await message.reply(`Le lien onedrive recap est actuellement : ${lienOnedrive}`);
+    }
+
+}
 
 export const description = "Commande donnant un lien OneDrive vers le dernier récaps de reunions";
 export const name = "recap";
@@ -15,23 +37,8 @@ export const run = async(bot, message, args) => {
     
         try
         {
-            if (bot instanceof Client && message instanceof CommandInteraction) {
+            if (bot instanceof Client && message instanceof CommandInteraction && message.isChatInputCommand()) {
                 /*
-                const option = message.options.get("lien recap");                
-                const jsonData = await import("../JSON/data.json");
-                
-                if(option !== null)
-                {
-                    const {value} = option;
-                    const ancienneValeur = jsonData.lienOnedrive;
-                    jsonData.lienOnedrive = value;
-
-                    const jsonMisAjour = JSON.stringify(jsonData,null,4);
-                    fs.writeFileSync("data.json", jsonMisAjour);
-
-                    await message.reply(`Le lien du recap a bien été modifié! (${ancienneValeur}->${value})`);
-                }
-                */
                 console.log("here")
                 let {option, jsonData} = changeValueFromFile("lien_recap",message,"lienOnedrive", async (ancienneValeur,value,message,jsonData) => {
                     const jsonMisAjour = JSON.stringify(jsonData,null,4);
@@ -46,8 +53,12 @@ export const run = async(bot, message, args) => {
                     console.log("here")
                     const lienOnedrive = jsonData.lienOnedrive;
                     await message.reply(`Le lien onedrive recap est actuellement : ${lienOnedrive}`);
-                }
+                }*/
+               handleRun(0,[],message)
 
+            }else 
+            {
+                handleRun(1,args,message)
             }
         }
         catch(error)
@@ -56,3 +67,4 @@ export const run = async(bot, message, args) => {
             await message.reply("Une erreur s'est produite, veuillez contacter un développeur!");
         }
 }
+

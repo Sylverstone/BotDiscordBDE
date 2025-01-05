@@ -1,4 +1,4 @@
-import {Client, CommandInteraction, SlashCommandStringOption} from 'discord.js';
+import {Client, CommandInteraction, Message, SlashCommandBuilder, SlashCommandStringOption} from 'discord.js';
 import events from "events";
 import readline from 'readline';
 import { changeValueFromFile } from '../Fonctions/scripts.js';
@@ -17,7 +17,7 @@ const run = async (bot, message, args) =>
 {
     try {
 
-        if(bot instanceof Client && message instanceof CommandInteraction)
+        if(bot instanceof Client && message instanceof CommandInteraction && message.isChatInputCommand())
         {
             /*
             const options = message.options.get("date_reunion");
@@ -55,6 +55,7 @@ const run = async (bot, message, args) =>
                     }
             } );
             console.log("finish")
+            
             if(option === null) {
                 console.log(jsonData)
                 const date = jsonData.prochaineReunion;
@@ -74,6 +75,12 @@ const run = async (bot, message, args) =>
                 }
             }
             
+        }
+        else if(message instanceof Message && args instanceof Array)
+        {
+           
+            
+            await message.reply("t'inquiète ça va le faire")
         }
     } catch (error) {
         console.log(error)

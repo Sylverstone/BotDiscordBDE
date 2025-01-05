@@ -17,16 +17,31 @@ import { json } from 'stream/consumers';
  * @param {string} pathJSON 
  * @returns {ReturnObject} ReturnObject
  */
-export function changeValueFromFile(optionName,message,key,callback, pathJSON = "JSON/data.json")
+export function changeValueFromFile(optionName,message,key,callback, args = [null],version = 0,pathJSON = "JSON/data.json")
 {
-    const option = message.options.get(optionName);
+    let option;
+    if(version === 0)
+    {
+        option = message.options.get(optionName);
+    }else{
+        option = args[0];
+    }
+    
     const jsonFile = fs.readFileSync(pathJSON,"utf-8");
     const jsonData = JSON.parse(jsonFile);
     let value = null;
     let ancienneValeur = null;
     if(option !== null)
     {
-        value = option.value;
+        if(version === 0)
+        {
+            value = option.value;
+        }
+        else
+        {
+            value = option;
+        }
+        
         ancienneValeur = jsonData[key];
         jsonData[key] = value;
         console.log(jsonData);
