@@ -1,43 +1,37 @@
+import { CommandInteraction} from 'discord.js';
+import fs from 'fs';
+import { json } from 'stream/consumers';
 
-export async function changeValueFromFile(goalStr,optionName,file = "data.txt")
+/**
+ * @typedef {Object} ReturnObject
+ * @property {any | null } option
+ * @property {Object} jsonData
+ */
+
+/**
+ * 
+ * @param {string} optionName 
+ * @param {CommandInteraction} message 
+ * @param {string} key 
+ * @param {(ancienneValeur : string, value:string, message,jsonData) => void} callback 
+ * @param {string} pathJSON 
+ * @returns {ReturnObject} ReturnObject
+ */
+export function changeValueFromFile(optionName,message,key,callback, pathJSON = "JSON/data.json")
 {
-    const options = message.options.get("date_reunion");
-    const goal = "prochainereunion";
-    let indexGoal = null;
-    const fluxLecture = fs.createReadStream("data.txt")
-    const rl = readline.createInterface(
-        {
-            input :fluxLecture,
-            crlfDelay: Infinity,
-        }
-    )
-
-    let allLines = []
-    if(options !== null)
+    const option = message.options.get(optionName);
+    const jsonFile = fs.readFileSync(pathJSON,"utf-8");
+    const jsonData = JSON.parse(jsonFile);
+    let value = null;
+    let ancienneValeur = null;
+    if(option !== null)
     {
-        let { value } = options;
-        
-        if(typeof value === "string")
-        {
-            console.log(typeof value)
-            //value = value.replaceAll('-','/')
-            
-            
-            console.log(value)
-
-            
-            rl.on('line', line => {
-                console.log(line)
-                allLines.push(line)
-                if(line.toLowerCase() === goal)
-                {
-                    indexGoal = allLines.length - 1;
-                }
-            })
-
-            await events.once(rl,'close');
-        }
+        value = option.value;
+        ancienneValeur = jsonData[key];
+        jsonData[key] = value;
+        console.log(jsonData);
+        callback(ancienneValeur, value,message,jsonData);
     }
-
-    return allLines[indexGoal+1],indexGoal,allLines,value
+    console.log("fin fichier")
+    return {option : option, jsonData : jsonData}
 }

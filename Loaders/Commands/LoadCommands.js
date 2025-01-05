@@ -1,7 +1,9 @@
 import { readdirSync } from "fs";
-import { join } from "path";
+import path from "path";
 import { SlashCommandBuilder, REST, Routes } from "discord.js";
 import dotenv from "dotenv"
+import __dirname from "../../dirname.js";
+import { fileURLToPath, pathToFileURL } from "url";
 dotenv.config();
 
 export default async () => 
@@ -12,7 +14,12 @@ export default async () =>
    
     for(const file of listeFileCommands)
     {
-        const commande = await import(join("..","..","Commands",file + ext));
+        const filePath = path.join(__dirname, "Commands",file + ext);
+        const fileUrl = pathToFileURL(filePath).href
+        console.log("file : ",filePath,"\n"+fileUrl);
+        console.log(__dirname)
+        
+        const commande = await import(fileUrl);
         console.log(commande.description, commande.name);
         //creation de la slash commande
         let slashCommand = new SlashCommandBuilder()

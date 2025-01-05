@@ -7,6 +7,7 @@ import fs from "fs";
 const description = "Avec cette commande vous pouvez planifié/avoir la date d'une reunion";
 
 const name = "reunion";
+
 const option = new SlashCommandStringOption()
     .setName("date_reunion")
     .setRequired(false)
@@ -18,82 +19,45 @@ const run = async (bot, message, args) =>
 
         if(bot instanceof Client && message instanceof CommandInteraction)
         {
-            
+            /*
             const options = message.options.get("date_reunion");
-            const goal = "prochainereunion";
-            let indexGoal = null;
-            const fluxLecture = fs.createReadStream("data.txt")
-            const rl = readline.createInterface(
-                {
-                    input :fluxLecture,
-                    crlfDelay: Infinity,
-                }
-            )
+            const jsonData = await import("../JSON/data.json");
 
-            let allLines = []
             if(options !== null)
             {
-                let { value } = options;
-                
-                if(typeof value === "string")
+                const {value} = option;
+                const ancienneValeur = jsonData.prochaineReunion;
+                jsonData.prochaineReunion = value;
+
+                if(!verifierDate(ancienneValeur,value))
                 {
-                    console.log(typeof value)
-                    value = value.replaceAll('-','/')
-                    
-                    
-                    console.log(value)
-        
-                    
-                    rl.on('line', line => {
-                        console.log(line)
-                        allLines.push(line)
-                        if(line.toLowerCase() === goal)
-                        {
-                            indexGoal = allLines.length - 1;
-                        }
-                    })
-        
-                    await events.once(rl,'close');
-                    const ancienneValeur = allLines[indexGoal+1]
-                    
-                    if(!verifierDate(ancienneValeur,value))
-                    {
-                        await message.reply(`La nouvelles date de reunion que tu essaies d'entrer est inférieur a l'ancienne :) PAS LOGIQUE`)
-                    }
-                    else 
-                    {
-                        allLines[indexGoal + 1] = value;
-                        let newContent = "";
-            
-                        allLines.forEach(line => newContent += line +"\n");
-                        fs.writeFileSync("data.txt",newContent)
-            
-                        await message.reply(`La nouvelle date de reunion a bien été enregistré ! (${ancienneValeur}->${value})`)
-                    }
-                    
+                    await message.reply(`La nouvelles date de reunion que tu essaies d'entrer est inférieur a l'ancienne :) PAS LOGIQUE`)
                 }
                 else 
                 {
-                    throw TypeError("Value n'est pas du bon type :)")
+                    const newJson = JSON.stringify(jsonData, null, 4);
+                    fs.writeFileSync("data.json", newJson);
+                    await message.reply(`La nouvelle date de reunion a bien été enregistré ! (${ancienneValeur}->${value})`);
                 }
-                
             }
-            else {
-                
-    
-                rl.on('line', line => {
-                    console.log(line)
-                    allLines.push(line.toLowerCase())
-                    if(line.toLowerCase() === goal)
+                */
+            let {option, jsonData} = changeValueFromFile("date_reunion",message,"prochaineReunion", async (ancienneValeur,value,message,jsonData) => {
+                console.log("start")
+                if(!verifierDate(ancienneValeur,value))
                     {
-                        indexGoal = allLines.length - 1;
+                        await message.reply(`La nouvelles date de reunion que tu essaies d'entrer est inférieur a l'ancienne :) Ce n'est donc pas possible`);
                     }
-                })
-                
-                
-
-                await events.once(rl,'close');
-                const date = allLines[indexGoal + 1];
+                    else 
+                    {
+                        const newJson = JSON.stringify(jsonData, null, 4);
+                        fs.writeFileSync("data.json", newJson);
+                        await message.reply(`La nouvelle date de reunion a bien été enregistré ! (${ancienneValeur}->${value})`);
+                    }
+            } );
+            console.log("finish")
+            if(option === null) {
+                console.log(jsonData)
+                const date = jsonData.prochaineReunion;
                 console.log(date);
 
                 const [jour, mois, annee] = date.split("/");
@@ -102,11 +66,11 @@ const run = async (bot, message, args) =>
                 const dateActu = new Date();
                 if(prochaineReunion > dateActu)
                 {
-                    await message.reply("Salut jeune chevalier :)\n # non je déconne crois pas \nAlors ducoup, la prochaine reunion c'est le " + datefr)
+                    await message.reply("La prochaine réunion est planifié au " + datefr)
                 }
                 else
                 {
-                    await message.reply("t'es préssé de ouf hein ? pas de prochaine reunion, la dernière date de " + datefr);
+                    await message.reply("Il n'y a pas de prochaine reunion prévu pour l'instant.\nLa dernière date du " + datefr);
                 }
             }
             
