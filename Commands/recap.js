@@ -34,7 +34,7 @@ export const run = async(bot, message, args = [null]) => {
                     await message.reply(`Le lien onedrive recap est actuellement : ${lienOnedrive}`);
                 }*/
                let version = 0;
-               if(message instanceof Message ||message instanceof CommandInteraction)
+               if(message instanceof Message)
                {
                     version = 1
                }
