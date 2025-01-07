@@ -1,8 +1,10 @@
-import { Client, Events, GatewayIntentBits, Partials } from "discord.js";
+import { ActivityType, Client, Collection, Events, GatewayIntentBits, Partials} from "discord.js";
 import loadCommands from "./Loaders/Commands/LoadCommands.js";
 import loadEvenements from "./Loaders/EVents/loadEvenements.js"
 import dotenv from "dotenv"
+import { type } from "os";
 dotenv.config();
+
 
 const bot = new Client({
     intents: [
@@ -16,9 +18,12 @@ const bot = new Client({
     partials : [Partials.Channel]
 })
 
+bot.commands = new Collection();
 
 bot.once(Events.ClientReady, bot => {
-    console.log(bot.user.tag)
+    console.log("bot",bot.user.tag,"is online :)");
+    bot.user.setUsername("Yoichi")
+    bot.user.setPresence({activities : [{name : "Vinland Saga" , type : ActivityType.Watching}], status : "dnd"});
     loadCommands(bot);
     loadEvenements(bot);
 })

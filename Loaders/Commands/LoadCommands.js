@@ -1,6 +1,6 @@
 import { readdirSync } from "fs";
 import path from "path";
-import { SlashCommandBuilder, REST, Routes, Client } from "discord.js";
+import { SlashCommandBuilder, REST, Routes, Client, Collection } from "discord.js";
 import dotenv from "dotenv"
 import __dirname from "../../dirname.js";
 import { fileURLToPath, pathToFileURL } from "url";
@@ -20,11 +20,13 @@ export default async (bot) =>
         {
             const filePath = path.join(__dirname, "Commands",file + ext);
             const fileUrl = pathToFileURL(filePath).href
-            console.log("file : ",filePath,"\n"+fileUrl);
-            console.log(__dirname)
             
             const commande = await import(fileUrl);
-            console.log(commande.description, commande.name);
+            if(commande.notAcommand) continue;
+            if(bot.commands instanceof Collection)
+            {
+                bot.commands.set(commande.name, commande);
+            }
             //creation de la slash commande
             let slashCommand = new SlashCommandBuilder()
                 .setName(commande.name)
@@ -44,7 +46,7 @@ export default async (bot) =>
                 console.log(`Started refreshing ${commands.length} application (/) commands.`);
                 //permet au slash commande d'être visible sur le serveur
                 const guildIds = bot.guilds.cache.map(guild => guild.id)
-                console.log(guildIds);
+                console.log("guilds of bots :", guildIds);
                 let data;
                 for(const guildId of guildIds)
                 {
@@ -57,7 +59,8 @@ export default async (bot) =>
                 console.log(`Successfully reloaded ${data.length} application (/) commands.`);
             } catch (error) {
                 
-                console.error(error);
+                console.error("error while loading commands\n", error);
+                throw error;
             }
         })();
     }

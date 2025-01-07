@@ -5,7 +5,7 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npx nodemon main.js",
     "start": "node main.js"
   },
   "author": "Sylvio PELAGE MAXIME",
@@ -14,6 +14,7 @@
     "discord.js": "^14.17.2",
     "dotenv": "^16.4.7",
     "fs": "^0.0.1-security",
+    "nodemon": "^3.1.9",
     "path": "^0.12.7",
     "readline": "^1.3.0"
   }
