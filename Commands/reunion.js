@@ -56,7 +56,7 @@ async function handleRun(version,args,message)
             else 
             {
                 const newJson = JSON.stringify(jsonData, null, 4);
-                fs.writeFileSync("data.json", newJson);
+                fs.writeFileSync("JSON/data.json", newJson);
                 await message.reply(`La nouvelle date de reunion a bien été enregistré ! (${ancienneValeur}->${value})`);
             }
     },args,version);
