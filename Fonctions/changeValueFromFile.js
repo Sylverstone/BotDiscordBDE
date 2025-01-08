@@ -29,6 +29,7 @@ export function changeValueFromFile(optionName,message,key,callback, args = [nul
     
     const jsonFile = fs.readFileSync(pathJSON,"utf-8");
     const jsonData = JSON.parse(jsonFile);
+    
     let value = null;
     let ancienneValeur = null;
     if(option !== null)
@@ -49,4 +50,14 @@ export function changeValueFromFile(optionName,message,key,callback, args = [nul
     }
     console.log("fin fichier")
     return {option : option, jsonData : jsonData}
+}
+
+export function changeSpecialValueFromFIle(key, value, pathJSON = "JSON/data.json")
+{
+    const jsonFile = fs.readFileSync(pathJSON,"utf-8");
+    const jsonData = JSON.parse(jsonFile);
+    jsonData[key] = value;
+    const newJson = JSON.stringify(jsonData, null, 4);
+    
+    fs.writeFileSync(pathJSON,newJson,"utf-8");
 }

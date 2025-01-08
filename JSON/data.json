@@ -1,4 +1,10 @@
 {
-    "prochaineReunion" : "08/01/2025",
-    "lienOnedrive" : ""
+    "prochaineReunion": "08/01/2025",
+    "lienOnedrive": "https://shadowtrad.fr/",
+    "prochainEnv": {
+        "name": "Anniversaire Sylvio",
+        "date": "08/01/2025",
+        "lieu": "Guadeloupe",
+        "more": "https://sylverservice.up.railway.app"
+    }
 }

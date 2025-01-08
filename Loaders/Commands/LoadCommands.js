@@ -34,7 +34,18 @@ export default async (bot) =>
             
             if(commande.option != undefined)
             {
-                slashCommand.addStringOption(commande.option);
+                if(!(commande.option instanceof Array))
+                {
+                    slashCommand.addStringOption(commande.option);
+                }
+                else
+                {
+                    for(const option of commande.option)
+                    {
+                        slashCommand.addStringOption(option);
+                    }
+                }
+                
             }
 
             commands.push(slashCommand);

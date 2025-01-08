@@ -2,7 +2,6 @@ import { ActivityType, Client, Collection, Events, GatewayIntentBits, Partials} 
 import loadCommands from "./Loaders/Commands/LoadCommands.js";
 import loadEvenements from "./Loaders/EVents/loadEvenements.js"
 import dotenv from "dotenv"
-import { type } from "os";
 dotenv.config();
 
 

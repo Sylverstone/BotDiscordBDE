@@ -4,6 +4,7 @@ dotenv.config();
 
 export const description = "Cette commande vous indiquera les commandes du bot";
 export const name = "help";
+export const howToUse = "Vous n'avez qu'a écrire `/help` et des indications sur toutes les commandes seront retournés"
 
 const displayMessageHelp = async(message,bot) => 
 {
@@ -20,13 +21,22 @@ const displayMessageHelp = async(message,bot) =>
             iconURL: bot.user?.displayAvatarURL() || ""
         }
     }], flags : [MessageFlags.Ephemeral]
-});
+    
+    });
+    console.log("command succes -author:",message.author.username);
 }
 
 export const  run = async(bot, message, args) => {
     if (bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message)) {
-        console.log("he")
-        displayMessageHelp(message,bot)
+        try {
+            console.log(message.author.username,"is running help");
+
+            displayMessageHelp(message,bot)
+        } catch (error) {
+            console.log("command went wrong while",message.author.username,"was running it\n",error)
+            return message.reply("Une erreur a eu lieu lors de l'exécution de la commande")
+        }
+       
     }
     
     

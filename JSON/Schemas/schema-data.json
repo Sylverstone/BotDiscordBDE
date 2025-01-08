@@ -3,7 +3,8 @@
     "type": "object",
     "properties": {
         "prochaineReunion": { "type": "string" },
-        "lienOnedrive": { "type": "string" }
+        "lienOnedrive": { "type": "string" },
+        "prochainEnv": { "type": "object" }
     },
-    "required": ["prochaineReunion", "lienOnedrive"]
+    "required": ["prochaineReunion", "lienOnedrive","prochainEnv"]
 }

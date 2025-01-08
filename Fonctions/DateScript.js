@@ -3,9 +3,19 @@ const convertToDate = (date) => {
     const dateOrigine = jour+"/"+mois+"/"+annee;
     return new Date(`${annee}-${mois}-${jour}`);
 }
-export default function verifierDate(dateOrigine,NouvelleDate)
+export default function verifierDate(dateOrigine,NouvelleDate,alreadyConverted = false)
 {
-    dateOrigine = convertToDate(dateOrigine);
-    NouvelleDate = convertToDate(NouvelleDate);
+    if(!alreadyConverted)
+    {
+        dateOrigine = convertToDate(dateOrigine);
+        NouvelleDate = convertToDate(NouvelleDate);
+    }
+    
     return NouvelleDate > dateOrigine && (NouvelleDate instanceof Date && dateOrigine instanceof Date);
+}
+
+export function createDate(date)
+{
+    const [jour, mois, annee] = date.split("/");
+    return new Date(`${annee}-${mois}-${jour}`);
 }
