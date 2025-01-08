@@ -21,7 +21,7 @@ const run = async (bot, message, args = [null]) =>
 
         if(bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message))
         {
-            console.log(message.author.username, "is running reunion")
+            console.log(message.user.tag, "is running reunion")
             let version = 0;
             if(message instanceof Message)
             {
@@ -36,7 +36,7 @@ const run = async (bot, message, args = [null]) =>
         }
         
     } catch (error) {
-        console.log("command went wrong while",message.author.username,"was running it\n",error)
+        console.log("command went wrong while",message.user.tag,"was running it\n",error)
         await message.reply("Une erreur a eu lieu durant l'éxécution de cette commande, super les devs !");
     }
     
@@ -77,6 +77,6 @@ async function handleRun(version,args,message)
         {
             await message.reply("Il n'y a pas de prochaine reunion prévu pour l'instant.\nLa dernière date du " + datefr);
         }
-        console.log("command success, author:",message.author.username)
+        console.log("command success, author:",message.user.tag)
     }
 }
