@@ -7,7 +7,7 @@ import __dirname from "../dirname.js";
 import lookIfCommandsValid from "../Fonctions/lookIfCommandsValid.js";
 dotenv.config();
 
-export const description = "Cette commande écrit le dernier récap dans le chat";
+export const description = "Cette commande vous permettra d'en apprendre plus sur l'utilisation d'une commande";
 export const name = "man";
 
 export const howToUse = "J'imagine que vous savez dékà utilsier /man :)"
