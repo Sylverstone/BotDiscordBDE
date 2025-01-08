@@ -53,7 +53,7 @@ const handleRun = async(version,message,args = [],bot) => {
 
     try {
         command = await import(pathToFileURL(path.join(__dirname,"Commands",commandName + ".js")))
-        console.log("command success while",message.author.username,"was running");
+        console.log("command success while",message.user.tag,"was running");
         return message.reply({ embeds: [{
             title : `Comment utiliser ${commandName}`,
             description : command.howToUse,
@@ -63,7 +63,7 @@ const handleRun = async(version,message,args = [],bot) => {
             }
         }], flags: [MessageFlags.Ephemeral]})
     } catch (error) {
-        console.log("command went wrong while",message.author.username,"was running it\n",error)
+        console.log("command went wrong while",message.user.tag,"was running it\n",error)
         return message.reply("Il y a eu une erreur pdt l'executiond de la commande");
     }
 
@@ -72,7 +72,7 @@ const handleRun = async(version,message,args = [],bot) => {
 
 export const  run = async(bot, message, args) => {
     if (bot instanceof Client && (message instanceof Message || message instanceof CommandInteraction)) {
-        console.log(message.author.username,"is running man");
+        console.log(message.user.tag,"is running man");
         if(message instanceof CommandInteraction){
             console.log("there")
             handleRun(0,message,args,bot)
