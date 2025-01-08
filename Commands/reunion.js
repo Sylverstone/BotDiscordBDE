@@ -1,17 +1,36 @@
-import {Client, CommandInteraction, Message, SlashCommandBuilder, SlashCommandStringOption} from 'discord.js';
+import {Client, CommandInteraction, EmbedBuilder, Message, SlashCommandBuilder, SlashCommandStringOption} from 'discord.js';
 import { createDate } from '../Fonctions/DateScript.js';
-import { changeValueFromFile } from '../Fonctions/changeValueFromFile.js';
+import { changeSpecialValueFromFIle, changeValueFromFile } from '../Fonctions/changeValueFromFile.js';
 import fs from "fs";
+import path from 'path';
 import verifierDate from '../Fonctions/DateScript.js';
+import __dirname from '../dirname.js';
 
-const description = "Cette commande permet de récuperer/set la prochaine reunion";
+const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 
 const name = "reunion";
 
-const option = new SlashCommandStringOption()
-    .setName("date_reunion")
+const option = [new SlashCommandStringOption()
+    .setName("date")
     .setRequired(false)
-    .setDescription("Paramètre permettant de définir une nouvelles dates :)")
+    .setDescription("Paramètre permettant de définir une nouvelles dates :)"),
+    new SlashCommandStringOption()
+    .setName("sujet")
+    .setRequired(false)
+    .setDescription("indiquez le lieu de sujet de la reunion"),
+    new SlashCommandStringOption()
+    .setName("heure")
+    .setRequired(false)
+    .setDescription("Indiquez l'heure de la réunion"),
+    new SlashCommandStringOption()
+    .setName("lieu")
+    .setRequired(false)
+    .setDescription("Indiquez le lieu de la réunion"),
+    new SlashCommandStringOption()
+    .setName("more")
+    .setRequired(false)
+    .setDescription("Indiquez des infos supplémentaire si vous le souhaite")
+]
     
 export const howToUse = "`/reunion` vous permet de faire *2* choses.\nPremière utilisation : `/reunion` en entrant cette commande il vous sera retourner la date de la prochaine reunion, si elle existe.\nDeuxième utilisation : `/reunion paramètre` Ici le 'paramètre' est la date de la nouvelle reunion, le format est de la date est jj/mm/yyyy où jj-mm-yyyy ( exemple : 08/01/2006 ). La commande va donc sauvegarder la prochaine date de reunion."
 
@@ -31,7 +50,7 @@ const run = async (bot, message, args = [null]) =>
             {
                 args = [null];
             }
-            handleRun(version, args,message)
+            handleRun(version, args,message,bot)
             
         }
         
@@ -45,38 +64,71 @@ const run = async (bot, message, args = [null]) =>
 
 export{description,name,run,option}
 
-async function handleRun(version,args,message)
+async function handleRun(version,args,message,bot)
     
 {
     if(!(message instanceof Message || message instanceof CommandInteraction)) return;
-    let {option, jsonData} = changeValueFromFile("date_reunion",message,"prochaineReunion", async (ancienneValeur,value,message,jsonData) => {
-        console.log("start")
-        if(!verifierDate(ancienneValeur,value))
-            {
-                await message.reply(`La nouvelles date de reunion que tu essaies d'entrer est inférieur a l'ancienne :) Ce n'est donc pas possible`);
-            }
-            else 
-            {
-                const newJson = JSON.stringify(jsonData, null, 4);
-                fs.writeFileSync("JSON/data.json", newJson);
-                await message.reply(`La nouvelle date de reunion a bien été enregistré ! (${ancienneValeur}->${value})`);
-            }
-    },args,version);
-    
-    if(option === null) {
-        const date = jsonData.prochaineReunion;
+    console.log(message.user.tag, "is running event")
+    let option;
+    //pour savoir si l'objet a été init
+    let ObjectIsReal = false;
+    let optionObject = {};
+    const ListeParam = ["date","sujet","heure","lieu","more"]
+    if(message instanceof CommandInteraction)
+    {
+        option = message.options.data;
+        if(option !== null)
+        {
+            option.forEach(o => {optionObject[o.name] = o.value; ObjectIsReal = true;});
+        }
+    }
+    else
+    {
+        args.forEach((value,index) => {optionObject[ListeParam[index]] = value; ObjectIsReal = true});
+    }
+
+    if(!ObjectIsReal) {
+        console.log(optionObject)
+        const jsonFile = path.join(__dirname,"JSON","data.json");
+        const jsonData = JSON.parse(fs.readFileSync(jsonFile));
+        const {date, sujet, heure, lieu,more} = jsonData.prochaineReunion;
         const [jour, mois, annee] = date.split("/");
         const datefr = jour+"/"+mois+"/"+annee;
         const prochaineReunion = new Date(`${annee}-${mois}-${jour}`);
         const dateActu = new Date();
+        const infoEnPlusText = more === "" ? "" : "Info en plus : " + more;
+        const embedText = new EmbedBuilder()
+            .setColor("#ff0000")
+            .setTitle(`Prochaine réunion - ${sujet}`)
+            .setDescription(`date : ${date}\n
+                            heure : ${heure}\n
+                            lieu : ${lieu}\n
+                            ${infoEnPlusText}`)
+            .setFooter({
+                text: "Au plaisir de vous aidez",
+                iconURL: bot.user?.displayAvatarURL() || ""
+            })
         if(prochaineReunion > dateActu)
         {
-            await message.reply("La prochaine réunion est planifié au " + datefr)
+            await message.reply({embeds : [embedText]})
         }
         else
         {
             await message.reply("Il n'y a pas de prochaine reunion prévu pour l'instant.\nLa dernière date du " + datefr);
         }
-        console.log("command success, author:",message.user.tag)
+    }
+    else
+    {
+        const finalObjectEvent = {
+            date : optionObject.date|| "pas de date",
+            sujet : optionObject.sujet || "pas de sujet",
+            lieu : optionObject.lieu || "pas de lieu",
+            more : optionObject.more || "pas d'information en plus",
+            heure : optionObject.heure || "pas d'heure définit"
+        }
+
+        changeSpecialValueFromFIle("prochaineReunion", finalObjectEvent)
+        console.log("command succes -author:",message.user.tag);
+        return message.reply({content : `Le changement a bien été fait ! :)`})
     }
 }

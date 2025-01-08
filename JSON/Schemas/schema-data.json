@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
-        "prochaineReunion": { "type": "string" },
+        "prochaineReunion": { "type": "object" },
         "lienOnedrive": { "type": "string" },
         "prochainEnv": { "type": "object" }
     },

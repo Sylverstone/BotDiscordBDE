@@ -1,6 +1,12 @@
 {
-    "prochaineReunion": "08/01/2025",
-    "lienOnedrive": "https://shadowtrad.fr/",
+    "prochaineReunion": {
+        "date": "10/01/2025",
+        "sujet": "Reunion BDE actuelle",
+        "lieu": "pas de lieu",
+        "more": "pas d'information en plus",
+        "heure": "14h - 15h"
+    },
+    "lienOnedrive": "",
     "prochainEnv": {
         "name": "Anniversaire Sylvio",
         "date": "08/01/2025",
