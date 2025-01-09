@@ -21,7 +21,7 @@ export const run = async(bot, message, args = [null]) => {
         try
         {
             if (bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message)) {
-                console.log(message.user.tag,"is running recap")
+                console.log(message.user,"is running recap")
                 /*
                 console.log("here")
                 let {option, jsonData} = changeValueFromFile("lien_recap",message,"lienOnedrive", async (ancienneValeur,value,message,jsonData) => {
@@ -54,7 +54,7 @@ export const run = async(bot, message, args = [null]) => {
         }
         catch(error)
         {
-            console.log("command went wrong while",message.user.tag,"was running it\n",error)
+            console.log("command went wrong while",message.user,"was running it\n",error)
             await message.reply("Une erreur s'est produite, veuillez contacter un développeur!");
         }
 }
@@ -81,6 +81,6 @@ export const run = async(bot, message, args = [null]) => {
             }
             return message.reply(`Le lien onedrive recap est actuellement : ${lienOnedrive}`);
         }
-        console.log("command success, author:",message.user.tag)
+        console.log("command success, author:",message.user)
     
     }
