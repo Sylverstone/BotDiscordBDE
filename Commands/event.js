@@ -38,7 +38,7 @@ const getDataEvent = (Ev) => {
 export const  run = async(bot, message, args = []) => {
     if(!(bot instanceof Client && (message instanceof Message || message instanceof CommandInteraction) && args instanceof Array)) return;
     try {
-        console.log(message.user.tag, "is running event")
+        console.log(message.user, "is running event")
         let option;
         //pour savoir si l'objet a été init
         let ObjectIsReal = false;
@@ -77,7 +77,7 @@ export const  run = async(bot, message, args = []) => {
                     iconURL: bot.user?.displayAvatarURL() || ""
                 })
                 .setDescription(textEnv)
-            console.log("command succes -author:",message.user.tag);
+            console.log("command succes -author:",message.user);
             return message.reply({embeds : [embedText]})
         }
         else
@@ -89,11 +89,11 @@ export const  run = async(bot, message, args = []) => {
                 more : optionObject.more || "pas de more"
             }
             changeSpecialValueFromFIle("prochainEnv",finalObjectEvent)
-            console.log("command succes -author:",message.user.tag);
+            console.log("command succes -author:",message.user);
             return message.reply({content : `Le changement a bien été fait ! :)`})
         }
     } catch (error) {
-        console.log("command went wrong while",message.user.tag,"was running it\n",error)
+        console.log("command went wrong while",message.user,"was running it\n",error)
         return message.reply("Une erreur est survenue lors de l'exécution de cette commande :(")
     }
 
