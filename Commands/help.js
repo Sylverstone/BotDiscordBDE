@@ -23,17 +23,17 @@ const displayMessageHelp = async(message,bot) =>
     }], flags : [MessageFlags.Ephemeral]
     
     });
-    console.log("command succes -author:",message.user);
+    console.log("command succes -author:",message.user || message.author);
 }
 
 export const  run = async(bot, message, args) => {
     if (bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message)) {
         try {
-            console.log(message.user,"is running help");
+            console.log(message.user || message.author,"is running help");
 
             displayMessageHelp(message,bot)
         } catch (error) {
-            console.log("command went wrong while",message.user,"was running it\n",error)
+            console.log("command went wrong while",message.user || message.author,"was running it\n",error)
             return message.reply("Une erreur a eu lieu lors de l'exécution de la commande")
         }
        
