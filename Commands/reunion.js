@@ -40,7 +40,7 @@ const run = async (bot, message, args = [null]) =>
 
         if(bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message))
         {
-            console.log(message.user.tag, "is running reunion")
+            console.log(message.user, "is running reunion")
             let version = 0;
             if(message instanceof Message)
             {
@@ -55,7 +55,7 @@ const run = async (bot, message, args = [null]) =>
         }
         
     } catch (error) {
-        console.log("command went wrong while",message.user.tag,"was running it\n",error)
+        console.log("command went wrong while",message.user,"was running it\n",error)
         await message.reply("Une erreur a eu lieu durant l'éxécution de cette commande, super les devs !");
     }
     
@@ -68,7 +68,7 @@ async function handleRun(version,args,message,bot)
     
 {
     if(!(message instanceof Message || message instanceof CommandInteraction)) return;
-    console.log(message.user.tag, "is running event")
+    console.log(message.user, "is running event")
     let option;
     //pour savoir si l'objet a été init
     let ObjectIsReal = false;
@@ -128,7 +128,7 @@ async function handleRun(version,args,message,bot)
         }
 
         changeSpecialValueFromFIle("prochaineReunion", finalObjectEvent)
-        console.log("command succes -author:",message.user.tag);
+        console.log("command succes -author:",message.user);
         return message.reply({content : `Le changement a bien été fait ! :)`})
     }
 }
