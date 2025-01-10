@@ -1,6 +1,7 @@
 import { Client, SlashCommandStringOption, CommandInteraction, Message } from "discord.js";
 import { getMostRecentValueFromDB, SaveValueToDB } from "../Fonctions/DbFunctions.js";
 import dotenv from "dotenv";
+import EmptyObject from "../Fonctions/LookIfObjectIsEmpty.js";
 
 dotenv.config();
 
@@ -56,13 +57,15 @@ export const run = async(bot, message) => {
         {
             await getMostRecentValueFromDB(message,"lien_recap","recapitulatif","idRecap",bot)
             .then(async(result) => {
-                const {lien_recap} = result;
                 
-                if(lien_recap === null)
+                
+                if(EmptyObject(result))
                 {
                     return message.reply("Il n'y a pas de lien de recap actuellement :(");;
                 }
+                const {lien_recap} = result;
                 return message.reply(`Le lien onedrive recap est actuellement : ${lien_recap}`);
+                
             }).catch(async(err) => {
                 console.error(err);
                 return message.reply("Une erreur est survenue lors de l'exécution de cette commande :(");
