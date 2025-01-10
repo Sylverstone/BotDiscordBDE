@@ -9,6 +9,6 @@ export const howToUse = "Vous n'avez qu'a tapez `/recapdirect` et la commande re
 
 export const  run = async(bot, message, args) => {
     if (bot instanceof Client) {
-        await message.reply("le recap en entier :)")
+        await message.reply("le recap en entier :) (flemme de faire ça mais si c'est demandé je fais)")
     }
 }

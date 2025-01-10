@@ -26,7 +26,7 @@ const displayMessageHelp = async(message,bot) =>
     console.log("command succes -author:",message.user || message.author);
 }
 
-export const  run = async(bot, message, args) => {
+export const  run = async(bot, message) => {
     if (bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message)) {
         try {
             console.log(message.user || message.author,"is running help");
