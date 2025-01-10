@@ -1,6 +1,5 @@
 import { Client, SlashCommandStringOption, CommandInteraction, Message } from "discord.js";
-import { changeValueFromFile } from "../Fonctions/changeValueFromFile.js";
-import fs from "fs";
+import { getMostRecentValueFromDB, SaveValueToDB } from "../Fonctions/DbFunctions.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -15,40 +14,17 @@ export const option = new SlashCommandStringOption()
         .setName("lien_recap")
         .setDescription("Paramètre permettant de mettre un nouveau recap")
         .setRequired(false);
+    
+
         
-export const run = async(bot, message, args = [null]) => {
+
+export const run = async(bot, message) => {
     
         try
         {
-            if (bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message)) {
-                console.log(message.user,"is running recap")
-                /*
-                console.log("here")
-                let {option, jsonData} = changeValueFromFile("lien_recap",message,"lienOnedrive", async (ancienneValeur,value,message,jsonData) => {
-                    const jsonMisAjour = JSON.stringify(jsonData,null,4);
-                    fs.writeFileSync("JSON/data.json", jsonMisAjour);
-
-                    await message.reply(`Le lien du recap a bien été modifié! (${ancienneValeur}->${value})`);
-                });
-                console.log("here")
-                console.log(option,jsonData);
-                if(option === null) 
-                {
-                    console.log("here")
-                    const lienOnedrive = jsonData.lienOnedrive;
-                    await message.reply(`Le lien onedrive recap est actuellement : ${lienOnedrive}`);
-                }*/
-               let version = 0;
-               if(message instanceof Message)
-               {
-                    version = 1
-               }
-               if(args.length === 0)
-                {
-                    args = [null];
-                }
-               handleRun(version,args,message)
-
+            if (bot instanceof Client && (message instanceof CommandInteraction)) {
+               console.log(message.user,"is running recap")            
+               handleRun(bot,message)
             }
            
         }
@@ -58,28 +34,40 @@ export const run = async(bot, message, args = [null]) => {
             await message.reply("Une erreur s'est produite, veuillez contacter un développeur!");
         }
 }
- async function handleRun(version,args,message)
+ async function handleRun(bot,message)
     {
-        if(args.length === 0)
-        {
-            args = [null];
-        }
-        let {option, jsonData} = changeValueFromFile("lien_recap",message,"lienOnedrive", async (ancienneValeur,value,message,jsonData) => {
-            const jsonMisAjour = JSON.stringify(jsonData,null,4);
-            fs.writeFileSync("JSON/data.json", jsonMisAjour);
+        
+        let haveParameters = false;
+        haveParameters = message.options.data.length >= 1;
     
-            await message.reply(`Le lien du recap a bien été modifié! (${ancienneValeur}->${value})`);
-        }, args,version);
-        if(option === null) 
+        //quand retourVal est true, ça veut dire qu'il y avait des parametres dans la commande
+        //quand il n'y a pas de parametre, ça veut dire que c'est une commande pour set
+        if(haveParameters)
         {
-            console.log("here")
-            const lienOnedrive = jsonData.lienOnedrive;
-            if(lienOnedrive === "")
-            {
-                 
-                return message.reply("Il n'y a pas de lien de recap actuellement :(");;
-            }
-            return message.reply(`Le lien onedrive recap est actuellement : ${lienOnedrive}`);
+            SaveValueToDB(message,bot,"recapitulatif")
+            .then(result => {
+                console.log("command succes -author:",message.user);
+                return message.reply({content : `Le changement a bien été fait ! :)`})
+            })
+            .catch(err => {throw err});
+        }       
+
+        else
+        {
+            await getMostRecentValueFromDB(message,"lien_recap","recapitulatif","idRecap",bot)
+            .then(async(result) => {
+                const {lien_recap} = result;
+                
+                if(lien_recap === null)
+                {
+                    return message.reply("Il n'y a pas de lien de recap actuellement :(");;
+                }
+                return message.reply(`Le lien onedrive recap est actuellement : ${lien_recap}`);
+            }).catch(async(err) => {
+                console.error(err);
+                return message.reply("Une erreur est survenue lors de l'exécution de cette commande :(");
+            });
+            
         }
         console.log("command success, author:",message.user)
     

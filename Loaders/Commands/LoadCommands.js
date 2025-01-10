@@ -3,7 +3,7 @@ import path from "path";
 import { SlashCommandBuilder, REST, Routes, Client, Collection } from "discord.js";
 import dotenv from "dotenv"
 import __dirname from "../../dirname.js";
-import { fileURLToPath, pathToFileURL } from "url";
+import { pathToFileURL } from "url";
 dotenv.config();
 
 export default async (bot) => 

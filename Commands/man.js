@@ -34,7 +34,7 @@ async function getChoices(){
 }
 
 const handleRun = async(version,message,args = [],bot) => {
-    if(!(message instanceof Message || message instanceof CommandInteraction)) return;
+    if(!(message instanceof CommandInteraction || message instanceof Message)) return;
     if(!(args instanceof Array)) return;
     let command;
     let commandName;

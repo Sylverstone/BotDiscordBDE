@@ -20,17 +20,19 @@ const bot = new Client({
 
 bot.commands = new Collection();
 
-connection.connect((err) => {
+bot.bd = connection;
+bot.bd.connect((err) => {
     if (err) throw err;
     console.log("Connected to MySQL!");
 });
 
-connection.query("SELECT * FROM utilisateurs", (err, results) => {
+bot.bd.query("SHOW tables", (err, results) => {
     if(!err)
     {
         console.log(results)
     }
 })
+
 bot.once(Events.ClientReady, bot => {
     console.log("bot",bot.user.tag,"is online :)");
     
