@@ -1,11 +1,10 @@
-import {Client, CommandInteraction, EmbedBuilder, Message, SlashCommandBuilder, SlashCommandStringOption} from 'discord.js';
-import { createDate } from '../Fonctions/DateScript.js';
-import { changeSpecialValueFromFIle, getMostRecentValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
-import fs from "fs";
-import path from 'path';
-import verifierDate from '../Fonctions/DateScript.js';
+import {Client, CommandInteraction, EmbedBuilder, Entitlement, GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel, Message, SlashCommandBuilder, SlashCommandIntegerOption, SlashCommandStringOption, StageInstancePrivacyLevel} from 'discord.js';
+import { createDate, dateToOnlyDate } from '../Fonctions/DateScript.js';
+import { getMostRecentValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
+
 import __dirname from '../dirname.js';
-import { table } from 'console';
+import { lutimes } from 'fs';
+import transfromOptionToObject from '../Fonctions/transfromOptionToObject.js';
 
 const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 
@@ -19,10 +18,7 @@ const option = [new SlashCommandStringOption()
     .setName("sujet")
     .setRequired(false)
     .setDescription("indiquez le lieu de sujet de la reunion"),
-    new SlashCommandStringOption()
-    .setName("heure")
-    .setRequired(false)
-    .setDescription("Indiquez l'heure de la réunion"),
+    
     new SlashCommandStringOption()
     .setName("lieu")
     .setRequired(false)
@@ -33,7 +29,17 @@ const option = [new SlashCommandStringOption()
     .setDescription("Indiquez des infos supplémentaire si vous le souhaite")
 ]
     
-export const howToUse = "`/reunion` vous permet de faire *2* choses.\nPremière utilisation : `/reunion` en entrant cette commande il vous sera retourner la date de la prochaine reunion, si elle existe.\nDeuxième utilisation : `/reunion paramètre` Ici le 'paramètre' est la date de la nouvelle reunion, le format est de la date est jj/mm/yyyy où jj-mm-yyyy ( exemple : 08/01/2006 ). La commande va donc sauvegarder la prochaine date de reunion."
+const optionInt = [
+    new SlashCommandIntegerOption()
+    .setName("heuredebut")
+    .setRequired(false)
+    .setDescription("Indiquez l'heure de début de la réunion"),
+    new SlashCommandIntegerOption()
+    .setName("heurefin")
+    .setRequired(false)
+    .setDescription("Indiquez l'heure de fin de la réunion")]
+
+export const howToUse = "`/reunion` vous permet de faire *2* choses.\nPremière utilisation : `/reunion` en entrant cette commande il vous sera retourner la date de la prochaine reunion, si elle existe.\nDeuxième utilisation : `/reunion paramètre` Ici le 'paramètre' est la date de la nouvelle reunion, le format est de la date est jj/mm/yyyy où jj-mm-yyyy ( exemple : 08/01/2006 ). La commande va donc sauvegarder la prochaine date de reunion.\n PS: si vous utilisez un argument, TOUT les autres sont nécéssaires sauf \`more\`"
 
 const run = async (bot, message) =>
 {
@@ -53,7 +59,7 @@ const run = async (bot, message) =>
 };
 
 
-export{description,name,run,option}
+export{description,name,run,option,optionInt}
 
 async function handleRun(message,bot)
     
@@ -74,12 +80,12 @@ async function handleRun(message,bot)
     if(!ObjectIsReal) {
         console.log(optionObject)
 
-        await getMostRecentValueFromDB(message,"date, heure, lieu, more, sujet","Reunion","idReunion",bot)
+        await getMostRecentValueFromDB(message,"date, heuredebut, heurefin, lieu, more, sujet","Reunion","idReunion",bot)
         .then(async(result) => {
             
             if(!(result === null))
             {
-                const {date, sujet, heure, lieu,more} = result;
+                const {date, sujet, heuredebut,heurefin, lieu,more} = result;
               
                 const [jour, mois, annee] = date.split("/");
                 const datefr = jour+"/"+mois+"/"+annee;
@@ -91,7 +97,7 @@ async function handleRun(message,bot)
                     .setColor("#ff0000")
                     .setTitle(`Prochaine réunion - ${sujet}`)
                     .setDescription(`date : ${date}\n
-                                    heure : ${heure}\n
+                                    heure : ${heuredebut} -> ${heurefin}\n
                                     lieu : ${lieu}\n
                                     ${infoEnPlusText}`)
                     .setFooter({
@@ -107,29 +113,66 @@ async function handleRun(message,bot)
                     return message.reply("Il n'y a pas de prochaine reunion prévu pour l'instant.\nLa dernière date du " + datefr);
                 }
                 
-                
             }
             return message.reply("Il n'y a pas de prochaine reunion prévu pour l'instant.");
             
         });
         
-        
-        
     }
     else
     {
+        //verifier si on peut creer la reunion
+        const listeParam = ["date", "sujet", "lieu", "more", "heuredebut","heurefin"];
+        let optionObject = {}
+        for(const param of listeParam)
+        {
+            if(message.options.get(param))
+                {
+                    optionObject[param] = message.options.get(param).value;
+                }
+                else if(param !== "more")
+                {
+                    return message.reply("Votre reunion ne peut pas être initialisé, il manque des infos importantes")
+                }
+        }
+          
         const finalObjectEvent = {
-            date : optionObject.date|| "Aucune date n'a été transmise",
-            sujet : optionObject.sujet || "Aucun sujet n'a été transmis",
-            lieu : optionObject.lieu || "Aucun lieu n'a été transmis",
+            date : optionObject.date,
+            sujet : optionObject.sujet ,
+            lieu : optionObject.lieu ,
             more : optionObject.more || "Aucune info en plus n'a été fournit",
-            heure : optionObject.heure || "Aucune heure n'a été fournit"
+            heuredebut : optionObject.heuredebut,
+            heurefin : optionObject.heurefin 
         }
 
         SaveValueToDB(message,bot,"Reunion",finalObjectEvent)
-        .then(result => {
+        .then(async result => {
             console.log("command succes -author:",message.user);
-            return message.reply({content : `Le changement a bien été fait ! :)`})
+            console.log(message.options.data)
+            const dateDebut = createDate(optionObject.date);
+            if(optionObject.heuredebut === undefined || optionObject.heurefin === undefined)
+            {
+                optionObject.heuredebut = 6;
+                optionObject.heurefin = 9;
+            }
+            
+            dateDebut.setHours(optionObject.heuredebut)
+            const dateFin = createDate(optionObject.date);
+            dateFin.setHours(optionObject.heurefin)
+            console.log(dateFin)
+            console.log(dateDebut)
+            const event = await message.guild.scheduledEvents.create({
+                name : `Reunion -> ${optionObject.sujet}`,
+                scheduledStartTime : dateDebut,
+                scheduledEndTime : dateFin,
+                privacyLevel :GuildScheduledEventPrivacyLevel.GuildOnly,
+                entityType : GuildScheduledEventEntityType.External,
+                entityMetadata : {
+                    location : optionObject.lieu
+                },
+                description : optionObject.more
+            });
+            return message.reply({content : `La réunion à été crée !`})
         })
         .catch(err => {throw err});
 

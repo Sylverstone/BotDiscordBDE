@@ -19,3 +19,9 @@ export function createDate(date)
     const [jour, mois, annee] = date.split("/");
     return new Date(`${annee}-${mois}-${jour}`);
 }
+
+export function dateToOnlyDate(date)
+{
+    if(!(date instanceof Date)) return;
+    return `${date.getDay()}/${date.getMonth()+1}/${date.getFullYear()}`;
+}

@@ -10,8 +10,7 @@ export default async (bot) =>
 {
     if(bot instanceof Client)
     {
-        
-    
+
         const ext = ".js"
         const listeFileCommands = readdirSync("Commands").filter(file => file.endsWith(ext)).map(file => file.slice(0, file.length - ext.length));
         let commands = [];
@@ -45,9 +44,25 @@ export default async (bot) =>
                         slashCommand.addStringOption(option);
                     }
                 }
+
+                
                 
             }
-
+            if(commande.optionInt !== undefined)
+            {
+                if(!(commande.optionInt instanceof Array))
+                    {
+                        slashCommand.addIntegerOption(commande.optionInt);
+                    }
+                    else
+                    {
+                        for(const option of commande.optionInt)
+                        {
+                            slashCommand.addIntegerOption(option);
+                        }
+                    }
+            }
+            
             commands.push(slashCommand);
         }
 

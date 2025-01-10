@@ -64,14 +64,16 @@ export const run = async(bot, message) => {
                     return message.reply("Il n'y a pas de lien de recap actuellement :(");;
                 }
                 const {lien_recap} = result;
-                return message.reply(`Le lien onedrive recap est actuellement : ${lien_recap}`);
+                console.log("command success, author:",message.user)
+                return message.reply(`Le lien du dernier récap est actuellement : ${lien_recap}`);
                 
             }).catch(async(err) => {
-                console.error(err);
-                return message.reply("Une erreur est survenue lors de l'exécution de cette commande :(");
+                console.error(err)
+                await message.reply("Une erreur est survenue lors de l'exécution de cette commande :(");
+                throw err;
             });
             
         }
-        console.log("command success, author:",message.user)
+        
     
     }
