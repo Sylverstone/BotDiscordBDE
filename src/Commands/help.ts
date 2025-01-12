@@ -1,0 +1,67 @@
+import { Client, CommandInteraction, Message, MessageFlags } from "discord.js";
+import "dotenv/config"
+import CBot from "../Class/CBot";
+
+export const description = "Cette commande vous indiquera les commandes du bot";
+export const name = "help";
+export const howToUse = "Vous n'avez qu'a écrire `/help` et des indications sur toutes les commandes seront retournés"
+
+const displayMessageHelp = async(message : Message | CommandInteraction ,bot : CBot) => 
+{
+    if(message instanceof CommandInteraction)
+    {
+        await message.reply({
+            embeds : [{
+                title: "Liste des commandes",
+                
+                description: bot.commands.map(command => 
+                    `**__Nom de commande__** : \`${command.name}\`.\n> ${command.description}`
+                ).join("\n\n") || "Aucune commande disponible",
+                color: 0xff0000,
+                footer: {
+                    text: "Au plaisr de vous aidez",
+                    icon_url: bot.user?.displayAvatarURL() || ""
+                }
+            }], 
+            flags : [MessageFlags.Ephemeral],
+        });
+    }
+    else
+    {
+        await message.reply({
+            embeds : [{
+                title: "Liste des commandes",
+                
+                description: bot.commands.map(command => 
+                    `**__Nom de commande__** : \`${command.name}\`.\n> ${command.description}`
+                ).join("\n\n") || "Aucune commande disponible",
+                color: 0xff0000,
+                footer: {
+                    text: "Au plaisr de vous aidez",
+                    icon_url: bot.user?.displayAvatarURL() || ""
+                }
+            }], 
+        });
+    }
+    const author_name = message instanceof Message ? message.author : message.user;
+
+    console.log("command succes -author:",author_name);
+}
+
+export const  run = async(bot : CBot, message : Message | CommandInteraction) => {
+    if (bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message)) {
+        const author_name = message instanceof Message ? message.author : message.user;
+        try {
+            
+            console.log(author_name,"is running help");
+
+            displayMessageHelp(message,bot)
+        } catch (error) {
+            console.log("command went wrong while",author_name,"was running it\n",error)
+            return message.reply("Une erreur a eu lieu lors de l'exécution de la commande")
+        }
+       
+    }
+    
+    
+}
