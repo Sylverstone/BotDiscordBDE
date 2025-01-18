@@ -5,8 +5,6 @@ import "dotenv/config";
 import { connection } from "./Database/coDatabase.js";
 import CBot from "./Class/CBot.js";
 
-
-
 let bot = new CBot(connection)
 
 bot.bd = connection;

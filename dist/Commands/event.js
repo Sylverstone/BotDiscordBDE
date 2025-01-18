@@ -1,6 +1,6 @@
 import { EmbedBuilder, hyperlink, SlashCommandIntegerOption, SlashCommandStringOption } from "discord.js";
 import { createDate } from "../Fonctions/DateScript.js";
-import { SaveValueToDB, getMostRecentValueFromDB } from "../Fonctions/DbFunctions.js";
+import { SaveValueToDB, getValueFromDB } from "../Fonctions/DbFunctions.js";
 import 'dotenv/config';
 import transfromOptionToObject from "../Fonctions/transfromOptionToObject.js";
 import CreateEvent from "../Fonctions/CreateEvent.js";
@@ -72,7 +72,7 @@ export const run = async (bot, message) => {
         console.log(message.user, "is running event");
         let { ObjectIsReal, optionObject } = transfromOptionToObject(message);
         if (!ObjectIsReal) {
-            const objectEvent = await getMostRecentValueFromDB(message, "lieu, more, datedebut,datefin, name, heuredebut, heurefin", "Event", "id", bot);
+            const objectEvent = await getValueFromDB(message, "lieu, more, datedebut,datefin, name, heuredebut, heurefin", "Event", "id", bot);
             console.log(objectEvent);
             if (objectEvent === null)
                 return message.reply("Il n'y a pas d'Event planifié pour les prochains jours");
