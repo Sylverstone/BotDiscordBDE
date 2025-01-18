@@ -1,9 +1,11 @@
-import {CommandInteraction, EmbedBuilder, GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel, SlashCommandIntegerOption, SlashCommandStringOption} from 'discord.js';
+import {CommandInteraction, EmbedBuilder, DiscordAPIError, SlashCommandIntegerOption, SlashCommandStringOption} from 'discord.js';
 import { createDate } from '../Fonctions/DateScript.js';
-import { getMostRecentValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
+import { getMostRecentValueFromDB, getValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
 import { listCommandObject_t } from '../Fonctions/transfromOptionToObject.js';
 import __dirname from '../dirname.js';
 import CBot from '../Class/CBot.js';
+import CreateEvent from '../Fonctions/CreateEvent.js';
+import handleError from '../Fonctions/handleError.js';
 
 const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 
@@ -49,6 +51,7 @@ interface reunion_t{
 
 function isReunion(result : unknown) : result is reunion_t
 {
+    
     return (
         result !== null && typeof result === "object"
         && "date" in result && "sujet" in result
@@ -56,6 +59,8 @@ function isReunion(result : unknown) : result is reunion_t
         && "heuredebut" in result && "heurefin" in result
     );
 }
+
+
 
 function isReunionArray(result : unknown) : result is reunion_t[]
 {
@@ -91,15 +96,15 @@ async function handleRun(message : CommandInteraction, bot : CBot)
     {
         option.forEach(o => {optionObject[o.name] = o.value; ObjectIsReal = true;});
     }
-    
-    if(!ObjectIsReal) {
-        console.log(optionObject)
 
-        await getMostRecentValueFromDB(message,"date, heuredebut, heurefin, lieu, more, sujet","Reunion","idReunion",bot)
+
+    if(!ObjectIsReal) {
+
+        await getValueFromDB(message,"date, heuredebut, heurefin, lieu, more, sujet","Reunion","idReunion",bot)
         .then(async(result) => {
             
             if(result === null) return message.reply("Il n'y a pas de reunion l'instant.");
-            
+            console.log(result);
             if(isReunionArray(result))
             {
                 const dateTemp = new Date();
@@ -154,62 +159,43 @@ async function handleRun(message : CommandInteraction, bot : CBot)
     }
     else
     {
-        //verifier si on peut creer la reunion
-        const listeParam = ["date", "sujet", "lieu", "more", "heuredebut","heurefin"];
-        let optionObject : listCommandObject_t = {}
-        for(const param of listeParam)
+        //verifier si o
+        // n peut creer la reunion
+        console.log("verification reunion")
+        if(!("more" in optionObject))
         {
-            if(message.options.get(param))
-            {
-                optionObject[param] = message.options.get(param)?.value;
-            }
-            else if(param !== "more")
-            {
-                return message.reply("Votre reunion ne peut pas être initialisé, il manque des infos importantes")
-            }
+            optionObject["more"] = "Pas d'informations en plus"
         }
-          
+        if(!isReunion(optionObject)) return message.reply("La définition de la réunion n'est pas complète :(");
+
+        const optionReunion : reunion_t = optionObject;
+        const dateActu = new Date();
+        const dateDebut = createDate(optionReunion.date);
+        if(dateActu > dateDebut) return message.reply("La reunion ne peut pas être défini dans le passé")
+            
         const finalObjectEvent = {
-            date : optionObject.date,
-            sujet : optionObject.sujet ,
-            lieu : optionObject.lieu ,
-            more : optionObject.more || "Aucune info en plus n'a été fournit",
-            heuredebut : optionObject.heuredebut,
-            heurefin : optionObject.heurefin 
-        }
+            date : optionReunion.date,
+            sujet : optionReunion.sujet ,
+            lieu : optionReunion.lieu ,
+            more : optionReunion.more,
+            heuredebut : optionReunion.heuredebut,
+            heurefin : optionReunion.heurefin 
+        };
 
         SaveValueToDB(message,bot,"Reunion",finalObjectEvent)
         .then(async result => {
             console.log("command succes -author:",message.user);
-            console.log(message.options.data)
-            if(!(typeof optionObject.date === "string")) return;
-            const dateDebut = createDate(optionObject.date); 
-            if(optionObject.heuredebut === undefined || optionObject.heurefin === undefined)
-            {
-                optionObject.heuredebut = 6;
-                optionObject.heurefin = 9;
-            }
-            if(!(typeof optionObject.heurefin === "number" && typeof optionObject.heuredebut === "number")) return;
-            dateDebut.setHours(optionObject.heuredebut)
-            const dateFin = createDate(optionObject.date);
-            dateFin.setHours(optionObject.heurefin)
-            console.log(dateFin)
-            console.log(dateDebut)
-            if(!message.guild) return;
-            if(!(typeof optionObject.lieu === "string" && typeof optionObject.more === "string")) return;
-            const event = await message.guild.scheduledEvents.create({
-                name : `Reunion -> ${optionObject.sujet}`,
-                scheduledStartTime : dateDebut,
-                scheduledEndTime : dateFin,
-                privacyLevel :GuildScheduledEventPrivacyLevel.GuildOnly,
-                entityType : GuildScheduledEventEntityType.External,
-                entityMetadata : {
-                    location : optionObject.lieu
-                },
-                description : optionObject.more
-            });
+            dateDebut.setHours(optionReunion.heuredebut)
+            const dateFin = createDate(optionReunion.date);
+            dateFin.setHours(optionReunion.heurefin)
+            const sujet = optionReunion.sujet;
+            const lieu = optionReunion.lieu;
+            const more = optionReunion.more;
+            await CreateEvent(message,sujet,dateDebut,dateFin,lieu,more,"Reunion");
             return message.reply({content : `La réunion à été crée !`})
         })
-        .catch(err => {throw err});
+        .catch(err => {
+            handleError(message,err);
+        });
     }
 }

@@ -1,7 +1,7 @@
 import { CommandInteraction } from 'discord.js';
 import transfromOptionToObject from './transfromOptionToObject.js';
 import EmptyObject from './LookIfObjectIsEmpty.js';
-export async function SaveValueToDB(message, bot, table, object = {}) {
+export async function SaveValueToDB(message, bot, table, object = {}, deleteAllOtherValues = false) {
     if (!message.guild || !(message instanceof CommandInteraction))
         return;
     let optionObject;
@@ -15,7 +15,8 @@ export async function SaveValueToDB(message, bot, table, object = {}) {
     if (!(optionObject instanceof Object))
         return false;
     optionObject["GuildId"] = message.guild.id;
-    //await deleteAllOtherValue(message.guild.id,table,bot);
+    if (deleteAllOtherValues)
+        await deleteAllOtherValue(message.guild.id, table, bot);
     let optionParam = "";
     for (let key in optionObject) {
         optionParam += key + ", ";
@@ -46,6 +47,26 @@ async function deleteAllOtherValue(guildID, table, bot) {
     });
 }
 export async function getMostRecentValueFromDB(message, champ, table, champID, bot) {
+    if (!message.guild)
+        return;
+    const guildId = message.guild.id;
+    const commandSql = `SELECT ${champ} FROM ${table} WHERE guildId = ${guildId} ORDER BY ${champID} DESC`;
+    return new Promise((resolve, reject) => {
+        bot.bd.query(commandSql, (err, result) => {
+            if (err) {
+                reject(err); // Rejeter la promesse en cas d'erreur
+                return;
+            }
+            if (result.length > 0) {
+                resolve(result[0][champ]); // Résoudre la promesse avec le résultat
+            }
+            else {
+                resolve(null); // Résoudre avec `null` si aucun résultat
+            }
+        });
+    });
+}
+export async function getValueFromDB(message, champ, table, champID, bot) {
     if (!message.guild)
         return;
     const guildId = message.guild.id;

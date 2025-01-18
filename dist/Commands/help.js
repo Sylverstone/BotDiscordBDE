@@ -5,17 +5,6 @@ export const name = "help";
 export const howToUse = "Vous n'avez qu'a écrire `/help` et des indications sur toutes les commandes seront retournés";
 const displayMessageHelp = async (message, bot) => {
     if (message instanceof CommandInteraction) {
-        if (!(bot.commands instanceof Object))
-            return;
-        console.log(Object.keys(bot.commands));
-        for (const key of Object.keys(bot.commands)) {
-            console.log(`key : ${key}`);
-            if (bot.commands.hasOwnProperty(key)) {
-                console.log(bot.commands.get(key)); // 1, 2, 3
-            }
-        }
-        const text = bot.commands.map(command => `**__Nom de commande__** : \`${command.name}\`.\n> ${command.description}`).join("\n\n") || "wtf is that";
-        console.log(text);
         await message.reply({
             embeds: [{
                     title: "Liste des commandes",

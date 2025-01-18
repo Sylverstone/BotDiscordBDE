@@ -16,13 +16,13 @@ bot.bd.query("SHOW tables", (err, results) => {
         console.log(results);
     }
 });
-bot.once(Events.ClientReady, () => {
+bot.once(Events.ClientReady, async () => {
     if (!bot.user)
         return;
     console.log("bot", bot.user.tag, "is online :)");
     bot.user.setUsername("Yoichi");
     bot.user.setPresence({ activities: [{ name: "Vinland Saga", type: ActivityType.Watching }], status: "dnd" });
-    loadCommands(bot);
-    loadEvenements(bot);
+    await loadCommands(bot);
+    await loadEvenements(bot);
 });
 bot.login(process.env.TOKEN);

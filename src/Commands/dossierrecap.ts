@@ -1,7 +1,8 @@
-import { Client, CommandInteraction,SlashCommandStringOption } from "discord.js";
+import {CommandInteraction,SlashCommandStringOption } from "discord.js";
 import "dotenv/config";
 import { getMostRecentValueFromDB, SaveValueToDB } from "../Fonctions/DbFunctions.js";
 import CBot from "../Class/CBot.js";
+import handleError from "../Fonctions/handleError.js";
 
 export const description = "Cette commande vous donnes le lien de l'endroit où sont stocker tout les récaps";
 export const name = "dossierrecap";
@@ -22,9 +23,9 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
     {
         getMostRecentValueFromDB(message,"lien_dossier_recap","DossierRecap","idDossierRecap",bot)
         .then(async (result : unknown) => {
-            if(result && typeof result === "object" && 'lien_dossier_recap' in result)
+            if(result)
             {
-                await message.reply("Voici le lien vers le dossier de récap : "+ result.lien_dossier_recap);
+                await message.reply("Voici le lien vers le dossier de récap : "+ result);
             }
             else
             {
@@ -33,21 +34,18 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             console.log("run with sucess. user :",message.user);
         })
         .catch(async err => {
-            await message.reply("Une erreur est survenue lors de la récupération du lien");
-            throw err;
+            handleError(message,err);
         })
     }
     else
     {
-        SaveValueToDB(message,bot,"DossierRecap")
+        SaveValueToDB(message,bot,"DossierRecap",undefined,true)
         .then(result => {
             console.log("command success, author:",message.user);
             return message.reply({content : `Le changement a bien été fait! :)`});
         })
         .catch(async err => {
-            console.log("error while running. user :",message.user)
-            await message.reply("Une erreur est survenue lors de la récupération du lien");
-            throw err;
+            handleError(message,err);
         });
     }
 

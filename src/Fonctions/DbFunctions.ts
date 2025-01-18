@@ -6,7 +6,7 @@ import CBot from '../Class/CBot.js';
 import {  QueryError, RowDataPacket } from 'mysql2';
 import { listCommandObject_t } from './transfromOptionToObject.js';
 
-export async function SaveValueToDB(message : CommandInteraction,bot : CBot,table : string,object = {})
+export async function SaveValueToDB(message : CommandInteraction,bot : CBot,table : string,object = {}, deleteAllOtherValues = false)
 {
     if(!message.guild || !(message instanceof CommandInteraction)) return;
     let optionObject : listCommandObject_t | null | undefined ;
@@ -23,8 +23,8 @@ export async function SaveValueToDB(message : CommandInteraction,bot : CBot,tabl
     if(!(optionObject instanceof Object)) return false;
 
     optionObject["GuildId"] = message.guild.id;
-
-    //await deleteAllOtherValue(message.guild.id,table,bot);
+    if(deleteAllOtherValues)
+      await deleteAllOtherValue(message.guild.id,table,bot);
     let optionParam = ""
     for(let key in optionObject)
     {
@@ -74,7 +74,26 @@ export async function getMostRecentValueFromDB(message : CommandInteraction,cham
             reject(err); // Rejeter la promesse en cas d'erreur
             return;
           }
-          
+          if (result.length > 0) {
+            resolve(result[0][champ]); // Résoudre la promesse avec le résultat
+          } else {
+            resolve(null); // Résoudre avec `null` si aucun résultat
+          }
+        });
+      });
+}
+
+export async function getValueFromDB(message : CommandInteraction,champ :string,table:string,champID : string,bot : CBot)
+{
+    if(!message.guild) return;
+    const guildId = message.guild.id;
+    const commandSql = `SELECT ${champ} FROM ${table} WHERE guildId = ${guildId} ORDER BY ${champID} DESC`;
+    return new Promise((resolve , reject)  => {
+        bot.bd.query<RowDataPacket[]>(commandSql, (err, result : Array<RowDataPacket>) => {
+          if (err) {
+            reject(err); // Rejeter la promesse en cas d'erreur
+            return;
+          }
           if (result.length > 0) {
             resolve(result); // Résoudre la promesse avec le résultat
           } else {
@@ -83,3 +102,4 @@ export async function getMostRecentValueFromDB(message : CommandInteraction,cham
         });
       });
 }
+

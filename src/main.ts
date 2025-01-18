@@ -1,4 +1,4 @@
-import { ActivityType, Client, Collection, CommandInteraction, Events, GatewayIntentBits, Partials} from "discord.js";
+import { ActivityType, Events} from "discord.js";
 import loadCommands from "./Loaders/Commands/LoadCommands.js";
 import loadEvenements from "./Loaders/EVents/loadEvenements.js"
 import "dotenv/config";
@@ -22,14 +22,14 @@ bot.bd.query("SHOW tables", (err, results) => {
     }
 })
 
-bot.once(Events.ClientReady, () => {
+bot.once(Events.ClientReady, async() => {
 
     if(!bot.user) return;
     console.log("bot",bot.user.tag,"is online :)");
     bot.user.setUsername("Yoichi")
     bot.user.setPresence({activities : [{name : "Vinland Saga" , type : ActivityType.Watching}], status : "dnd"});
-    loadCommands(bot);
-    loadEvenements(bot);
+    await loadCommands(bot);
+    await loadEvenements(bot);
     
 })
 

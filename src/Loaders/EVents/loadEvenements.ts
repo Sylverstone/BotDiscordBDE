@@ -1,9 +1,8 @@
 import * as fs from "fs"
 import * as path from "path"
 import __dirname from "../../dirname.js"
-import { CommandInteraction } from "discord.js"
 import CBot from "../../Class/CBot.js"
-import { fileURLToPath, pathToFileURL } from "url"
+import { pathToFileURL } from "url"
 
 const loadEvenements = async (bot : CBot) =>
 {
@@ -15,7 +14,7 @@ const loadEvenements = async (bot : CBot) =>
         {
             
             const {exec,name} = await import(pathToFileURL(path.join(__dirname,"Events",file)).href);
-            bot.on(name, (interaction : CommandInteraction) => exec(bot,interaction))
+            bot.on(name, (interaction) => exec(bot,interaction));
         }
         console.log("successfully loaded",Events.length,"events")
     }
