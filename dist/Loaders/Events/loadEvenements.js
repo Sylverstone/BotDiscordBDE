@@ -7,7 +7,9 @@ const loadEvenements = async (bot) => {
         const Events = fs.readdirSync(path.join("dist", "Events")).filter(file => file.endsWith(".js"));
         console.log("loading", Events.length, "events");
         for (const file of Events) {
-            const { exec, name } = await import(pathToFileURL(path.join(__dirname, "Events", file)).href);
+            const Event = await import(pathToFileURL(path.join(__dirname, "Events", file)).href);
+            const name = Event.name;
+            const exec = Event.exec;
             bot.on(name, (interaction) => exec(bot, interaction));
         }
         console.log("successfully loaded", Events.length, "events");

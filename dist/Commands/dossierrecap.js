@@ -2,12 +2,15 @@ import { SlashCommandStringOption } from "discord.js";
 import "dotenv/config";
 import { getMostRecentValueFromDB, SaveValueToDB } from "../Fonctions/DbFunctions.js";
 import handleError from "../Fonctions/handleError.js";
-export const description = "Cette commande vous donnes le lien de l'endroit où sont stocker tout les récaps";
+export const description = "Cette commande vous donnes le lien de l'endroit où sont stocker les récapitulatifs de vos réunion";
 export const name = "dossierrecap";
-export const option = new SlashCommandStringOption()
-    .setName("lien_dossier_recap")
-    .setDescription("Paramètre permettant de mettre le nouveau lien du dossier du récap")
-    .setRequired(false);
+export const onlyGuild = true;
+export const option = [
+    new SlashCommandStringOption()
+        .setName("lien_dossier_recap")
+        .setDescription("Paramètre permettant de mettre le nouveau lien du dossier du récap")
+        .setRequired(false),
+];
 export const howToUse = "Vous n'avez qu'a tapez `/dossierRecap` et la commande renverra le lien vers le dossier contenant tout les récap";
 export const run = async (bot, message) => {
     console.log(message.user, "is running dossierrecap");

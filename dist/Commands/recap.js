@@ -5,10 +5,13 @@ import handleError from "../Fonctions/handleError.js";
 export const description = "Cette commande permet de recuperer/set le dernier récap";
 export const name = "recap";
 export const howToUse = "`/recap` vous permet de faire *2* choses.\nPremière utilisation : `/recap` en entrant cette commande il vous sera retourner le lien OneDrive du dernier récap de reunion.\nDeuxième utilisation : `/recap paramètre` Ici le 'paramètre' est le lien du nouveau recap, alors la commande sauvegarder le nouveau lien.";
-export const option = new SlashCommandStringOption()
-    .setName("lien_recap")
-    .setDescription("Paramètre permettant de mettre un nouveau recap")
-    .setRequired(false);
+export const onlyGuild = true;
+export const option = [
+    new SlashCommandStringOption()
+        .setName("lien_recap")
+        .setDescription("Paramètre permettant de mettre un nouveau recap")
+        .setRequired(false),
+];
 export const run = async (bot, message) => {
     try {
         console.log(message.user, "is running recap");

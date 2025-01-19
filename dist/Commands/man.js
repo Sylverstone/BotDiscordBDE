@@ -8,13 +8,16 @@ import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 import { pathToFileURL } from "url";
 export const description = "Cette commande vous permettra d'en apprendre plus sur l'utilisation d'une commande";
 export const name = "man";
-export const howToUse = "J'imagine que vous savez dékà utilsier /man :)";
+export const howToUse = "J'imagine que vous savez déjà utilsier /man :)";
+export const onlyGuild = false;
 let choices = await getChoices();
-export const option = new SlashCommandStringOption()
-    .setName("commande")
-    .setDescription("La commande que tu apprendres a utiliser")
-    .setRequired(true)
-    .addChoices(...choices);
+export const option = [
+    new SlashCommandStringOption()
+        .setName("commande")
+        .setDescription("La commande que tu apprendres a utiliser")
+        .setRequired(true)
+        .addChoices(...choices),
+];
 async function getChoices() {
     let choices = [];
     const allCommandsScript = fs.readdirSync(path.join(__dirname, "Commands")).filter(file => file !== "man.js");
@@ -39,7 +42,7 @@ const handleRun = async (version, message, args, bot) => {
     if (!(typeof commandName === 'string'))
         return;
     if (!lookIfCommandsValid(commandName))
-        return;
+        return message.reply(`La commande ${commandName} n'existe pas !`); //juste pour les dm
     const author_name = message instanceof Message ? message.author : message.user;
     try {
         command = await import(pathToFileURL(path.join(__dirname, "Commands", commandName + ".js")).href);

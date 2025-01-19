@@ -1,6 +1,6 @@
-import { Client, CommandInteraction, EmbedBuilder,hyperlink, Message,SlashCommandIntegerOption,SlashCommandNumberOption,SlashCommandStringOption } from "discord.js";
-import verifierDate, { createDate } from "../Fonctions/DateScript.js";
-import { SaveValueToDB, getMostRecentValueFromDB, getValueFromDB } from "../Fonctions/DbFunctions.js";
+import { CommandInteraction, EmbedBuilder,hyperlink, SlashCommandIntegerOption,SlashCommandStringOption } from "discord.js";
+import { createDate } from "../Fonctions/DateScript.js";
+import { SaveValueToDB,  getValueFromDB } from "../Fonctions/DbFunctions.js";
 import 'dotenv/config'
 import __dirname from "../dirname.js";
 import transfromOptionToObject from "../Fonctions/transfromOptionToObject.js";
@@ -8,7 +8,7 @@ import CBot from "../Class/CBot.js";
 import CreateEvent from "../Fonctions/CreateEvent.js";
 import handleError from "../Fonctions/handleError.js";
 
-export const description = "Cette commande écrit le dernier récap dans le chat";
+export const description = "Cette commande vous renvoie les infos du prochain Event de votre serveur";
 export const name = "event";
 
 export const howToUse = "`/event` vous permet de faire *2* choses.\nPremière utilisation : `/event` en entrant cette commande il vous sera retourner des informations sur le dernier évènements.\nDeuxième utilisation : `/event name date more` Ici les Concerne des nou"
@@ -35,9 +35,9 @@ export const option = [
     .setDescription("Lien pour en savoir plus")
     .setRequired(false),
     
-
 ];
 
+export const onlyGuild = true;
 export const optionInt = [
     new SlashCommandIntegerOption()
     .setName("heuredebut")
@@ -108,7 +108,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                 const date = createDate(row.datedebut);
                 return date > DateAujourdhui;
             })
-            let eventSet = true;
+
             let NearestEvent : Evenement_t | null;
             if(allFuturEvent.length > 0)
             {
@@ -124,7 +124,6 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             else
             {
                 NearestEvent = null
-                eventSet = false
             }
             if(isEvent(NearestEvent))
             {

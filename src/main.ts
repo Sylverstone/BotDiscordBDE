@@ -1,5 +1,5 @@
 import { ActivityType, Events} from "discord.js";
-import loadCommands from "./Loaders/Commands/LoadCommands.js";
+import {loadCommandsOnAllServers} from "./Loaders/Commands/LoadCommands.js";
 import loadEvenements from "./Loaders/EVents/loadEvenements.js"
 import "dotenv/config";
 import { connection } from "./Database/coDatabase.js";
@@ -26,7 +26,7 @@ bot.once(Events.ClientReady, async() => {
     console.log("bot",bot.user.tag,"is online :)");
     bot.user.setUsername("Yoichi")
     bot.user.setPresence({activities : [{name : "Vinland Saga" , type : ActivityType.Watching}], status : "dnd"});
-    await loadCommands(bot);
+    await loadCommandsOnAllServers(bot);
     await loadEvenements(bot);
     
 })

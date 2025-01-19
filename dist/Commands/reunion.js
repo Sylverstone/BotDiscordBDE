@@ -5,6 +5,7 @@ import CreateEvent from '../Fonctions/CreateEvent.js';
 import handleError from '../Fonctions/handleError.js';
 const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 const name = "reunion";
+const onlyGuild = true;
 const option = [new SlashCommandStringOption()
         .setName("date")
         .setRequired(false)
@@ -52,7 +53,7 @@ const run = async (bot, message) => {
         await message.reply("Une erreur a eu lieu durant l'éxécution de cette commande, super les devs !");
     }
 };
-export { description, name, run, option, optionInt };
+export { description, name, run, option, optionInt, onlyGuild };
 async function handleRun(message, bot) {
     console.log(message.user, "is running event");
     let option;
@@ -68,7 +69,6 @@ async function handleRun(message, bot) {
             .then(async (result) => {
             if (result === null)
                 return message.reply("Il n'y a pas de reunion l'instant.");
-            console.log(result);
             if (isReunionArray(result)) {
                 const dateTemp = new Date();
                 const dateActu = new Date(dateTemp.getFullYear(), dateTemp.getMonth(), dateTemp.getDate());
@@ -117,7 +117,6 @@ async function handleRun(message, bot) {
     else {
         //verifier si o
         // n peut creer la reunion
-        console.log("verification reunion");
         if (!("more" in optionObject)) {
             optionObject["more"] = "Pas d'informations en plus";
         }

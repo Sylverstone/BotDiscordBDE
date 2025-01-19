@@ -5,7 +5,7 @@ import 'dotenv/config';
 import transfromOptionToObject from "../Fonctions/transfromOptionToObject.js";
 import CreateEvent from "../Fonctions/CreateEvent.js";
 import handleError from "../Fonctions/handleError.js";
-export const description = "Cette commande écrit le dernier récap dans le chat";
+export const description = "Cette commande vous renvoie les infos du prochain Event de votre serveur";
 export const name = "event";
 export const howToUse = "`/event` vous permet de faire *2* choses.\nPremière utilisation : `/event` en entrant cette commande il vous sera retourner des informations sur le dernier évènements.\nDeuxième utilisation : `/event name date more` Ici les Concerne des nou";
 export const option = [
@@ -30,6 +30,7 @@ export const option = [
         .setDescription("Lien pour en savoir plus")
         .setRequired(false),
 ];
+export const onlyGuild = true;
 export const optionInt = [
     new SlashCommandIntegerOption()
         .setName("heuredebut")
@@ -83,7 +84,6 @@ export const run = async (bot, message) => {
                 const date = createDate(row.datedebut);
                 return date > DateAujourdhui;
             });
-            let eventSet = true;
             let NearestEvent;
             if (allFuturEvent.length > 0) {
                 NearestEvent = allFuturEvent[0];
@@ -97,7 +97,6 @@ export const run = async (bot, message) => {
             }
             else {
                 NearestEvent = null;
-                eventSet = false;
             }
             if (isEvent(NearestEvent)) {
                 const textEnv = getDataEvent(NearestEvent);

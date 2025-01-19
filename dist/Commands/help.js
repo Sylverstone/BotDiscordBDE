@@ -1,8 +1,9 @@
 import { Client, CommandInteraction, Message, MessageFlags } from "discord.js";
 import "dotenv/config";
-export const description = "Cette commande vous indiquera les commandes du bot";
+export const description = "Cette commande vous indiquera les commandes du bot ainsi que leur description";
 export const name = "help";
 export const howToUse = "Vous n'avez qu'a écrire `/help` et des indications sur toutes les commandes seront retournés";
+export const onlyGuild = false;
 const displayMessageHelp = async (message, bot) => {
     if (message instanceof CommandInteraction) {
         await message.reply({

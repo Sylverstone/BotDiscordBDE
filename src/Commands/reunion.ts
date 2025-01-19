@@ -1,6 +1,6 @@
-import {CommandInteraction, EmbedBuilder, DiscordAPIError, SlashCommandIntegerOption, SlashCommandStringOption} from 'discord.js';
+import {CommandInteraction, EmbedBuilder, SlashCommandIntegerOption, SlashCommandStringOption} from 'discord.js';
 import { createDate } from '../Fonctions/DateScript.js';
-import { getMostRecentValueFromDB, getValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
+import {getValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
 import { listCommandObject_t } from '../Fonctions/transfromOptionToObject.js';
 import __dirname from '../dirname.js';
 import CBot from '../Class/CBot.js';
@@ -10,7 +10,7 @@ import handleError from '../Fonctions/handleError.js';
 const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 
 const name = "reunion";
-
+const onlyGuild = true;
 const option = [new SlashCommandStringOption()
     .setName("date")
     .setRequired(false)
@@ -28,7 +28,7 @@ const option = [new SlashCommandStringOption()
     .setName("more")
     .setRequired(false)
     .setDescription("Indiquez des infos supplémentaire si vous le souhaite")
-]
+];
     
 const optionInt = [
     new SlashCommandIntegerOption()
@@ -38,7 +38,8 @@ const optionInt = [
     new SlashCommandIntegerOption()
     .setName("heurefin")
     .setRequired(false)
-    .setDescription("Indiquez l'heure de fin de la réunion")]
+    .setDescription("Indiquez l'heure de fin de la réunion")
+];
 
 interface reunion_t{
     date : string,
@@ -81,7 +82,7 @@ const run = async (bot : CBot, message : CommandInteraction) =>
     
 };
 
-export{description,name,run,option,optionInt}
+export{description,name,run,option,optionInt,onlyGuild}
 
 async function handleRun(message : CommandInteraction, bot : CBot)   
 {
@@ -104,7 +105,6 @@ async function handleRun(message : CommandInteraction, bot : CBot)
         .then(async(result) => {
             
             if(result === null) return message.reply("Il n'y a pas de reunion l'instant.");
-            console.log(result);
             if(isReunionArray(result))
             {
                 const dateTemp = new Date();
@@ -161,7 +161,6 @@ async function handleRun(message : CommandInteraction, bot : CBot)
     {
         //verifier si o
         // n peut creer la reunion
-        console.log("verification reunion")
         if(!("more" in optionObject))
         {
             optionObject["more"] = "Pas d'informations en plus"

@@ -12,8 +12,9 @@ export type script_t =
     description : string;
     howToUse : string;
     run : any;
-    option : SlashCommandStringOption[],
-    optionInt : SlashCommandIntegerOption | null;
+    option : SlashCommandStringOption[] | undefined ;
+    optionInt : SlashCommandIntegerOption[] | undefined;
+    onlyGuild : boolean;
 
 }
 export default class CBot extends Client{

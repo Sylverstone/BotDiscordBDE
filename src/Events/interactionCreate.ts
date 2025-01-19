@@ -6,7 +6,6 @@ import CBot from "../Class/CBot.js";
 
 const name = Events.InteractionCreate;
 
-
 const exec = async (bot : CBot, interaction : CommandInteraction) =>  {
     if(!interaction.isChatInputCommand()) return;
     const commandName = interaction.commandName;

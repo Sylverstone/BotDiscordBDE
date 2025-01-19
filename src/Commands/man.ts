@@ -1,4 +1,4 @@
-import { Client, CommandInteraction, EmbedBuilder, Message, MessageFlags,SlashCommandStringOption } from "discord.js";
+import { CommandInteraction, EmbedBuilder, Message,SlashCommandStringOption } from "discord.js";
 import "dotenv/config"
 import * as path from "path";
 import * as fs from "fs";
@@ -11,14 +11,18 @@ import { pathToFileURL } from "url";
 export const description = "Cette commande vous permettra d'en apprendre plus sur l'utilisation d'une commande";
 export const name = "man";
 
-export const howToUse = "J'imagine que vous savez dékà utilsier /man :)"
+export const howToUse = "J'imagine que vous savez déjà utilsier /man :)"
+export const onlyGuild = false;
 
 let choices = await getChoices()
-export const option = new SlashCommandStringOption()
+export const option = 
+[
+    new SlashCommandStringOption()
         .setName("commande")
         .setDescription("La commande que tu apprendres a utiliser")
         .setRequired(true)
-        .addChoices(...choices);
+        .addChoices(...choices),
+];
 
     
 async function getChoices(){
@@ -27,7 +31,6 @@ async function getChoices(){
 
     for(const script of allCommandsScript)
     {
-
         const {name} = await import(pathToFileURL(path.join(__dirname, "Commands",script)).href);
         choices.push({name: name, value:name});
     }
@@ -50,7 +53,7 @@ const handleRun = async(version : number,message : CommandInteraction | Message,
 
     if(!(typeof commandName === 'string')) return;
 
-    if(!lookIfCommandsValid(commandName)) return;
+    if(!lookIfCommandsValid(commandName)) return message.reply(`La commande ${commandName} n'existe pas !`); //juste pour les dm
     const author_name = message instanceof Message ? message.author : message.user;
     try {
         command = await import(pathToFileURL(path.join(__dirname,"Commands",commandName + ".js")).href);
@@ -70,8 +73,6 @@ const handleRun = async(version : number,message : CommandInteraction | Message,
         console.log("command went wrong while",author_name,"was running it\n",error)
         return message.reply("Il y a eu une erreur pdt l'executiond de la commande");
     }
-
-
 }
 
 export const  run = async(bot : CBot, message : Message | CommandInteraction, args : Array<string>) => {
