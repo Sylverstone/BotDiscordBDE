@@ -7,6 +7,7 @@ import CBot from "../Class/CBot.js";
 const name = Events.InteractionCreate;
 
 const exec = async (bot : CBot, interaction : CommandInteraction) =>  {
+   
     if(!interaction.isChatInputCommand()) return;
     const commandName = interaction.commandName;
     const {run} = await import(pathToFileURL(path.join(__dirname,"Commands",commandName + ".js")).href);

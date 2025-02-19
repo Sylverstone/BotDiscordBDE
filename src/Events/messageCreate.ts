@@ -16,6 +16,7 @@ const exec = async (bot : CBot, message : Message) =>  {
     const commandsFolder = path.join(__dirname, "Commands");
     
     const isCommand = message.content.startsWith("!");
+    
     if(!isCommand)
     {
         if(message.content.startsWith("/"))

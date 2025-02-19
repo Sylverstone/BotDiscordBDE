@@ -41,6 +41,15 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
             }
             
         }
+        
+        if(commande.optionUser !== undefined)
+        {
+            for (const option of commande.optionUser)
+            {
+                slashCommand.addUserOption(option);
+            }
+        }
+
         SlashCommands.push(slashCommand);
     }
 

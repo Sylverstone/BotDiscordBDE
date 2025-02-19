@@ -1,4 +1,4 @@
-import { Client, Collection, GatewayIntentBits, CommandInteraction, Partials, SlashCommandStringOption, SlashCommandIntegerOption } from "discord.js"
+import { Client, Collection, GatewayIntentBits, CommandInteraction, Partials, SlashCommandStringOption, SlashCommandIntegerOption, SlashCommandUserOption } from "discord.js"
 import { Connection } from "mysql2/typings/mysql/lib/Connection";
 
 
@@ -15,6 +15,7 @@ export type script_t =
     option : SlashCommandStringOption[] | undefined ;
     optionInt : SlashCommandIntegerOption[] | undefined;
     onlyGuild : boolean;
+    optionUser : SlashCommandUserOption[] | undefined;
 
 }
 export default class CBot extends Client{
@@ -30,6 +31,7 @@ export default class CBot extends Client{
                 GatewayIntentBits.MessageContent,
                 GatewayIntentBits.DirectMessages,
                 GatewayIntentBits.DirectMessageTyping,
+                GatewayIntentBits.GuildModeration
             ],
             partials : [Partials.Channel],
         })

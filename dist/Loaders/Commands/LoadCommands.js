@@ -28,6 +28,11 @@ const setupLoad = async (bot, guildIds) => {
                 slashCommand.addIntegerOption(option);
             }
         }
+        if (commande.optionUser !== undefined) {
+            for (const option of commande.optionUser) {
+                slashCommand.addUserOption(option);
+            }
+        }
         SlashCommands.push(slashCommand);
     }
     if (!(typeof process.env.TOKEN === 'string'))

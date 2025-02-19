@@ -8,7 +8,6 @@ export default async function displayEmbedsMessage(message: CommandInteraction |
         await message.reply({
             embeds : [embedText],
             flags : [MessageFlags.Ephemeral],
-
         });
     }
     else

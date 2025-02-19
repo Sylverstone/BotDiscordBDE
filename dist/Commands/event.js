@@ -50,16 +50,7 @@ function isEvent(object) {
         'datefin' in object &&
         'name' in object &&
         'heuredebut' in object &&
-        'heurefin' in object
-    /*
-    typeof (object as Evenement_t).lieu === 'string' &&
-    typeof (object as Evenement_t).more === 'string' &&
-    typeof (object as Evenement_t).datedebut === 'string' &&
-    typeof (object as Evenement_t).datefin === 'string' &&
-    typeof (object as Evenement_t).name === 'string' &&
-    typeof (object as Evenement_t).heuredebut === 'number' &&
-    typeof (object as Evenement_t).heurefin === 'number'*/
-    );
+        'heurefin' in object);
 }
 function isEventArray(value) {
     return Array.isArray(value) && value.every(item => isEvent(item));
