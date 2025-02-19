@@ -5,7 +5,7 @@ export default async function CreateEvent(message : CommandInteraction,sujet : s
 {
     if(!message.guild) return;
     await message.guild.scheduledEvents.create({
-        name : `${typeEvent} -> ${sujet}`,
+        name : `${typeEvent} ${dateDebut}`,
         scheduledStartTime : dateDebut,
         scheduledEndTime : dateFin,
         privacyLevel :GuildScheduledEventPrivacyLevel.GuildOnly,
@@ -13,6 +13,6 @@ export default async function CreateEvent(message : CommandInteraction,sujet : s
         entityMetadata : {
             location : lieu
         },
-        description : more
+        description : `Sujet : ${sujet}\n${more}`
     });
 }

@@ -3,7 +3,7 @@ export default async function CreateEvent(message, sujet, dateDebut, dateFin, li
     if (!message.guild)
         return;
     await message.guild.scheduledEvents.create({
-        name: `${typeEvent} -> ${sujet}`,
+        name: `${typeEvent} ${dateDebut}`,
         scheduledStartTime: dateDebut,
         scheduledEndTime: dateFin,
         privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
@@ -11,6 +11,6 @@ export default async function CreateEvent(message, sujet, dateDebut, dateFin, li
         entityMetadata: {
             location: lieu
         },
-        description: more
+        description: `Sujet : ${sujet}\n${more}`
     });
 }

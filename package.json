@@ -7,7 +7,7 @@
   "scripts": {
     "dev" : "npx tsx watch src/**/*.ts",
     "build" : "npx tsc",
-    "start": "node ."
+    "start": "npm run build && node ."
   },
   "author": "Sylvio PELAGE MAXIME",
   "license": "ISC",
