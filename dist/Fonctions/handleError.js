@@ -1,5 +1,5 @@
 import { DiscordAPIError, EmbedBuilder } from "discord.js";
-import displayEmbedsMessage from "./displayEmbedsMessage";
+import displayEmbedsMessage from "./displayEmbedsMessage.js";
 export default function handleError(message, error) {
     console.log("command went wrong while", message.user.username, "was running it\n", error);
     if (error instanceof DiscordAPIError) {

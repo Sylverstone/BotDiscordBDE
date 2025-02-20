@@ -147,7 +147,7 @@ async function handleRun(message, bot) {
         };
         SaveValueToDB(message, bot, "Reunion", finalObjectEvent)
             .then(async (result) => {
-            console.log("command succes -author:", message.user);
+            console.log("command succes -author:", message.user.username);
             dateDebut.setHours(optionReunion.heuredebut);
             const dateFin = createDate(optionReunion.date);
             if (!(dateFin instanceof Date))
