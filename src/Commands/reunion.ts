@@ -1,17 +1,22 @@
-import {CommandInteraction, EmbedBuilder, SlashCommandIntegerOption, SlashCommandStringOption} from 'discord.js';
+import {CommandInteraction, EmbedBuilder, SlashCommandNumberOption, SlashCommandStringOption} from 'discord.js';
 import { createDate } from '../Fonctions/DateScript.js';
-import {getValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
+import {getLastId, getValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
 import { listCommandObject_t } from '../Fonctions/transfromOptionToObject.js';
 import __dirname from '../dirname.js';
 import CBot from '../Class/CBot.js';
 import CreateEvent from '../Fonctions/CreateEvent.js';
 import handleError from '../Fonctions/handleError.js';
+import splitNumber from '../Fonctions/splitHeure.js';
 
 const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 
 const name = "reunion";
 const onlyGuild = true;
-const option = [new SlashCommandStringOption()
+
+export const howToUse = "`/reunion` vous permet de faire *2* choses.\nPremière utilisation : `/reunion` en entrant cette commande il vous sera retourner la date de la prochaine reunion, si elle existe.\nDeuxième utilisation : `/reunion 'date' 'sujet' 'lieu' 'info_en_plus' 'heuredebut' 'heurefin'`. Une deuxième réunion sera alors sauvegarder";
+
+const option = [
+    new SlashCommandStringOption()
     .setName("date")
     .setRequired(false)
     .setDescription("Paramètre permettant de définir une nouvelles dates :)"),
@@ -25,38 +30,53 @@ const option = [new SlashCommandStringOption()
     .setRequired(false)
     .setDescription("Indiquez le lieu de la réunion"),
     new SlashCommandStringOption()
-    .setName("more")
+    .setName("info_en_plus")
     .setRequired(false)
     .setDescription("Indiquez des infos supplémentaire si vous le souhaite")
 ];
     
-const optionInt = [
-    new SlashCommandIntegerOption()
+
+
+const optionNum = [
+    new SlashCommandNumberOption()
     .setName("heuredebut")
     .setRequired(false)
     .setDescription("Indiquez l'heure de début de la réunion"),
-    new SlashCommandIntegerOption()
+    new SlashCommandNumberOption()
     .setName("heurefin")
     .setRequired(false)
     .setDescription("Indiquez l'heure de fin de la réunion")
 ];
 
+
 interface reunion_t{
     date : string,
     sujet : string,
     lieu : string,
-    more : string,
+    info_en_plus : string,
     heuredebut : number,
     heurefin : number
 }
 
+interface maxId_t
+{
+    maxId : number
+}
+
+function isMaxId(result : unknown) : result is maxId_t
+{
+    return (
+        result !== null && typeof result === "object"
+        && "maxId" in result && typeof result.maxId === "number"
+    );
+}
 function isReunion(result : unknown) : result is reunion_t
 {
     
     return (
         result !== null && typeof result === "object"
         && "date" in result && "sujet" in result
-        && "lieu" in result && "more" in result
+        && "lieu" in result && "info_en_plus" in result
         && "heuredebut" in result && "heurefin" in result
     );
 }
@@ -68,7 +88,6 @@ function isReunionArray(result : unknown) : result is reunion_t[]
     return Array.isArray(result) && result.every(row => isReunion(row));
 }
 
-export const howToUse = "`/reunion` vous permet de faire *2* choses.\nPremière utilisation : `/reunion` en entrant cette commande il vous sera retourner la date de la prochaine reunion, si elle existe.\nDeuxième utilisation : `/reunion paramètre` Ici le 'paramètre' est la date de la nouvelle reunion, le format est de la date est jj/mm/yyyy où jj-mm-yyyy ( exemple : 08/01/2006 ). La commande va donc sauvegarder la prochaine date de reunion.\n PS: si vous utilisez un argument, TOUT les autres sont nécéssaires sauf \`more\`"
 
 const run = async (bot : CBot, message : CommandInteraction) =>
 {
@@ -82,7 +101,7 @@ const run = async (bot : CBot, message : CommandInteraction) =>
     
 };
 
-export{description,name,run,option,optionInt,onlyGuild}
+export{description,name,run,option,optionNum,onlyGuild}
 
 async function handleRun(message : CommandInteraction, bot : CBot)   
 {
@@ -101,7 +120,7 @@ async function handleRun(message : CommandInteraction, bot : CBot)
 
     if(!ObjectIsReal) {
 
-        await getValueFromDB(message,"date, heuredebut, heurefin, lieu, more, sujet","Reunion","idReunion",bot)
+        await getValueFromDB(message,"date, heuredebut, heurefin, lieu, info_en_plus, sujet","Reunion","idReunion",bot)
         .then(async(result) => {
             
             if(result === null) return message.reply("Il n'y a pas de reunion l'instant.");
@@ -136,13 +155,16 @@ async function handleRun(message : CommandInteraction, bot : CBot)
                 }
                 if(isReunion(NearestReunion))
                 {
-                    const {date, sujet, heuredebut,heurefin, lieu,more} = NearestReunion;
-                    const infoEnPlusText = more === "" ? "" : "Info en plus : " + more;
+                    const {date, sujet, heuredebut,heurefin, lieu,info_en_plus} = NearestReunion;
+                    const infoEnPlusText = info_en_plus === "" ? "" : "Info en plus : " + info_en_plus;
+                    const [integerPart,DecimalPart] = splitNumber(heuredebut);
+                    const [integerPartFin,DecimalPartFin] = splitNumber(heurefin);
+                    
                     const embedText = new EmbedBuilder()
                         .setColor("#ff0000")
                         .setTitle(`Prochaine réunion - ${sujet}`)
                         .setDescription(`date : ${date}\n
-                                        heure : ${heuredebut} -> ${heurefin}\n
+                                        heure : ${integerPart}h${DecimalPart} -> ${integerPartFin}h${DecimalPartFin}\n
                                         lieu : ${lieu}\n
                                         ${infoEnPlusText}`)
                         .setFooter({
@@ -164,39 +186,46 @@ async function handleRun(message : CommandInteraction, bot : CBot)
     {
         //verifier si o
         // n peut creer la reunion
-        if(!("more" in optionObject))
+        if(!("info_en_plus" in optionObject))
         {
-            optionObject["more"] = "Pas d'informations en plus"
+            optionObject["info_en_plus"] = "Pas d'informations en plus"
         }
         if(!isReunion(optionObject)) return message.reply("La définition de la réunion n'est pas complète :(");
 
         const optionReunion : reunion_t = optionObject;
         const dateActu = new Date();
         const dateDebut = createDate(optionReunion.date);
-        if(!(dateDebut instanceof Date)) return message.reply("ntm");
+        const [stringIntegerPart,stringDecimalPart] = splitNumber(optionReunion.heuredebut)
+        const [stringIntegerPartFin, stringDecimalPartFin] = splitNumber(optionReunion.heurefin)
+        const dateFin = createDate(optionReunion.date);
+        if(!(dateFin instanceof Date && dateDebut instanceof Date)) return message.reply("ntm");
+        dateDebut.setHours((+stringIntegerPart),stringDecimalPart);
+        dateFin.setHours((+stringIntegerPartFin),stringDecimalPartFin);
         console.log("date debut  :",dateDebut.toString(),"\n",dateActu)
-        if(dateActu > dateDebut) return message.reply("La reunion ne peut pas être défini dans le passé")
+        if(dateActu.getTime() > dateDebut.getTime()) return message.reply("La reunion ne peut pas être défini dans le passé")
             
         const finalObjectEvent = {
             date : optionReunion.date,
-            sujet : optionReunion.sujet ,
-            lieu : optionReunion.lieu ,
-            more : optionReunion.more,
+            sujet : optionReunion.sujet,
+            lieu : optionReunion.lieu,
+            info_en_plus : optionReunion.info_en_plus,
             heuredebut : optionReunion.heuredebut,
             heurefin : optionReunion.heurefin 
         };
 
         SaveValueToDB(message,bot,"Reunion",finalObjectEvent)
         .then(async result => {
-            console.log("command succes -author:",message.user.username);
-            dateDebut.setHours(optionReunion.heuredebut)
-            const dateFin = createDate(optionReunion.date);
-            if(!(dateFin instanceof Date)) return message.reply("ntm");
-            dateFin.setHours(optionReunion.heurefin)
+            console.log("command succes -author:",message.user.username);     
             const sujet = optionReunion.sujet;
             const lieu = optionReunion.lieu;
-            const more = optionReunion.more;
-            await CreateEvent(message,sujet,dateDebut,dateFin,lieu,more,"Reunion");
+            const info_en_plus = optionReunion.info_en_plus;
+            console.log("date :",dateDebut,dateFin)
+            const res  = await getLastId("Reunion","idReunion",bot);
+            console.log(res);
+            if(!isMaxId(res)) return;
+            
+            const id = res.maxId;
+            await CreateEvent(message,sujet,dateDebut,dateFin,lieu,info_en_plus,"Reunion",id);
             return message.reply({content : `La réunion à été crée !`})
         })
         .catch(err => {

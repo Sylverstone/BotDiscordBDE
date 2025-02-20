@@ -1,7 +1,7 @@
 import { CommandInteraction, GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel } from "discord.js";
 
 export default async function CreateEvent(message : CommandInteraction,sujet : string, dateDebut : Date, dateFin : Date,
-    lieu : string, more : string, typeEvent : string)
+    lieu : string, more : string, typeEvent : string,id? : number)
 {
     if(!message.guild) return;
     await message.guild.scheduledEvents.create({
@@ -13,6 +13,6 @@ export default async function CreateEvent(message : CommandInteraction,sujet : s
         entityMetadata : {
             location : lieu
         },
-        description : `Sujet : ${sujet}\n${more}`
+        description : `Sujet : ${sujet}\n${more}\nid : ${id}`,
     });
 }

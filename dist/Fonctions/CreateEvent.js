@@ -1,5 +1,5 @@
 import { GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel } from "discord.js";
-export default async function CreateEvent(message, sujet, dateDebut, dateFin, lieu, more, typeEvent) {
+export default async function CreateEvent(message, sujet, dateDebut, dateFin, lieu, more, typeEvent, id) {
     if (!message.guild)
         return;
     await message.guild.scheduledEvents.create({
@@ -11,6 +11,6 @@ export default async function CreateEvent(message, sujet, dateDebut, dateFin, li
         entityMetadata: {
             location: lieu
         },
-        description: `Sujet : ${sujet}\n${more}`
+        description: `Sujet : ${sujet}\n${more}\nid : ${id}`,
     });
 }

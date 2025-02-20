@@ -86,3 +86,32 @@ export async function getValueFromDB(message, champ, table, champID, bot) {
         });
     });
 }
+export async function getLastId(table, champId, bot) {
+    const commandSQL = `SELECT max(${champId}) as maxId from ${table}`;
+    return new Promise((resolve, reject) => {
+        bot.bd.query(commandSQL, (err, result) => {
+            if (err) {
+                reject(err); // Rejeter la promesse en cas d'erreur
+                return;
+            }
+            if (result.length > 0) {
+                resolve(result[0]); // Résoudre la promesse avec le résultat
+            }
+            else {
+                resolve(null); // Résoudre avec `null` si aucun résultat
+            }
+        });
+    });
+}
+export async function deleteFromTableWithId(table, champId, cibleId, bot) {
+    const commandSQL = `DELETE FROM ${table} WHERE ${champId} = ${cibleId}`;
+    return new Promise((resolve, reject) => {
+        bot.bd.query(commandSQL, (err, result) => {
+            if (err) {
+                reject(err); // Rejeter la promesse en cas d'erreur
+                return;
+            }
+            resolve(true);
+        });
+    });
+}

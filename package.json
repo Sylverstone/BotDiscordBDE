@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "npx tsx watch src/**/.ts",
-    "build": "npx tsc",
-    "start": "npx rimraf dist && npm run build && node ."
+    "build": "npx rimraf dist && npx tsc",
+    "start": "npm run build && node ."
   },
   "author": "Sylvio PELAGE MAXIME",
   "license": "ISC",

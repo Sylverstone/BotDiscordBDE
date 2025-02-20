@@ -38,7 +38,9 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
         {
             console.log("cible reconnue :", member); 
             member.ban({reason : "why not "});
-            displayEmbedsMessage(message,new EmbedBuilder().setTitle("bannissement").setDescription(`l'utilisateur : ${member.user.username} a été banni`))
+            displayEmbedsMessage(message,new EmbedBuilder()
+                .setTitle("bannissement")
+                .setDescription(`l'utilisateur : ${member.user.username} a été banni`))
 
         }
         catch(Err)

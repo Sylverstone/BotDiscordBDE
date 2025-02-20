@@ -33,6 +33,11 @@ const setupLoad = async (bot, guildIds) => {
                 slashCommand.addUserOption(option);
             }
         }
+        if (commande.optionNum !== undefined) {
+            for (const option of commande.optionNum) {
+                slashCommand.addNumberOption(option);
+            }
+        }
         SlashCommands.push(slashCommand);
     }
     if (!(typeof process.env.TOKEN === 'string'))

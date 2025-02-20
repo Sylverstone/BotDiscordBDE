@@ -1,13 +1,14 @@
-import { EmbedBuilder, hyperlink, SlashCommandIntegerOption, SlashCommandStringOption } from "discord.js";
+import { EmbedBuilder, hyperlink, SlashCommandNumberOption, SlashCommandStringOption } from "discord.js";
 import { createDate } from "../Fonctions/DateScript.js";
 import { SaveValueToDB, getValueFromDB } from "../Fonctions/DbFunctions.js";
 import 'dotenv/config';
 import transfromOptionToObject from "../Fonctions/transfromOptionToObject.js";
 import CreateEvent from "../Fonctions/CreateEvent.js";
 import handleError from "../Fonctions/handleError.js";
+import splitNumber from "../Fonctions/splitHeure.js";
 export const description = "Cette commande vous renvoie les infos du prochain Event de votre serveur";
 export const name = "event";
-export const howToUse = "`/event` vous permet de faire *2* choses.\nPremière utilisation : `/event` en entrant cette commande il vous sera retourner des informations sur le dernier évènements.\nDeuxième utilisation : `/event name date more` Ici les Concerne des nou";
+export const howToUse = "`/event` vous permet de faire *2* choses.\nPremière utilisation : `/event` en entrant cette commande il vous sera retourner des informations sur le dernier évènements.\nDeuxième utilisation : `/event 'name' 'datedebut' 'datefin' 'lieu' 'info_en_plus' 'heuredebut' 'heurefin'` pour définir un Evènement";
 export const option = [
     new SlashCommandStringOption()
         .setName("name")
@@ -26,17 +27,17 @@ export const option = [
         .setDescription("le lieu de l'évènements")
         .setRequired(false),
     new SlashCommandStringOption()
-        .setName("more")
+        .setName("info_en_plus")
         .setDescription("Lien pour en savoir plus")
         .setRequired(false),
 ];
 export const onlyGuild = true;
-export const optionInt = [
-    new SlashCommandIntegerOption()
+export const optionNum = [
+    new SlashCommandNumberOption()
         .setName("heuredebut")
         .setDescription("heure de début l'évènements")
         .setRequired(false),
-    new SlashCommandIntegerOption()
+    new SlashCommandNumberOption()
         .setName("heurefin")
         .setDescription("heure de fin l'évènements")
         .setRequired(false)
@@ -45,7 +46,7 @@ function isEvent(object) {
     return (typeof object === 'object' &&
         object !== null &&
         'lieu' in object &&
-        'more' in object &&
+        'info_en_plus' in object &&
         'datedebut' in object &&
         'datefin' in object &&
         'name' in object &&
@@ -56,15 +57,17 @@ function isEventArray(value) {
     return Array.isArray(value) && value.every(item => isEvent(item));
 }
 const getDataEvent = (Ev) => {
-    const textInfoPlus = Ev.more === "Aucune info en plus n'a été fournit" ? Ev.more + "." : `${hyperlink("Ici", Ev.more)} vous pourrez retrouvez plus d'information :)`;
-    return `Le prochaine évènements est : \`${Ev.name}\` et il aura lieu le \`${Ev.datedebut}\` jusqu'au \`${Ev.datefin}\` à \`'${Ev.lieu}'\` de \`${Ev.heuredebut}h à ${Ev.heurefin}h\`.\n\n${textInfoPlus}`;
+    const [integerPart, DecimalPart] = splitNumber(Ev.heuredebut);
+    const [integerPartFin, DecimalPartFin] = splitNumber(Ev.heurefin);
+    const textInfoPlus = Ev.info_en_plus === "Aucune info en plus n'a été fournit" ? Ev.info_en_plus + "." : `${hyperlink("Ici", Ev.info_en_plus)} vous pourrez retrouvez plus d'information :)`;
+    return `Le prochaine évènements est : \`${Ev.name}\` et il aura lieu le \`${Ev.datedebut}\` jusqu'au \`${Ev.datefin}\` à \`'${Ev.lieu}'\` de \`${integerPart}h${DecimalPart} à ${integerPartFin}h${DecimalPartFin}\`.\n\n${textInfoPlus}`;
 };
 export const run = async (bot, message) => {
     try {
         console.log(message.user, "is running event");
         let { ObjectIsReal, optionObject } = transfromOptionToObject(message);
         if (!ObjectIsReal) {
-            const objectEvent = await getValueFromDB(message, "lieu, more, datedebut,datefin, name, heuredebut, heurefin", "Event", "id", bot);
+            const objectEvent = await getValueFromDB(message, "lieu, info_en_plus, datedebut,datefin, name, heuredebut, heurefin", "Event", "id", bot);
             console.log(objectEvent);
             if (objectEvent === null)
                 return message.reply("Il n'y a pas d'Event planifié pour les prochains jours");
@@ -112,17 +115,22 @@ export const run = async (bot, message) => {
             return message.reply("Il n'y a pas d'Event planifié pour les prochains jours");
         }
         else {
-            if (!("more" in optionObject)) {
-                optionObject["more"] = "Aucune info en plus n'a été fournit";
+            if (!("info_en_plus" in optionObject)) {
+                optionObject["info_en_plus"] = "Aucune info en plus n'a été fournit";
             }
             if (!isEvent(optionObject))
                 return message.reply("La définition de l'Evenement n'est pas complète");
             const optionEvent = optionObject;
             const dateActu = new Date();
             const dateDebutEvent = createDate(optionEvent.datedebut);
-            if (!(dateDebutEvent instanceof Date))
+            const dateFinEvent = createDate(optionEvent.datefin);
+            const [stringHeureDebutInt, stringHeureDebutDecimal] = splitNumber(optionEvent.heuredebut);
+            const [stringHeureFintInt, stringHeureFinDecimal] = splitNumber(optionEvent.heurefin);
+            if (!(dateDebutEvent instanceof Date && dateFinEvent instanceof Date))
                 return message.reply("bad shit");
-            if (dateActu > dateDebutEvent)
+            dateFinEvent.setHours(+stringHeureFintInt, (+stringHeureFinDecimal));
+            dateDebutEvent.setMinutes(+stringHeureDebutInt, (+stringHeureDebutDecimal));
+            if (dateActu.getTime() > dateDebutEvent.getTime())
                 return message.reply("L'evenement ne peut pas être défini dans le passé");
             const finalObjectEvent = {
                 name: optionEvent.name,
@@ -131,19 +139,16 @@ export const run = async (bot, message) => {
                 heuredebut: optionEvent.heuredebut,
                 heurefin: optionEvent.heurefin,
                 lieu: optionEvent.lieu,
-                more: optionEvent.more,
+                info_en_plus: optionEvent.info_en_plus,
             };
             SaveValueToDB(message, bot, "Event", finalObjectEvent)
                 .then(async (result) => {
-                dateDebutEvent.setHours(optionEvent.heuredebut);
-                const dateFinEvent = createDate(optionEvent.datefin);
                 if (!(dateFinEvent instanceof Date))
                     return message.reply("Bad shit");
-                dateFinEvent.setHours(optionEvent.heurefin);
                 const name = optionEvent.name;
                 const lieu = optionEvent.lieu;
-                const more = optionEvent.more;
-                CreateEvent(message, name, dateDebutEvent, dateFinEvent, lieu, more, "Evènement");
+                const info_en_plus = optionEvent.info_en_plus;
+                CreateEvent(message, name, dateDebutEvent, dateFinEvent, lieu, info_en_plus, "Evènement");
                 console.log("command succes -author:", message.user);
                 return message.reply({ content: `Le changement a bien été fait ! :)` });
             })

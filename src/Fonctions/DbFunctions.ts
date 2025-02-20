@@ -103,3 +103,36 @@ export async function getValueFromDB(message : CommandInteraction,champ :string,
       });
 }
 
+export async function getLastId(table : string, champId : string,bot : CBot) 
+{
+	const commandSQL = `SELECT max(${champId}) as maxId from ${table}`;
+	return new Promise((resolve , reject)  => {
+	bot.bd.query<RowDataPacket[]>(commandSQL, (err, result : Array<RowDataPacket>) => {
+		if (err) {
+			reject(err); // Rejeter la promesse en cas d'erreur
+			return;
+		}
+		if (result.length > 0) {
+			resolve(result[0]); // Résoudre la promesse avec le résultat
+		} 
+		else {
+			resolve(null); // Résoudre avec `null` si aucun résultat
+		}
+	});
+	});
+
+}
+
+export async function deleteFromTableWithId(table : string, champId : string, cibleId : number, bot : CBot)
+{
+	const commandSQL = `DELETE FROM ${table} WHERE ${champId} = ${cibleId}`;
+    return new Promise((resolve, reject) => {
+    bot.bd.query(commandSQL, (err, result) => {
+        if (err) {
+            reject(err); // Rejeter la promesse en cas d'erreur
+            return;
+        }
+        resolve(true);
+    });
+    });
+}
