@@ -8,6 +8,7 @@ import CBot from "../Class/CBot.js";
 import CreateEvent from "../Fonctions/CreateEvent.js";
 import handleError from "../Fonctions/handleError.js";
 import splitNumber from "../Fonctions/splitHeure.js";
+import make_log from "../Fonctions/makeLog.js";
 
 export const description = "Cette commande vous renvoie les infos du prochain Event de votre serveur";
 export const name = "event";
@@ -88,7 +89,6 @@ const getDataEvent = (Ev : Evenement_t) => {
 
 export const  run = async(bot : CBot, message : CommandInteraction) => {
     try {
-        console.log(message.user, "is running event")
         let {ObjectIsReal, optionObject} = transfromOptionToObject(message)
         if(!ObjectIsReal)
         {
@@ -134,9 +134,10 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                         iconURL: bot.user?.displayAvatarURL() || ""
                     })
                     .setDescription(textEnv)
-                console.log("command succes -author:",message.user);
+                make_log(true,message);
                 return message.reply({embeds : [embedText]})
             }
+            make_log(true,message);
             return message.reply("Il n'y a pas d'Event planifié pour les prochains jours");
             
         }
@@ -178,7 +179,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                 const lieu = optionEvent.lieu;
                 const info_en_plus = optionEvent.info_en_plus;
                 CreateEvent(message,name,dateDebutEvent,dateFinEvent,lieu,info_en_plus,"Evènement")
-                console.log("command succes -author:",message.user);
+                make_log(true,message);
                 return message.reply({content : `Le changement a bien été fait ! :)`})
             })
             .catch(err => {

@@ -3,6 +3,7 @@ import 'dotenv/config';
 import handleError from "../Fonctions/handleError.js";
 import { deleteFromTableWithId } from "../Fonctions/DbFunctions.js";
 import { createDate } from "../Fonctions/DateScript.js";
+import make_log from "../Fonctions/makeLog.js";
 export const description = "Cette commande vous permet de supprimer une réunion";
 export const name = "sup_reunion";
 export const howToUse = "`/supReunion` vous permet de supprimer une réunion. Vous devez saisir son nom, sa date, son id (écrit dans la description) ainsi que son heure de debut";
@@ -46,6 +47,7 @@ export const run = async (bot, message) => {
         const date = temp_date;
         date.setHours(heureDebut);
         if (!guild) {
+            make_log(true, message);
             return message.reply("not a guild");
         }
         else {
@@ -59,9 +61,10 @@ export const run = async (bot, message) => {
             if (event) {
                 console.log(event);
                 await event.delete();
-                await deleteFromTableWithId("Reunion", "idReunion", id, bot);
+                await deleteFromTableWithId("Reunion", "idReunion", id, bot, message);
                 return message.reply("L'évènement a été supprimé");
             }
+            make_log(true, message);
             return message.reply("Il n'existe pas d'évènements de ce nom");
         }
     }

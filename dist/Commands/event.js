@@ -6,6 +6,7 @@ import transfromOptionToObject from "../Fonctions/transfromOptionToObject.js";
 import CreateEvent from "../Fonctions/CreateEvent.js";
 import handleError from "../Fonctions/handleError.js";
 import splitNumber from "../Fonctions/splitHeure.js";
+import make_log from "../Fonctions/makeLog.js";
 export const description = "Cette commande vous renvoie les infos du prochain Event de votre serveur";
 export const name = "event";
 export const howToUse = "`/event` vous permet de faire *2* choses.\nPremière utilisation : `/event` en entrant cette commande il vous sera retourner des informations sur le dernier évènements.\nDeuxième utilisation : `/event 'name' 'datedebut' 'datefin' 'lieu' 'info_en_plus' 'heuredebut' 'heurefin'` pour définir un Evènement";
@@ -64,7 +65,6 @@ const getDataEvent = (Ev) => {
 };
 export const run = async (bot, message) => {
     try {
-        console.log(message.user, "is running event");
         let { ObjectIsReal, optionObject } = transfromOptionToObject(message);
         if (!ObjectIsReal) {
             const objectEvent = await getValueFromDB(message, "lieu, info_en_plus, datedebut,datefin, name, heuredebut, heurefin", "Event", "id", bot);
@@ -109,9 +109,10 @@ export const run = async (bot, message) => {
                     iconURL: bot.user?.displayAvatarURL() || ""
                 })
                     .setDescription(textEnv);
-                console.log("command succes -author:", message.user);
+                make_log(true, message);
                 return message.reply({ embeds: [embedText] });
             }
+            make_log(true, message);
             return message.reply("Il n'y a pas d'Event planifié pour les prochains jours");
         }
         else {
@@ -149,7 +150,7 @@ export const run = async (bot, message) => {
                 const lieu = optionEvent.lieu;
                 const info_en_plus = optionEvent.info_en_plus;
                 CreateEvent(message, name, dateDebutEvent, dateFinEvent, lieu, info_en_plus, "Evènement");
-                console.log("command succes -author:", message.user);
+                make_log(true, message);
                 return message.reply({ content: `Le changement a bien été fait ! :)` });
             })
                 .catch(err => {

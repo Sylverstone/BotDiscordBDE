@@ -103,8 +103,28 @@ export async function getLastId(table, champId, bot) {
         });
     });
 }
-export async function deleteFromTableWithId(table, champId, cibleId, bot) {
-    const commandSQL = `DELETE FROM ${table} WHERE ${champId} = ${cibleId}`;
+export async function lookIfIdExist(table, champId, cibleId, bot, message) {
+    if (!message.guild)
+        return;
+    const guildId = message.guild.id;
+    const commandSQL = `SELECT count(*) as nbId FROM ${table} WHERE ${champId} = ${cibleId} AND GuildId = ${guildId}`;
+    return new Promise((resolve, reject) => {
+        bot.bd.query(commandSQL, (err, result) => {
+            if (err) {
+                reject(err); // Rejeter la promesse en cas d'erreur
+                return;
+            }
+            if (result.length > 0) {
+                resolve(result[0]["nbId"]);
+            }
+        });
+    });
+}
+export async function deleteFromTableWithId(table, champId, cibleId, bot, message) {
+    if (!message.guild)
+        return;
+    const guildId = message.guild.id;
+    const commandSQL = `DELETE FROM ${table} WHERE ${champId} = ${cibleId} AND GuildId = ${guildId}`;
     return new Promise((resolve, reject) => {
         bot.bd.query(commandSQL, (err, result) => {
             if (err) {

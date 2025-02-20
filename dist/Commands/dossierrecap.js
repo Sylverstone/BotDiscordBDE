@@ -2,6 +2,7 @@ import { SlashCommandStringOption } from "discord.js";
 import "dotenv/config";
 import { getMostRecentValueFromDB, SaveValueToDB } from "../Fonctions/DbFunctions.js";
 import handleError from "../Fonctions/handleError.js";
+import make_log from "../Fonctions/makeLog.js";
 export const description = "Cette commande vous donnes le lien de l'endroit où sont stocker les récapitulatifs de vos réunion";
 export const name = "dossierrecap";
 export const onlyGuild = true;
@@ -13,7 +14,6 @@ export const option = [
 ];
 export const howToUse = "Vous n'avez qu'a tapez `/dossierRecap` et la commande renverra le lien vers le dossier contenant tout les récap";
 export const run = async (bot, message) => {
-    console.log(message.user, "is running dossierrecap");
     let haveParameters = false;
     haveParameters = message.options.data.length >= 1;
     if (!haveParameters) {
@@ -25,7 +25,7 @@ export const run = async (bot, message) => {
             else {
                 await message.reply("Il n'y a pas de lien vers le dossier récap :(");
             }
-            console.log("run with sucess. user :", message.user);
+            make_log(true, message);
         })
             .catch(async (err) => {
             handleError(message, err);
@@ -34,7 +34,7 @@ export const run = async (bot, message) => {
     else {
         SaveValueToDB(message, bot, "DossierRecap", undefined, true)
             .then(result => {
-            console.log("command success, author:", message.user);
+            make_log(true, message);
             return message.reply({ content: `Le changement a bien été fait! :)` });
         })
             .catch(async (err) => {

@@ -24,7 +24,7 @@ const loadEvenements = async (bot : CBot) =>
     }
     catch(error)
     {
-        console.error("Error while loading events :",error);
+        console.error("[ERROR] Error while loading events :",error);
         throw error;
     }
     

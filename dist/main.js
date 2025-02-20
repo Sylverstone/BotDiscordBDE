@@ -11,11 +11,6 @@ bot.bd.connect((err) => {
         throw err;
     console.log("Connected to MySQL!");
 });
-bot.bd.query("SHOW tables", (err, results) => {
-    if (!err) {
-        console.log(results);
-    }
-});
 bot.once(Events.ClientReady, async () => {
     if (!bot.user)
         return;

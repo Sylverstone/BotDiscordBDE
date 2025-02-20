@@ -3,6 +3,7 @@ import { getMostRecentValueFromDB, SaveValueToDB } from "../Fonctions/DbFunction
 import "dotenv/config"
 import CBot from "../Class/CBot.js";
 import handleError from "../Fonctions/handleError.js";
+import make_log from "../Fonctions/makeLog.js";
 
 
 export const description = "Cette commande permet de recuperer/set le dernier récap";
@@ -21,14 +22,13 @@ export const option =
     
 export const run = async(bot : CBot, message : CommandInteraction) => {
         try
-        {
-            console.log(message.user,"is running recap")            
+        {        
             handleRun(bot,message)
         }
         catch(error)
         {
-            console.log("command went wrong while",message.user,"was running it\n",error)
-            await message.reply("Une erreur s'est produite, veuillez contacter un développeur!");
+            if(!(error instanceof Error)) return;
+            handleError(message,error)
         }
 }
  async function handleRun(bot : CBot,message : CommandInteraction)
@@ -43,7 +43,7 @@ export const run = async(bot : CBot, message : CommandInteraction) => {
         {
             SaveValueToDB(message,bot,"recapitulatif",undefined,true)
             .then(result => {
-                console.log("command succes -author:",message.user);
+                make_log(true,message);
                 return message.reply({content : `Le changement a bien été fait ! :)`})
             })
             .catch(err => handleError(message,err));
@@ -55,10 +55,12 @@ export const run = async(bot : CBot, message : CommandInteraction) => {
             .then(async(result) => {
                 if(result)
                 {
+                    make_log(true,message);
                     return message.reply(`Le lien du dernier récap est actuellement : ${result}`);
                 }
                 else
                 {
+                    make_log(true,message);
                     return message.reply("Il n'y a pas de lien de recap actuellement :(");
                 }        
             }).catch(async(err) => {

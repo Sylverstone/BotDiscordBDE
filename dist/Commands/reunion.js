@@ -4,6 +4,7 @@ import { getLastId, getValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctio
 import CreateEvent from '../Fonctions/CreateEvent.js';
 import handleError from '../Fonctions/handleError.js';
 import splitNumber from '../Fonctions/splitHeure.js';
+import make_log from '../Fonctions/makeLog.js';
 const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 const name = "reunion";
 const onlyGuild = true;
@@ -51,17 +52,16 @@ function isReunionArray(result) {
 }
 const run = async (bot, message) => {
     try {
-        console.log(message.user, "is running reunion");
         handleRun(message, bot);
     }
     catch (error) {
-        console.log("command went wrong while", message.user.tag, "was running it\n", error);
-        await message.reply("Une erreur a eu lieu durant l'éxécution de cette commande, super les devs !");
+        if (error instanceof Error) {
+            handleError(message, error);
+        }
     }
 };
 export { description, name, run, option, optionNum, onlyGuild };
 async function handleRun(message, bot) {
-    console.log(message.user, "is running event");
     let option;
     //pour savoir si l'objet a été init
     let ObjectIsReal = false;
@@ -120,9 +120,11 @@ async function handleRun(message, bot) {
                         text: "Au plaisir de vous aidez",
                         iconURL: bot.user?.displayAvatarURL() || ""
                     });
+                    make_log(true, message);
                     return message.reply({ embeds: [embedText] });
                 }
                 else {
+                    make_log(true, message);
                     return message.reply("Il n'y a pas de prochaine reunion prévu pour l'instant.\n");
                 }
             }
@@ -171,6 +173,7 @@ async function handleRun(message, bot) {
                 return;
             const id = res.maxId;
             await CreateEvent(message, sujet, dateDebut, dateFin, lieu, info_en_plus, "Reunion", id);
+            make_log(true, message);
             return message.reply({ content: `La réunion à été crée !` });
         })
             .catch(err => {

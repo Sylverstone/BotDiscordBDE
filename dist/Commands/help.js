@@ -1,5 +1,7 @@
 import { Client, CommandInteraction, Message, MessageFlags } from "discord.js";
 import "dotenv/config";
+import make_log from "../Fonctions/makeLog.js";
+import handleError from "../Fonctions/handleError.js";
 export const description = "Cette commande vous indiquera les commandes du bot ainsi que leur description";
 export const name = "help";
 export const howToUse = "Vous n'avez qu'a écrire `/help` et des indications sur toutes les commandes seront retournés";
@@ -33,7 +35,8 @@ const displayMessageHelp = async (message, bot) => {
         });
     }
     const author_name = message instanceof Message ? message.author : message.user;
-    console.log("command succes -author:", author_name);
+    if (message instanceof CommandInteraction)
+        make_log(true, message);
 };
 export const run = async (bot, message) => {
     if (bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message)) {
@@ -43,8 +46,8 @@ export const run = async (bot, message) => {
             displayMessageHelp(message, bot);
         }
         catch (error) {
-            console.log("command went wrong while", author_name, "was running it\n", error);
-            return message.reply("Une erreur a eu lieu lors de l'exécution de la commande");
+            if (message instanceof CommandInteraction && error instanceof Error)
+                handleError(message, error);
         }
     }
 };

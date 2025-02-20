@@ -7,6 +7,8 @@ import lookIfCommandsValid from "../Fonctions/lookIfCommandsValid.js";
 import CBot from "../Class/CBot.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 import { pathToFileURL } from "url";
+import make_log from "../Fonctions/makeLog.js";
+import handleError from "../Fonctions/handleError.js";
 
 export const description = "Cette commande vous permettra d'en apprendre plus sur l'utilisation d'une commande";
 export const name = "man";
@@ -60,6 +62,7 @@ const handleRun = async(version : number,message : CommandInteraction | Message,
         
         if(message instanceof Message)
         console.log("command success while",author_name,"was running");
+        
         const embedText = new EmbedBuilder()
         .setTitle(`Comment utiliser ${commandName}`)
         .setDescription(command.howToUse)
@@ -69,9 +72,11 @@ const handleRun = async(version : number,message : CommandInteraction | Message,
         })
        
         displayEmbedsMessage(message,embedText);
+        if(message instanceof CommandInteraction)
+            make_log(true,message);
     } catch (error) {
-        console.log("command went wrong while",author_name,"was running it\n",error)
-        return message.reply("Il y a eu une erreur pdt l'executiond de la commande");
+        if(message instanceof CommandInteraction && error instanceof Error)
+            handleError(message,error);
     }
 }
 

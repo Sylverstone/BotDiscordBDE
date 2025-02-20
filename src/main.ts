@@ -13,22 +13,13 @@ bot.bd.connect((err) => {
     console.log("Connected to MySQL!");
 });
 
-bot.bd.query("SHOW tables", (err, results) => {
-    if(!err)
-    {
-        console.log(results)
-    }
-})
-
 bot.once(Events.ClientReady, async() => {
-
     if(!bot.user) return;
     console.log("bot",bot.user.tag,"is online :)");
     bot.user.setUsername("Yoichi")
     bot.user.setPresence({activities : [{name : "Vinland Saga" , type : ActivityType.Watching}], status : "dnd"});
     await loadCommandsOnAllServers(bot);
     await loadEvenements(bot);
-    
 })
 
 

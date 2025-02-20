@@ -1,4 +1,4 @@
-import { CommandInteraction} from 'discord.js';
+import { CommandInteraction, Interaction} from 'discord.js';
 import * as fs from 'fs';
 import transfromOptionToObject from './transfromOptionToObject.js';
 import EmptyObject from './LookIfObjectIsEmpty.js';
@@ -105,6 +105,7 @@ export async function getValueFromDB(message : CommandInteraction,champ :string,
 
 export async function getLastId(table : string, champId : string,bot : CBot) 
 {
+	
 	const commandSQL = `SELECT max(${champId}) as maxId from ${table}`;
 	return new Promise((resolve , reject)  => {
 	bot.bd.query<RowDataPacket[]>(commandSQL, (err, result : Array<RowDataPacket>) => {
@@ -122,10 +123,29 @@ export async function getLastId(table : string, champId : string,bot : CBot)
 	});
 
 }
-
-export async function deleteFromTableWithId(table : string, champId : string, cibleId : number, bot : CBot)
+export async function lookIfIdExist(table : string, champId : string, cibleId : number, bot : CBot, message : CommandInteraction)
 {
-	const commandSQL = `DELETE FROM ${table} WHERE ${champId} = ${cibleId}`;
+	if(!message.guild) return;
+	const guildId = message.guild.id;
+	const commandSQL = `SELECT count(*) as nbId FROM ${table} WHERE ${champId} = ${cibleId} AND GuildId = ${guildId}`;
+	return new Promise((resolve, reject) => {
+		bot.bd.query<RowDataPacket[]>(commandSQL, (err, result : RowDataPacket[]) => {
+			if (err) {
+				reject(err); // Rejeter la promesse en cas d'erreur
+				return;
+			}
+			if(result.length > 0)
+			{
+				resolve(result[0]["nbId"]);
+			}			
+		});
+		});
+}
+export async function deleteFromTableWithId(table : string, champId : string, cibleId : number, bot : CBot,message : CommandInteraction)
+{
+	if(!message.guild) return;
+	const guildId = message.guild.id;
+	const commandSQL = `DELETE FROM ${table} WHERE ${champId} = ${cibleId} AND GuildId = ${guildId}`;
     return new Promise((resolve, reject) => {
     bot.bd.query(commandSQL, (err, result) => {
         if (err) {

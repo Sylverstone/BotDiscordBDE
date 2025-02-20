@@ -6,6 +6,8 @@ import __dirname from "../dirname.js";
 import lookIfCommandsValid from "../Fonctions/lookIfCommandsValid.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 import { pathToFileURL } from "url";
+import make_log from "../Fonctions/makeLog.js";
+import handleError from "../Fonctions/handleError.js";
 export const description = "Cette commande vous permettra d'en apprendre plus sur l'utilisation d'une commande";
 export const name = "man";
 export const howToUse = "J'imagine que vous savez déjà utilsier /man :)";
@@ -56,10 +58,12 @@ const handleRun = async (version, message, args, bot) => {
             iconURL: bot.user?.displayAvatarURL() || ""
         });
         displayEmbedsMessage(message, embedText);
+        if (message instanceof CommandInteraction)
+            make_log(true, message);
     }
     catch (error) {
-        console.log("command went wrong while", author_name, "was running it\n", error);
-        return message.reply("Il y a eu une erreur pdt l'executiond de la commande");
+        if (message instanceof CommandInteraction && error instanceof Error)
+            handleError(message, error);
     }
 };
 export const run = async (bot, message, args) => {

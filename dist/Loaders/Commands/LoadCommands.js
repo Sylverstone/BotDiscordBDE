@@ -12,7 +12,6 @@ const setupLoad = async (bot, guildIds) => {
         const filePath = path.join(__dirname, "Commands", file + ext);
         const fileUrl = pathToFileURL(filePath).href;
         const commande = await import(fileUrl);
-        console.log(commande.name);
         bot.commands.set(commande.name, commande);
         //creation de la slash commande
         let slashCommand = new SlashCommandBuilder()
@@ -58,7 +57,7 @@ const setupLoad = async (bot, guildIds) => {
             console.log(`Successfully reloaded ${listeFileCommands.length} application (/) SlashCommands.`);
         }
         catch (error) {
-            console.error("error while loading SlashCommands\n", error);
+            console.error("[ERROR] error while loading SlashCommands\n", error);
             throw error;
         }
     })();

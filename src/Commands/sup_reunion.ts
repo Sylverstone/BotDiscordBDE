@@ -4,8 +4,8 @@ import __dirname from "../dirname.js";
 import CBot from "../Class/CBot.js";
 import handleError from "../Fonctions/handleError.js";
 import { deleteFromTableWithId } from "../Fonctions/DbFunctions.js";
-import CreateEvent from "../Fonctions/CreateEvent.js";
 import { createDate } from "../Fonctions/DateScript.js";
+import make_log from "../Fonctions/makeLog.js";
 
 
 export const description = "Cette commande vous permet de supprimer une réunion";
@@ -58,6 +58,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
         date.setHours(heureDebut);
         if(!guild)
         {
+            make_log(true,message);
             return message.reply("not a guild");
         }
         else
@@ -77,11 +78,13 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             {
                 console.log(event)
                 await event.delete()
-                await deleteFromTableWithId("Reunion","idReunion",id,bot);
+                await deleteFromTableWithId("Reunion","idReunion",id,bot,message);
                 return message.reply("L'évènement a été supprimé");
             }
+            make_log(true,message);
             return message.reply("Il n'existe pas d'évènements de ce nom")
         }
+        
     }
     catch(Err)
     {

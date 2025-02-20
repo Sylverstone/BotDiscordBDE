@@ -5,6 +5,7 @@ import "dotenv/config"
 import __dirname from "../../dirname.js";
 import { pathToFileURL } from "url";
 import CBot, { script_t } from "../../Class/CBot.js";
+import make_log from "../../Fonctions/makeLog.js";
 
 const setupLoad = async (bot : CBot, guildIds : string[]) =>
 {
@@ -17,7 +18,6 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
         const fileUrl = pathToFileURL(filePath).href
         
         const commande : script_t = await import(fileUrl);
-        console.log(commande.name)
         bot.commands.set(commande.name, commande)
         
         //creation de la slash commande
@@ -83,7 +83,7 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
             }
             console.log(`Successfully reloaded ${listeFileCommands.length} application (/) SlashCommands.`);
         } catch (error) {
-            console.error("error while loading SlashCommands\n", error);
+            console.error("[ERROR] error while loading SlashCommands\n", error);
             throw error;
         }
     })();

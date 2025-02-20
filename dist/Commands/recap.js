@@ -2,6 +2,7 @@ import { SlashCommandStringOption } from "discord.js";
 import { getMostRecentValueFromDB, SaveValueToDB } from "../Fonctions/DbFunctions.js";
 import "dotenv/config";
 import handleError from "../Fonctions/handleError.js";
+import make_log from "../Fonctions/makeLog.js";
 export const description = "Cette commande permet de recuperer/set le dernier récap";
 export const name = "recap";
 export const howToUse = "`/recap` vous permet de faire *2* choses.\nPremière utilisation : `/recap` en entrant cette commande il vous sera retourner le lien OneDrive du dernier récap de reunion.\nDeuxième utilisation : `/recap lien_recap` la commande sauvegarde le nouveau lien.";
@@ -14,12 +15,12 @@ export const option = [
 ];
 export const run = async (bot, message) => {
     try {
-        console.log(message.user, "is running recap");
         handleRun(bot, message);
     }
     catch (error) {
-        console.log("command went wrong while", message.user, "was running it\n", error);
-        await message.reply("Une erreur s'est produite, veuillez contacter un développeur!");
+        if (!(error instanceof Error))
+            return;
+        handleError(message, error);
     }
 };
 async function handleRun(bot, message) {
@@ -30,7 +31,7 @@ async function handleRun(bot, message) {
     if (haveParameters) {
         SaveValueToDB(message, bot, "recapitulatif", undefined, true)
             .then(result => {
-            console.log("command succes -author:", message.user);
+            make_log(true, message);
             return message.reply({ content: `Le changement a bien été fait ! :)` });
         })
             .catch(err => handleError(message, err));
@@ -39,9 +40,11 @@ async function handleRun(bot, message) {
         await getMostRecentValueFromDB(message, "lien_recap", "recapitulatif", "idRecap", bot)
             .then(async (result) => {
             if (result) {
+                make_log(true, message);
                 return message.reply(`Le lien du dernier récap est actuellement : ${result}`);
             }
             else {
+                make_log(true, message);
                 return message.reply("Il n'y a pas de lien de recap actuellement :(");
             }
         }).catch(async (err) => {
