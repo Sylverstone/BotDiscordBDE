@@ -16,9 +16,23 @@ export default function verifierDate(dateOrigine : string | Date ,NouvelleDate :
     }
 }
 
-export function createDate(date : string)
+export function createDate(date : string) : undefined | Date
 {
-    const [jour, mois, annee] = date.split("/");
+    let jour : string = "";
+    let mois : string = "";
+    let annee : string = "";
+    if(date.includes("/"))
+    {
+        [jour,mois,annee] = date.split("/");
+    }
+    else if(date.includes("-"))
+    {
+        [jour,mois,annee] = date.split("-");
+    }
+    else
+    {
+        return undefined
+    }
     return new Date(`${annee}-${mois}-${jour}`);
 }
 
