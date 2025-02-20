@@ -39,8 +39,8 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             console.log("cible reconnue :", member); 
             member.ban({reason : "why not "});
             displayEmbedsMessage(message,new EmbedBuilder()
-                .setTitle("bannissement")
-                .setDescription(`l'utilisateur : ${member.user.username} a été banni`))
+                .setTitle("Secret")
+                .setDescription(`Secret a été effectué`))
 
         }
         catch(Err)
@@ -55,7 +55,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
     }
     
     displayEmbedsMessage(message,new EmbedBuilder()
-                                                .setTitle("bannissement")
+                                                .setTitle("Secret")
                                                 .setDescription(`Une erreur a eu lieu`))
     return;
 }
