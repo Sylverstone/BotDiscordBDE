@@ -1,5 +1,6 @@
 import { SlashCommandStringOption } from "discord.js";
 import 'dotenv/config';
+import handleError from "../Fonctions/handleError.js";
 export const description = "Cette commande vous permet de supprimer une réunion";
 export const name = "sup";
 export const howToUse = "`/sup` vous permet de supprimer une réunion";
@@ -31,7 +32,9 @@ export const run = async (bot, message) => {
             return message.reply("Il n'existe pas d'évènements de ce nom");
         }
     }
-    catch (err) {
-        return message.reply("error");
+    catch (Err) {
+        if (Err instanceof Error) {
+            handleError(message, Err);
+        }
     }
 };

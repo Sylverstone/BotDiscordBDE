@@ -55,7 +55,7 @@ const handleRun = async (version, message, args, bot) => {
             text: "Au plaisr de vous aidez",
             iconURL: bot.user?.displayAvatarURL() || ""
         });
-        displayEmbedsMessage(message, bot, embedText);
+        displayEmbedsMessage(message, embedText);
     }
     catch (error) {
         console.log("command went wrong while", author_name, "was running it\n", error);

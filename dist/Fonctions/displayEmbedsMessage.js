@@ -1,5 +1,5 @@
 import { CommandInteraction, MessageFlags } from "discord.js";
-export default async function displayEmbedsMessage(message, bot, embedText) {
+export default async function displayEmbedsMessage(message, embedText) {
     if (message instanceof CommandInteraction) {
         await message.reply({
             embeds: [embedText],
