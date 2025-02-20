@@ -1,5 +1,4 @@
 import { CommandInteraction, EmbedBuilder, Message , MessageFlags} from "discord.js";
-import CBot from "../Class/CBot";
 
 export default async function displayEmbedsMessage(message: CommandInteraction | Message,embedText : EmbedBuilder )
 {

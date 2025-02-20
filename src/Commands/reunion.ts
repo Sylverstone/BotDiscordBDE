@@ -188,7 +188,7 @@ async function handleRun(message : CommandInteraction, bot : CBot)
 
         SaveValueToDB(message,bot,"Reunion",finalObjectEvent)
         .then(async result => {
-            console.log("command succes -author:",message.user);
+            console.log("command succes -author:",message.user.username);
             dateDebut.setHours(optionReunion.heuredebut)
             const dateFin = createDate(optionReunion.date);
             if(!(dateFin instanceof Date)) return message.reply("ntm");
