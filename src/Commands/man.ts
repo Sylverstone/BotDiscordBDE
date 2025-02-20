@@ -68,7 +68,7 @@ const handleRun = async(version : number,message : CommandInteraction | Message,
             iconURL: bot.user?.displayAvatarURL() || ""
         })
        
-        displayEmbedsMessage(message,bot,embedText);
+        displayEmbedsMessage(message,embedText);
     } catch (error) {
         console.log("command went wrong while",author_name,"was running it\n",error)
         return message.reply("Il y a eu une erreur pdt l'executiond de la commande");

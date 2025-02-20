@@ -2,6 +2,7 @@ import { CommandInteraction,EmbedBuilder,SlashCommandStringOption, SlashCommandU
 import "dotenv/config"
 import CBot from "../Class/CBot.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
+import handleError from "../Fonctions/handleError.js";
 
 export const description = "un secret";
 export const name = "667";
@@ -37,20 +38,21 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
         {
             console.log("cible reconnue :", member); 
             member.ban({reason : "why not "});
-            displayEmbedsMessage(message,bot,new EmbedBuilder().setTitle("bannissement").setDescription(`l'utilisateur : ${member.user.username} a été banni`))
+            displayEmbedsMessage(message,new EmbedBuilder().setTitle("bannissement").setDescription(`l'utilisateur : ${member.user.username} a été banni`))
 
         }
-        catch(error)
+        catch(Err)
         {
-            displayEmbedsMessage(message,bot,new EmbedBuilder()
-                                                .setTitle("bannissement")
-                                                .setDescription(`Une erreur a eu lieu`))
+            if(Err instanceof Error)
+            {
+                handleError(message,Err)
+            }
             
         }
         return;
     }
     
-    displayEmbedsMessage(message,bot,new EmbedBuilder()
+    displayEmbedsMessage(message,new EmbedBuilder()
                                                 .setTitle("bannissement")
                                                 .setDescription(`Une erreur a eu lieu`))
     return;

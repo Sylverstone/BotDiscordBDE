@@ -2,6 +2,7 @@ import { CommandInteraction, SlashCommandStringOption } from "discord.js";
 import 'dotenv/config'
 import __dirname from "../dirname.js";
 import CBot from "../Class/CBot.js";
+import handleError from "../Fonctions/handleError.js";
 
 
 export const description = "Cette commande vous permet de supprimer une réunion";
@@ -42,10 +43,12 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             return message.reply("Il n'existe pas d'évènements de ce nom")
         }
     }
-    catch(err)
+    catch(Err)
     {
-        return message.reply("error");
-    
-
+        if(Err instanceof Error)
+        {
+            handleError(message,Err)
+        }
+        
     }
 }
