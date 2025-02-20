@@ -1,7 +1,6 @@
 const convertToDate = (date : string) => 
 {
     const [jour, mois, annee] = date.split("/");
-    const dateOrigine = jour+"/"+mois+"/"+annee;
     return new Date(`${annee}-${mois}-${jour}`);
 }
 

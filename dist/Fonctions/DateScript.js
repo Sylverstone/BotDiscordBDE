@@ -1,6 +1,5 @@
 const convertToDate = (date) => {
     const [jour, mois, annee] = date.split("/");
-    const dateOrigine = jour + "/" + mois + "/" + annee;
     return new Date(`${annee}-${mois}-${jour}`);
 };
 export default function verifierDate(dateOrigine, NouvelleDate) {

@@ -170,6 +170,7 @@ async function handleRun(message : CommandInteraction, bot : CBot)
         const optionReunion : reunion_t = optionObject;
         const dateActu = new Date();
         const dateDebut = createDate(optionReunion.date);
+        console.log("date debut  :",dateDebut.toString(),"\n",dateActu)
         if(dateActu > dateDebut) return message.reply("La reunion ne peut pas être défini dans le passé")
             
         const finalObjectEvent = {

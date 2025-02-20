@@ -3,7 +3,7 @@ export default async function CreateEvent(message, sujet, dateDebut, dateFin, li
     if (!message.guild)
         return;
     await message.guild.scheduledEvents.create({
-        name: `${typeEvent} ${dateDebut}`,
+        name: `${typeEvent} ${dateDebut.getDate()}/${dateDebut.getMonth() + 1}`,
         scheduledStartTime: dateDebut,
         scheduledEndTime: dateFin,
         privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
