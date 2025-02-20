@@ -13,6 +13,7 @@ bot.bd.connect((err) => {
     console.log("Connected to MySQL!");
 });
 
+
 bot.once(Events.ClientReady, async() => {
     if(!bot.user) return;
     console.log("bot",bot.user.tag,"is online :)");
