@@ -73,6 +73,8 @@ export const run = async (bot, message) => {
             const DateAujourdhui = new Date();
             const allFuturEvent = objectEvent.filter((row) => {
                 const date = createDate(row.datedebut);
+                if (!(date instanceof Date))
+                    return;
                 return date > DateAujourdhui;
             });
             let NearestEvent;
@@ -80,9 +82,14 @@ export const run = async (bot, message) => {
                 NearestEvent = allFuturEvent[0];
                 allFuturEvent.forEach((row) => {
                     const date = createDate(row.datedebut);
+                    if (!(date instanceof Date))
+                        return;
                     if (!(isEvent(NearestEvent)))
                         return;
-                    if (date < createDate(NearestEvent.datedebut))
+                    const temp_date = createDate(NearestEvent.datedebut);
+                    if (!(temp_date instanceof Date))
+                        return;
+                    if (date < temp_date)
                         NearestEvent = row;
                 });
             }
@@ -113,6 +120,8 @@ export const run = async (bot, message) => {
             const optionEvent = optionObject;
             const dateActu = new Date();
             const dateDebutEvent = createDate(optionEvent.datedebut);
+            if (!(dateDebutEvent instanceof Date))
+                return message.reply("bad shit");
             if (dateActu > dateDebutEvent)
                 return message.reply("L'evenement ne peut pas être défini dans le passé");
             const finalObjectEvent = {
@@ -128,6 +137,8 @@ export const run = async (bot, message) => {
                 .then(async (result) => {
                 dateDebutEvent.setHours(optionEvent.heuredebut);
                 const dateFinEvent = createDate(optionEvent.datefin);
+                if (!(dateFinEvent instanceof Date))
+                    return message.reply("Bad shit");
                 dateFinEvent.setHours(optionEvent.heurefin);
                 const name = optionEvent.name;
                 const lieu = optionEvent.lieu;

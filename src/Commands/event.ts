@@ -97,6 +97,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             const DateAujourdhui = new Date();
             const allFuturEvent = objectEvent.filter((row) => {
                 const date = createDate(row.datedebut);
+                if(!(date instanceof Date)) return;
                 return date > DateAujourdhui;
             })
 
@@ -107,9 +108,11 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                 
                 allFuturEvent.forEach((row) => {
                     const date = createDate(row.datedebut);
+                    if(!(date instanceof Date)) return;
                     if(!(isEvent(NearestEvent))) return;
-
-                    if(date < createDate(NearestEvent.datedebut)) NearestEvent = row;
+                    const temp_date = createDate(NearestEvent.datedebut);
+                    if(!(temp_date instanceof Date)) return;
+                    if(date < temp_date) NearestEvent = row;
                 });
             }
             else
@@ -143,6 +146,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             const optionEvent : Evenement_t = optionObject;
             const dateActu = new Date();
             const dateDebutEvent = createDate(optionEvent.datedebut);
+            if(!(dateDebutEvent instanceof Date)) return message.reply("bad shit");
             if(dateActu > dateDebutEvent) return message.reply("L'evenement ne peut pas être défini dans le passé");
 
             const finalObjectEvent = {
@@ -159,6 +163,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             .then(async result => {
                 dateDebutEvent.setHours(optionEvent.heuredebut)
                 const dateFinEvent = createDate(optionEvent.datefin)
+                if(!(dateFinEvent instanceof Date)) return message.reply("Bad shit");
                 dateFinEvent.setHours(optionEvent.heurefin)
                 const name = optionEvent.name;
                 const lieu = optionEvent.lieu;

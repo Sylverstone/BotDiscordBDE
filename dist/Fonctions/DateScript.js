@@ -12,7 +12,18 @@ export default function verifierDate(dateOrigine, NouvelleDate) {
     }
 }
 export function createDate(date) {
-    const [jour, mois, annee] = date.split("/");
+    let jour = "";
+    let mois = "";
+    let annee = "";
+    if (date.includes("/")) {
+        [jour, mois, annee] = date.split("/");
+    }
+    else if (date.includes("-")) {
+        [jour, mois, annee] = date.split("-");
+    }
+    else {
+        return undefined;
+    }
     return new Date(`${annee}-${mois}-${jour}`);
 }
 export function dateToOnlyDate(date) {

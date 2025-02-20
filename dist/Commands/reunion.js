@@ -75,6 +75,8 @@ async function handleRun(message, bot) {
                 dateActu.setHours(dateTemp.getHours());
                 const allfuturReunion = result.filter((row) => {
                     const date = createDate(row.date);
+                    if (!(date instanceof Date))
+                        return;
                     return date > dateActu;
                 });
                 let NearestReunion;
@@ -82,9 +84,14 @@ async function handleRun(message, bot) {
                     NearestReunion = allfuturReunion[0];
                     allfuturReunion.forEach((row) => {
                         const date = createDate(row.date);
+                        if (!(date instanceof Date))
+                            return;
                         if (!(isReunion(NearestReunion)))
                             return;
-                        if (date < createDate(NearestReunion.date))
+                        const temp_date = createDate(NearestReunion.date);
+                        if (!(temp_date instanceof Date))
+                            return;
+                        if (date < temp_date)
                             NearestReunion = row;
                     });
                 }
@@ -125,6 +132,8 @@ async function handleRun(message, bot) {
         const optionReunion = optionObject;
         const dateActu = new Date();
         const dateDebut = createDate(optionReunion.date);
+        if (!(dateDebut instanceof Date))
+            return message.reply("ntm");
         console.log("date debut  :", dateDebut.toString(), "\n", dateActu);
         if (dateActu > dateDebut)
             return message.reply("La reunion ne peut pas être défini dans le passé");
@@ -141,6 +150,8 @@ async function handleRun(message, bot) {
             console.log("command succes -author:", message.user);
             dateDebut.setHours(optionReunion.heuredebut);
             const dateFin = createDate(optionReunion.date);
+            if (!(dateFin instanceof Date))
+                return message.reply("ntm");
             dateFin.setHours(optionReunion.heurefin);
             const sujet = optionReunion.sujet;
             const lieu = optionReunion.lieu;
