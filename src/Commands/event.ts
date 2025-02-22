@@ -1,6 +1,6 @@
 import { CommandInteraction, EmbedBuilder,hyperlink, SlashCommandIntegerOption,SlashCommandNumberOption,SlashCommandStringOption } from "discord.js";
-import { createDate } from "../Fonctions/DateScript.js";
-import { SaveValueToDB,  getValueFromDB } from "../Fonctions/DbFunctions.js";
+import { createDate, setup_date, to_date_sql } from "../Fonctions/DateScript.js";
+import { SaveValueToDB,  getLastId,  getValueFromDB } from "../Fonctions/DbFunctions.js";
 import 'dotenv/config'
 import __dirname from "../dirname.js";
 import transfromOptionToObject from "../Fonctions/transfromOptionToObject.js";
@@ -9,6 +9,8 @@ import CreateEvent from "../Fonctions/CreateEvent.js";
 import handleError from "../Fonctions/handleError.js";
 import splitNumber from "../Fonctions/splitHeure.js";
 import make_log from "../Fonctions/makeLog.js";
+import { isMaxId } from "./reunion.js";
+import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 
 export const description = "Cette commande vous renvoie les infos du prochain Event de votre serveur";
 export const name = "event";
@@ -150,37 +152,47 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             if(!isEvent(optionObject)) return message.reply("La définition de l'Evenement n'est pas complète");
             const optionEvent : Evenement_t = optionObject;
             const dateActu = new Date();
-            const dateDebutEvent = createDate(optionEvent.datedebut);
-            const dateFinEvent = createDate(optionEvent.datefin)
-            const [stringHeureDebutInt, stringHeureDebutDecimal] = splitNumber(optionEvent.heuredebut);
-            const [stringHeureFintInt, stringHeureFinDecimal] = splitNumber(optionEvent.heurefin);
-            if(!(dateDebutEvent instanceof Date && dateFinEvent instanceof Date)) return message.reply("bad shit");
-            dateFinEvent.setHours(+stringHeureFintInt,(+stringHeureFinDecimal));
-            dateDebutEvent.setMinutes(+stringHeureDebutInt,(+stringHeureDebutDecimal));
+            const DateResult : null | Date[] = setup_date(optionEvent.datedebut, optionEvent.datefin,optionEvent.heuredebut,optionEvent.heurefin,
+                message);
+            if(DateResult === null) return ;
+
+            const dateDebutEvent = DateResult[0];
+            const dateFinEvent = DateResult[1];
+            console.log("date debut  :",dateDebutEvent.getHours(),"\n",dateFinEvent.getHours())
             if(dateActu.getTime() > dateDebutEvent.getTime()) return message.reply("L'evenement ne peut pas être défini dans le passé");
+            //on change le separateur pour date to sql, si la date n'était pas bonnes le programme se serait arreter.
+            optionEvent.datedebut = optionEvent.datedebut.replace("/","-").replace("/","-");
+            optionEvent.datefin = optionEvent.datefin.replace("/","-").replace("/","-");
 
             const finalObjectEvent = {
                 name : optionEvent.name,
-                datedebut : optionEvent.datedebut ,
-                datefin : optionEvent.datefin,
-                heuredebut : optionEvent.heuredebut ,
-                heurefin : optionEvent.heurefin ,
+                datedebut : to_date_sql(optionEvent.datedebut),
+                datefin : to_date_sql(optionEvent.datefin),
+                heuredebut : optionEvent.heuredebut,
+                heurefin : optionEvent.heurefin,
                 lieu : optionEvent.lieu,
                 info_en_plus : optionEvent.info_en_plus,
             }
             
             SaveValueToDB(message,bot,"Event",finalObjectEvent)
             .then(async result => {
-                
-               
-                if(!(dateFinEvent instanceof Date)) return message.reply("Bad shit");
-               
                 const name = optionEvent.name;
                 const lieu = optionEvent.lieu;
                 const info_en_plus = optionEvent.info_en_plus;
-                CreateEvent(message,name,dateDebutEvent,dateFinEvent,lieu,info_en_plus,"Evènement")
+                console.log("date :",dateDebutEvent,dateFinEvent)
+                const res  = await getLastId("Event","id",bot);
+                if(!isMaxId(res)) return;                
+                const id = res.maxId;
+                const typeEvent = "Evènement";
+                //on envoie le mess dans ça
+                let temoinNom = [`${typeEvent} ${dateDebutEvent.getDate()}/${dateDebutEvent.getMonth()+1}`,]
+                CreateEvent(message,name,dateDebutEvent,dateFinEvent,lieu,info_en_plus,typeEvent,id,temoinNom);
+                
+                displayEmbedsMessage(message, new EmbedBuilder()
+                                                            .setTitle("Evènement")
+                                                        .setDescription("L'Evènement a été crée. il se nomme : " + temoinNom[0]))
+
                 make_log(true,message);
-                return message.reply({content : `Le changement a bien été fait ! :)`})
             })
             .catch(err => {
                 handleError(message,err);

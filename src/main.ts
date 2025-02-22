@@ -4,6 +4,7 @@ import loadEvenements from "./Loaders/EVents/loadEvenements.js"
 import "dotenv/config";
 import { connection } from "./Database/coDatabase.js";
 import CBot from "./Class/CBot.js";
+import actualise_events from "./Fonctions/actualise_event.js";
 
 let bot = new CBot(connection)
 

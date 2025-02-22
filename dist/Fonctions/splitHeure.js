@@ -1,5 +1,6 @@
 export default function splitNumber(num) {
     let [intergetPart, decimalPart] = num.toString().split('.');
-    decimalPart = decimalPart === undefined ? '' : decimalPart;
+    console.log("integer part :", intergetPart, decimalPart);
+    decimalPart = typeof decimalPart === "undefined" ? '0' : decimalPart;
     return [+intergetPart, (+decimalPart) * 10];
 }

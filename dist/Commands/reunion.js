@@ -1,10 +1,11 @@
 import { EmbedBuilder, SlashCommandNumberOption, SlashCommandStringOption } from 'discord.js';
-import { createDate } from '../Fonctions/DateScript.js';
+import { createDate, to_date_sql } from '../Fonctions/DateScript.js';
 import { getLastId, getValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
 import CreateEvent from '../Fonctions/CreateEvent.js';
 import handleError from '../Fonctions/handleError.js';
 import splitNumber from '../Fonctions/splitHeure.js';
 import make_log from '../Fonctions/makeLog.js';
+import displayEmbedsMessage from '../Fonctions/displayEmbedsMessage.js';
 const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 const name = "reunion";
 const onlyGuild = true;
@@ -37,7 +38,7 @@ const optionNum = [
         .setRequired(false)
         .setDescription("Indiquez l'heure de fin de la réunion")
 ];
-function isMaxId(result) {
+export function isMaxId(result) {
     return (result !== null && typeof result === "object"
         && "maxId" in result && typeof result.maxId === "number");
 }
@@ -147,13 +148,15 @@ async function handleRun(message, bot) {
         const dateFin = createDate(optionReunion.date);
         if (!(dateFin instanceof Date && dateDebut instanceof Date))
             return message.reply("ntm");
-        dateDebut.setHours((+stringIntegerPart), stringDecimalPart);
-        dateFin.setHours((+stringIntegerPartFin), stringDecimalPartFin);
-        console.log("date debut  :", dateDebut.toString(), "\n", dateActu);
+        dateDebut.setHours(+stringIntegerPart, stringDecimalPart);
+        dateFin.setHours(+stringIntegerPartFin, stringDecimalPartFin);
+        console.log("date debut  :", dateDebut, "\n", dateActu);
         if (dateActu.getTime() > dateDebut.getTime())
             return message.reply("La reunion ne peut pas être défini dans le passé");
+        //le changement de séparateur est obligatoire
+        optionReunion.date = optionReunion.date.replace("/", "-").replace("/", "-");
         const finalObjectEvent = {
-            date: optionReunion.date,
+            date: to_date_sql(optionReunion.date),
             sujet: optionReunion.sujet,
             lieu: optionReunion.lieu,
             info_en_plus: optionReunion.info_en_plus,
@@ -168,13 +171,17 @@ async function handleRun(message, bot) {
             const info_en_plus = optionReunion.info_en_plus;
             console.log("date :", dateDebut, dateFin);
             const res = await getLastId("Reunion", "idReunion", bot);
-            console.log(res);
             if (!isMaxId(res))
                 return;
             const id = res.maxId;
-            await CreateEvent(message, sujet, dateDebut, dateFin, lieu, info_en_plus, "Reunion", id);
+            const typeEvent = "Reunion";
+            //on envoie le mess dans ça
+            let temoinNom = [`${typeEvent} ${dateDebut.getDate()}/${dateDebut.getMonth() + 1}`,];
+            CreateEvent(message, sujet, dateDebut, dateFin, lieu, info_en_plus, typeEvent, id, temoinNom);
+            displayEmbedsMessage(message, new EmbedBuilder()
+                .setTitle("Reunion")
+                .setDescription("La reunion a été crée. Elle se nomme : " + temoinNom[0]));
             make_log(true, message);
-            return message.reply({ content: `La réunion à été crée !` });
         })
             .catch(err => {
             handleError(message, err);

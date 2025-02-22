@@ -34,6 +34,7 @@ export async function SaveValueToDB(message : CommandInteraction,bot : CBot,tabl
     optionParam = optionParam.slice(0,-2);
     let commandSql = `INSERT INTO ${table}(${optionParam})
     VALUES(${Object.values(optionObject).map(v => `"${v}"`).join(', ')})`;
+    
     return new Promise(function(resolve, reject){
       bot.bd.query(commandSql, (err,values) => {
         if(err)

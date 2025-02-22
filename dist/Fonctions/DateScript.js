@@ -1,3 +1,6 @@
+import { EmbedBuilder } from "discord.js";
+import displayEmbedsMessage from "./displayEmbedsMessage.js";
+import splitNumber from "./splitHeure.js";
 const convertToDate = (date) => {
     const [jour, mois, annee] = date.split("/");
     return new Date(`${annee}-${mois}-${jour}`);
@@ -30,4 +33,25 @@ export function dateToOnlyDate(date) {
     if (!(date instanceof Date))
         return;
     return `${date.getDay()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+}
+export function setup_date(dateDebut, DateFin, heureDebut, heureFin, message) {
+    const dateDebutEvent = createDate(dateDebut);
+    const dateFinEvent = createDate(DateFin);
+    const [stringHeureDebutInt, stringHeureDebutDecimal] = splitNumber(heureDebut);
+    const [stringHeureFintInt, stringHeureFinDecimal] = splitNumber(heureFin);
+    if (!(dateDebutEvent instanceof Date && dateFinEvent instanceof Date)) {
+        displayEmbedsMessage(message, new EmbedBuilder()
+            .setTitle("Erreur")
+            .setDescription("Le format de date que vous avez transmis est incorrect :)"));
+        return null;
+    }
+    dateDebutEvent.setHours(+stringHeureDebutInt, +stringHeureDebutDecimal);
+    dateFinEvent.setHours(+stringHeureFintInt, +stringHeureFinDecimal);
+    return [dateDebutEvent, dateFinEvent];
+}
+export function to_date_sql(date) {
+    //le separateur doit être ABSOLUMENT "-" ici.
+    const [jour, mois, annee] = date.split("-");
+    console.log("la date qui doit être transfo", date);
+    return `${annee}-${mois}-${jour}`;
 }

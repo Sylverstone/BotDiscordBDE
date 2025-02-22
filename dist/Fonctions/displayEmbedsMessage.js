@@ -1,10 +1,15 @@
 import { CommandInteraction, MessageFlags } from "discord.js";
-export default async function displayEmbedsMessage(message, embedText) {
+export default async function displayEmbedsMessage(message, embedText, edit = false) {
     if (message instanceof CommandInteraction) {
-        await message.reply({
-            embeds: [embedText],
-            flags: [MessageFlags.Ephemeral],
-        });
+        if (!edit) {
+            await message.reply({
+                embeds: [embedText],
+                flags: [MessageFlags.Ephemeral],
+            });
+        }
+        else {
+            await message.editReply({ embeds: [embedText] });
+        }
     }
     else {
         await message.reply({
