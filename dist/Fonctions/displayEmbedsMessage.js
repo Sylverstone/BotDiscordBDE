@@ -8,7 +8,7 @@ export default async function displayEmbedsMessage(message, embedText, edit = fa
             });
         }
         else {
-            await message.editReply({ embeds: [embedText] });
+            await message.editReply({ content: "", embeds: [embedText] });
         }
     }
     else {

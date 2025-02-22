@@ -8,15 +8,14 @@ export type listCommandObject_t = {
 
 export type returnOptionToObj_t = {optionObject : listCommandObject_t, ObjectIsReal : boolean } 
 
-export default function transfromOptionToObject(message : CommandInteraction) : returnOptionToObj_t {
-    let ObjectIsReal = false;
+export default function transfromOptionToObject(message : CommandInteraction) : listCommandObject_t {
     let optionObject : listCommandObject_t = {};
     
     let option = message.options.data;
     if(option !== null)
     {
-        option.forEach(o => {optionObject[o.name] = o.value; ObjectIsReal = true;});
+        option.forEach(o => {optionObject[o.name] = o.value;});
     }
     
-    return { optionObject , ObjectIsReal};
+    return optionObject;
 }

@@ -6,7 +6,7 @@ export async function SaveValueToDB(message, bot, table, object = {}, deleteAllO
         return;
     let optionObject;
     if (EmptyObject(object)) {
-        optionObject = transfromOptionToObject(message)?.optionObject;
+        optionObject = transfromOptionToObject(message);
     }
     else {
         console.log(object, "obejct");

@@ -2,7 +2,7 @@ import { CommandInteraction, EmbedBuilder, GuildScheduledEventEntityType, GuildS
 import displayEmbedsMessage from "./displayEmbedsMessage.js";
 
 export default async function CreateEvent(message : CommandInteraction,sujet : string, dateDebut : Date, dateFin : Date,
-    lieu : string, more : string, typeEvent : string,id? : number,temoin? : string[]) : Promise<[boolean,string] | undefined>
+    lieu : string, more : string, typeEvent : string,id? : number,temoin? : string[]) : Promise<string | undefined>
 {
     if(!message.guild) return;
     let name_have_been_changed = false;
@@ -39,7 +39,7 @@ export default async function CreateEvent(message : CommandInteraction,sujet : s
         },
         description : `Sujet : ${sujet}\n${more}\nid : ${id}`,
     })
-    return [name_have_been_changed,name];
+    return name;
 
     
 }

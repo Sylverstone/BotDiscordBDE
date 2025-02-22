@@ -9,10 +9,10 @@ import { listCommandObject_t } from './transfromOptionToObject.js';
 export async function SaveValueToDB(message : CommandInteraction,bot : CBot,table : string,object = {}, deleteAllOtherValues = false)
 {
     if(!message.guild || !(message instanceof CommandInteraction)) return;
-    let optionObject : listCommandObject_t | null | undefined ;
+    let optionObject : listCommandObject_t ;
     if(EmptyObject(object))
     {
-        optionObject = transfromOptionToObject(message)?.optionObject;  
+        optionObject = transfromOptionToObject(message);  
     }
     else
     {

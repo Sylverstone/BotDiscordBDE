@@ -30,5 +30,5 @@ export default async function CreateEvent(message, sujet, dateDebut, dateFin, li
         },
         description: `Sujet : ${sujet}\n${more}\nid : ${id}`,
     });
-    return [name_have_been_changed, name];
+    return name;
 }

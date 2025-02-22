@@ -11,6 +11,7 @@ import splitNumber from "../Fonctions/splitHeure.js";
 import make_log from "../Fonctions/makeLog.js";
 import { isMaxId } from "./reunion.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
+import EmptyObject from "../Fonctions/LookIfObjectIsEmpty.js";
 
 export const description = "Cette commande vous renvoie les infos du prochain Event de votre serveur";
 export const name = "event";
@@ -57,8 +58,8 @@ export const optionNum = [
 interface Evenement_t{
     info_en_plus :string,
     lieu : string,
-    datedebut : string,
-    datefin : string,
+    datedebut : Date | string,
+    datefin : Date | string,
     heuredebut : number,
     heurefin : number,
     name : string
@@ -91,10 +92,9 @@ const getDataEvent = (Ev : Evenement_t) => {
 
 export const  run = async(bot : CBot, message : CommandInteraction) => {
     try {
-        let {ObjectIsReal, optionObject} = transfromOptionToObject(message)
-        if(!ObjectIsReal)
-        {
-            
+        let optionObject = transfromOptionToObject(message)
+        if(EmptyObject(optionObject))
+        {            
             const objectEvent = await getValueFromDB(message,"lieu, info_en_plus, datedebut,datefin, name, heuredebut, heurefin","Event","id",bot);
             console.log(objectEvent)
             if(objectEvent === null) return message.reply("Il n'y a pas d'Event planifié pour les prochains jours");
@@ -102,7 +102,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             if(!isEventArray(objectEvent)) return;
             const DateAujourdhui = new Date();
             const allFuturEvent = objectEvent.filter((row) => {
-                const date = createDate(row.datedebut);
+                const date = row.datedebut;
                 if(!(date instanceof Date)) return;
                 return date > DateAujourdhui;
             })
@@ -113,10 +113,10 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                 NearestEvent = allFuturEvent[0];
                 
                 allFuturEvent.forEach((row) => {
-                    const date = createDate(row.datedebut);
+                    const date = row.datedebut;
                     if(!(date instanceof Date)) return;
                     if(!(isEvent(NearestEvent))) return;
-                    const temp_date = createDate(NearestEvent.datedebut);
+                    const temp_date = NearestEvent.datedebut;
                     if(!(temp_date instanceof Date)) return;
                     if(date < temp_date) NearestEvent = row;
                 });
@@ -152,6 +152,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             if(!isEvent(optionObject)) return message.reply("La définition de l'Evenement n'est pas complète");
             const optionEvent : Evenement_t = optionObject;
             const dateActu = new Date();
+            if(optionEvent.datedebut instanceof Date || optionEvent.datefin instanceof Date) return ;
             const DateResult : null | Date[] = setup_date(optionEvent.datedebut, optionEvent.datefin,optionEvent.heuredebut,optionEvent.heurefin,
                 message);
             if(DateResult === null) return ;
@@ -163,10 +164,10 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             //on change le separateur pour date to sql, si la date n'était pas bonnes le programme se serait arreter.
             optionEvent.datedebut = optionEvent.datedebut.replace("/","-").replace("/","-");
             optionEvent.datefin = optionEvent.datefin.replace("/","-").replace("/","-");
-
+            
             const finalObjectEvent = {
                 name : optionEvent.name,
-                datedebut : to_date_sql(optionEvent.datedebut),
+                datedebut :to_date_sql(optionEvent.datedebut),
                 datefin : to_date_sql(optionEvent.datefin),
                 heuredebut : optionEvent.heuredebut,
                 heurefin : optionEvent.heurefin,
@@ -174,6 +175,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                 info_en_plus : optionEvent.info_en_plus,
             }
             
+            await message.reply("Prépatation de l'évènement...")
             SaveValueToDB(message,bot,"Event",finalObjectEvent)
             .then(async result => {
                 const name = optionEvent.name;
@@ -185,14 +187,24 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                 const id = res.maxId;
                 const typeEvent = "Evènement";
                 //on envoie le mess dans ça
-                let temoinNom = [`${typeEvent} ${dateDebutEvent.getDate()}/${dateDebutEvent.getMonth()+1}`,]
-                CreateEvent(message,name,dateDebutEvent,dateFinEvent,lieu,info_en_plus,typeEvent,id,temoinNom);
-                
-                displayEmbedsMessage(message, new EmbedBuilder()
-                                                            .setTitle("Evènement")
-                                                        .setDescription("L'Evènement a été crée. il se nomme : " + temoinNom[0]))
+                CreateEvent(message,name,dateDebutEvent,dateFinEvent,lieu,info_en_plus,typeEvent,id)
+                .then( name => {
 
-                make_log(true,message);
+                    displayEmbedsMessage(message, new EmbedBuilder()
+                                                        .setTitle("Evènement")
+                                                        .setDescription("L'Evènement a été crée. il se nomme : " + name),true);
+
+                    make_log(true,message);
+
+                }).catch(err => {
+                    displayEmbedsMessage(message, new EmbedBuilder()
+                        .setTitle("Erreur")
+                        .setDescription("Une erreur a eu lieu"),true);
+
+                    make_log(false,message);
+                })
+                
+                
             })
             .catch(err => {
                 handleError(message,err);

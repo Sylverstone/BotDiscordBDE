@@ -47,7 +47,7 @@ export function dateToOnlyDate(date : Date)
 export function setup_date(dateDebut : string, DateFin : string, heureDebut : number, heureFin : number,message : CommandInteraction) : Date[] | null
 {
     const dateDebutEvent = createDate(dateDebut);
-    const dateFinEvent = createDate(DateFin)
+    const dateFinEvent = createDate(DateFin);
     const [stringHeureDebutInt, stringHeureDebutDecimal] = splitNumber(heureDebut);
     const [stringHeureFintInt, stringHeureFinDecimal] = splitNumber(heureFin);
     if(!(dateDebutEvent instanceof Date && dateFinEvent instanceof Date)) {
