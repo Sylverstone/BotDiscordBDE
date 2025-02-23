@@ -1,4 +1,4 @@
-import { CommandInteraction, EmbedBuilder,hyperlink, SlashCommandIntegerOption,SlashCommandNumberOption,SlashCommandStringOption } from "discord.js";
+import { CommandInteraction, EmbedBuilder,embedLength,hyperlink, MessageFlags, SlashCommandIntegerOption,SlashCommandNumberOption,SlashCommandStringOption } from "discord.js";
 import { createDate, setup_date, to_date_sql } from "../Fonctions/DateScript.js";
 import { SaveValueToDB,  getLastId,  getValueFromDB } from "../Fonctions/DbFunctions.js";
 import 'dotenv/config'
@@ -91,7 +91,9 @@ const getDataEvent = (Ev : Evenement_t) => {
 }
 
 export const  run = async(bot : CBot, message : CommandInteraction) => {
+    
     try {
+        await message.deferReply({flags : MessageFlags.Ephemeral});
         let optionObject = transfromOptionToObject(message)
         if(EmptyObject(optionObject))
         {            
@@ -174,8 +176,14 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                 lieu : optionEvent.lieu,
                 info_en_plus : optionEvent.info_en_plus,
             }
-            
-            await message.reply("Prépatation de l'évènement...")
+            const EventList = await message.guild?.scheduledEvents.fetch();
+            if(typeof EventList?.find(event => event.name === optionEvent.name) !== "undefined") 
+            {
+                displayEmbedsMessage(message,new EmbedBuilder()
+                                                    .setTitle("Erreur")
+                                                 .setDescription("Un évènement avec le même nom existe déjà"),true);
+                return;
+            }
             SaveValueToDB(message,bot,"Event",finalObjectEvent)
             .then(async result => {
                 const name = optionEvent.name;
@@ -185,31 +193,21 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                 const res  = await getLastId("Event","id",bot);
                 if(!isMaxId(res)) return;                
                 const id = res.maxId;
-                const typeEvent = "Evènement";
                 //on envoie le mess dans ça
-                CreateEvent(message,name,dateDebutEvent,dateFinEvent,lieu,info_en_plus,typeEvent,id)
+                CreateEvent(message,name,dateDebutEvent,dateFinEvent,lieu,info_en_plus,id,optionEvent.name)
                 .then( name => {
-
                     displayEmbedsMessage(message, new EmbedBuilder()
                                                         .setTitle("Evènement")
                                                         .setDescription("L'Evènement a été crée. il se nomme : " + name),true);
-
                     make_log(true,message);
 
-                }).catch(err => {
-                    displayEmbedsMessage(message, new EmbedBuilder()
-                        .setTitle("Erreur")
-                        .setDescription("Une erreur a eu lieu"),true);
-
-                    make_log(false,message);
+                }).catch(err => {                    
+                    throw err;
                 })
-                
-                
             })
             .catch(err => {
-                handleError(message,err);
-            });
-            
+                throw err;
+            });            
         }
     }catch(error) {
        if(error instanceof Error)

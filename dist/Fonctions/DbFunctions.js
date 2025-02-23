@@ -135,3 +135,18 @@ export async function deleteFromTableWithId(table, champId, cibleId, bot, messag
         });
     });
 }
+export async function deleteFromTableWithName(table, champName, cibleName, bot, message) {
+    if (!message.guild)
+        return;
+    const guildId = message.guild.id;
+    const commandSQL = `DELETE FROM ${table} WHERE ${champName} = '${cibleName}' AND GuildId = ${guildId}`;
+    return new Promise((resolve, reject) => {
+        bot.bd.query(commandSQL, (err, result) => {
+            if (err) {
+                reject(err); // Rejeter la promesse en cas d'erreur
+                return;
+            }
+            resolve(true);
+        });
+    });
+}

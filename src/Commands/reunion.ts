@@ -1,4 +1,4 @@
-import {CommandInteraction, EmbedBuilder, SlashCommandNumberOption, SlashCommandStringOption} from 'discord.js';
+import {CommandInteraction, EmbedBuilder, MessageFlags, SlashCommandNumberOption, SlashCommandStringOption} from 'discord.js';
 import { createDate, to_date_sql } from '../Fonctions/DateScript.js';
 import {getLastId, getValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
 import transfromOptionToObject, { listCommandObject_t } from '../Fonctions/transfromOptionToObject.js';
@@ -11,6 +11,7 @@ import make_log from '../Fonctions/makeLog.js';
 import displayEmbedsMessage from '../Fonctions/displayEmbedsMessage.js';
 import simpleEmbed from '../Fonctions/simpleEmbed.js';
 import EmptyObject from '../Fonctions/LookIfObjectIsEmpty.js';
+import { eventNames } from 'process';
 
 const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 
@@ -95,13 +96,14 @@ function isReunionArray(result : unknown) : result is reunion_t[]
 
 const run = async (bot : CBot, message : CommandInteraction) =>
 {
+    await message.deferReply({flags : MessageFlags.Ephemeral});
     try {
         handleRun(message,bot)
-    } catch (error) {
+    } 
+    catch (error) {
         if(error instanceof Error) {
-            handleError(message,error)
-        }
-        
+            //handleError(message,error)
+        }        
     }
     
 };
@@ -181,6 +183,7 @@ async function handleRun(message : CommandInteraction, bot : CBot)
         //Insertion de donnée dans la base
         try 
         {
+            if(!message.guild) return;
             if(!("info_en_plus" in optionObject))
                 {
                     optionObject["info_en_plus"] = "Pas d'informations en plus"
@@ -203,18 +206,23 @@ async function handleRun(message : CommandInteraction, bot : CBot)
                 if(dateActu.getTime() > dateDebut.getTime()) return message.reply("La reunion ne peut pas être défini dans le passé");
                 //le changement de séparateur est obligatoire
                 optionReunion.date = optionReunion.date.replace("/","-").replace("/","-");
-        
+                let name = `Reunion ${dateDebut.getDate()}/${dateDebut.getMonth()+1}`;
+                let EventList = await message.guild.scheduledEvents.fetch();
+                EventList = EventList.filter(event => event.name.startsWith(name));
+                if(EventList.size > 0)
+                {
+                    name = `Reunion ${dateDebut.getDate()}/${dateDebut.getMonth()+1} (${EventList.size})`;
+                }
                 const finalObjectEvent = {
                     date : to_date_sql(optionReunion.date),
                     sujet : optionReunion.sujet,
                     lieu : optionReunion.lieu,
                     info_en_plus : optionReunion.info_en_plus,
                     heuredebut : optionReunion.heuredebut,
-                    heurefin : optionReunion.heurefin 
+                    heurefin : optionReunion.heurefin ,
+                    reunion_name : name
                 };
         
-                //obligatoire pour pouvoir modifier la réponse.
-                await message.reply("Preparation de l'évènement...");
                 SaveValueToDB(message,bot,"Reunion",finalObjectEvent)
                 .then(async result => {
                     const sujet = optionReunion.sujet;
@@ -224,8 +232,7 @@ async function handleRun(message : CommandInteraction, bot : CBot)
                     const res  = await getLastId("Reunion","idReunion",bot);
                     if(!isMaxId(res)) return;
                     const id = res.maxId;
-                    const typeEvent = "Reunion";
-                    CreateEvent(message,sujet,dateDebut,dateFin,lieu,info_en_plus,typeEvent,id)
+                    CreateEvent(message,sujet,dateDebut,dateFin,lieu,info_en_plus,id,finalObjectEvent.reunion_name)
                     .then((name) => {
                         displayEmbedsMessage(message, new EmbedBuilder()
                                                 .setTitle("Reunion")
@@ -237,18 +244,14 @@ async function handleRun(message : CommandInteraction, bot : CBot)
                                                 .setTitle("Information")
                                                 .setDescription("Une erreur a eu lieu :("),true);
                         make_log(false,message);
-                    });           
-                    
+                    });                            
                 })
                 .catch(err => {
                     handleError(message,err);
                 });
         }
         catch (error) {
-            if(error instanceof Error) {
-                handleError(message,error);
-            }
-            
+            console.log(error);            
         }
         
     }

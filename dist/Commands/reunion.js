@@ -1,4 +1,4 @@
-import { EmbedBuilder, SlashCommandNumberOption, SlashCommandStringOption } from 'discord.js';
+import { EmbedBuilder, MessageFlags, SlashCommandNumberOption, SlashCommandStringOption } from 'discord.js';
 import { createDate, to_date_sql } from '../Fonctions/DateScript.js';
 import { getLastId, getValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
 import transfromOptionToObject from '../Fonctions/transfromOptionToObject.js';
@@ -54,12 +54,13 @@ function isReunionArray(result) {
     return Array.isArray(result) && result.every(row => isReunion(row));
 }
 const run = async (bot, message) => {
+    await message.deferReply({ flags: MessageFlags.Ephemeral });
     try {
         handleRun(message, bot);
     }
     catch (error) {
         if (error instanceof Error) {
-            handleError(message, error);
+            //handleError(message,error)
         }
     }
 };
@@ -132,6 +133,8 @@ async function handleRun(message, bot) {
     else {
         //Insertion de donnée dans la base
         try {
+            if (!message.guild)
+                return;
             if (!("info_en_plus" in optionObject)) {
                 optionObject["info_en_plus"] = "Pas d'informations en plus";
             }
@@ -156,16 +159,21 @@ async function handleRun(message, bot) {
                 return message.reply("La reunion ne peut pas être défini dans le passé");
             //le changement de séparateur est obligatoire
             optionReunion.date = optionReunion.date.replace("/", "-").replace("/", "-");
+            let name = `Reunion ${dateDebut.getDate()}/${dateDebut.getMonth() + 1}`;
+            let EventList = await message.guild.scheduledEvents.fetch();
+            EventList = EventList.filter(event => event.name.startsWith(name));
+            if (EventList.size > 0) {
+                name = `Reunion ${dateDebut.getDate()}/${dateDebut.getMonth() + 1} (${EventList.size})`;
+            }
             const finalObjectEvent = {
                 date: to_date_sql(optionReunion.date),
                 sujet: optionReunion.sujet,
                 lieu: optionReunion.lieu,
                 info_en_plus: optionReunion.info_en_plus,
                 heuredebut: optionReunion.heuredebut,
-                heurefin: optionReunion.heurefin
+                heurefin: optionReunion.heurefin,
+                reunion_name: name
             };
-            //obligatoire pour pouvoir modifier la réponse.
-            await message.reply("Preparation de l'évènement...");
             SaveValueToDB(message, bot, "Reunion", finalObjectEvent)
                 .then(async (result) => {
                 const sujet = optionReunion.sujet;
@@ -176,8 +184,7 @@ async function handleRun(message, bot) {
                 if (!isMaxId(res))
                     return;
                 const id = res.maxId;
-                const typeEvent = "Reunion";
-                CreateEvent(message, sujet, dateDebut, dateFin, lieu, info_en_plus, typeEvent, id)
+                CreateEvent(message, sujet, dateDebut, dateFin, lieu, info_en_plus, id, finalObjectEvent.reunion_name)
                     .then((name) => {
                     displayEmbedsMessage(message, new EmbedBuilder()
                         .setTitle("Reunion")
@@ -196,9 +203,7 @@ async function handleRun(message, bot) {
             });
         }
         catch (error) {
-            if (error instanceof Error) {
-                handleError(message, error);
-            }
+            console.log(error);
         }
     }
 }
