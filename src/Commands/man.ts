@@ -59,15 +59,12 @@ const handleRun = async(version : number,message : CommandInteraction | Message,
     const author_name = message instanceof Message ? message.author : message.user;
     try {
         command = await import(pathToFileURL(path.join(__dirname,"Commands",commandName + ".js")).href);
-        
-        if(message instanceof Message)
-        console.log("command success while",author_name,"was running");
-        
+                
         const embedText = new EmbedBuilder()
         .setTitle(`Comment utiliser ${commandName}`)
         .setDescription(command.howToUse)
         .setFooter({
-            text: "Au plaisr de vous aidez",
+            text: "Au plaisir de vous aidez",
             iconURL: bot.user?.displayAvatarURL() || ""
         })
        
@@ -82,7 +79,6 @@ const handleRun = async(version : number,message : CommandInteraction | Message,
 
 export const  run = async(bot : CBot, message : Message | CommandInteraction, args : Array<string>) => {
     const author_name = message instanceof Message ? message.author : message.user;
-    console.log(author_name,"is running man");
     if(message instanceof CommandInteraction){
         console.log("there")
         handleRun(0,message,args,bot)

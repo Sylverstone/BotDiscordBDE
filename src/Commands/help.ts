@@ -22,7 +22,7 @@ const displayMessageHelp = async(message : Message | CommandInteraction ,bot : C
                 ).join("\n\n") || "Aucune commande disponible",
                 color: 0xff0000,
                 footer: {
-                    text: "Au plaisr de vous aidez",
+                    text: "Au plaisir de vous aidez",
                     icon_url: bot.user?.displayAvatarURL() || ""
                 }
             }], 

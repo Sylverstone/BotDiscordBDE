@@ -1,5 +1,5 @@
 import { CommandInteraction, EmbedBuilder,embedLength,hyperlink, MessageFlags, SlashCommandIntegerOption,SlashCommandNumberOption,SlashCommandStringOption } from "discord.js";
-import { createDate, setup_date, to_date_sql } from "../Fonctions/DateScript.js";
+import {  setup_date, to_date_sql } from "../Fonctions/DateScript.js";
 import { SaveValueToDB,  getLastId,  getValueFromDB } from "../Fonctions/DbFunctions.js";
 import 'dotenv/config'
 import __dirname from "../dirname.js";
@@ -12,6 +12,9 @@ import make_log from "../Fonctions/makeLog.js";
 import { isMaxId } from "./reunion.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 import EmptyObject from "../Fonctions/LookIfObjectIsEmpty.js";
+import filterFuturEvent from "../Fonctions/filterFuturEvent.js";
+import makeEmbedABoutEvent from "../Fonctions/makeEmbedAboutEvent.js";
+import { EVentType } from "../Enum/EventType.js";
 
 export const description = "Cette commande vous renvoie les infos du prochain Event de votre serveur";
 export const name = "event";
@@ -55,7 +58,7 @@ export const optionNum = [
     .setRequired(false)
 ];
 
-interface Evenement_t{
+export interface Evenement_t{
     info_en_plus :string,
     lieu : string,
     datedebut : Date | string,
@@ -65,7 +68,7 @@ interface Evenement_t{
     name : string
 }
 
-function isEvent(object : unknown) : object is Evenement_t{
+export function isEvent(object : unknown) : object is Evenement_t{
     return (
         typeof object === 'object' &&
         object !== null &&
@@ -79,7 +82,7 @@ function isEvent(object : unknown) : object is Evenement_t{
     );
 }
 
-function isEventArray(value: unknown): value is Evenement_t[] {
+export function isEventArray(value: unknown): value is Evenement_t[] {
     return Array.isArray(value) && value.every(item => isEvent(item));
 }
 
@@ -99,16 +102,11 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
         {            
             const objectEvent = await getValueFromDB(message,"lieu, info_en_plus, datedebut,datefin, name, heuredebut, heurefin","Event","id",bot);
             console.log(objectEvent)
-            if(objectEvent === null) return message.reply("Il n'y a pas d'Event planifié pour les prochains jours");
+            if(objectEvent === null) return message.editReply("Il n'y a pas d'Event planifié pour les prochains jours");
 
             if(!isEventArray(objectEvent)) return;
-            const DateAujourdhui = new Date();
-            const allFuturEvent = objectEvent.filter((row) => {
-                const date = row.datedebut;
-                if(!(date instanceof Date)) return;
-                return date > DateAujourdhui;
-            })
-
+            const allFuturEvent = filterFuturEvent(objectEvent);
+            if(!(isEventArray(allFuturEvent))) return;
             let NearestEvent : Evenement_t | null;
             if(allFuturEvent.length > 0)
             {
@@ -130,6 +128,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             if(isEvent(NearestEvent))
             {
                 const textEnv = getDataEvent(NearestEvent)
+                /*
                 const embedText = new EmbedBuilder()
                     .setColor('#ff0000')
                     .setTitle(NearestEvent.name)
@@ -138,11 +137,19 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                         iconURL: bot.user?.displayAvatarURL() || ""
                     })
                     .setDescription(textEnv)
+                    */
+
+                if(!(NearestEvent.datedebut instanceof Date && NearestEvent.datefin instanceof Date)) return;
+                const embedText = makeEmbedABoutEvent(bot,EVentType.Event,NearestEvent.name,
+                    [NearestEvent.datedebut,NearestEvent.datefin],[NearestEvent.heuredebut,NearestEvent.heurefin],
+                    NearestEvent.lieu,
+                    NearestEvent.info_en_plus
+                );
                 make_log(true,message);
-                return message.reply({embeds : [embedText]})
+                return message.editReply({embeds : [embedText]})
             }
             make_log(true,message);
-            return message.reply("Il n'y a pas d'Event planifié pour les prochains jours");
+            return message.editReply("Il n'y a pas d'Event planifié pour les prochains jours");
             
         }
         else
@@ -151,7 +158,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             {
                 optionObject["info_en_plus"] = "Aucune info en plus n'a été fournit"
             }
-            if(!isEvent(optionObject)) return message.reply("La définition de l'Evenement n'est pas complète");
+            if(!isEvent(optionObject)) return message.editReply("La définition de l'Evenement n'est pas complète");
             const optionEvent : Evenement_t = optionObject;
             const dateActu = new Date();
             if(optionEvent.datedebut instanceof Date || optionEvent.datefin instanceof Date) return ;
@@ -169,19 +176,20 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             
             const finalObjectEvent = {
                 name : optionEvent.name,
-                datedebut :to_date_sql(optionEvent.datedebut),
-                datefin : to_date_sql(optionEvent.datefin),
+                datedebut : dateDebutEvent.toISOString().replace("T"," ").replace("Z"," "),
+                datefin : dateFinEvent.toISOString().replace("T"," ").replace("Z"," "),
                 heuredebut : optionEvent.heuredebut,
                 heurefin : optionEvent.heurefin,
                 lieu : optionEvent.lieu,
                 info_en_plus : optionEvent.info_en_plus,
             }
+
             const EventList = await message.guild?.scheduledEvents.fetch();
             if(typeof EventList?.find(event => event.name === optionEvent.name) !== "undefined") 
             {
                 displayEmbedsMessage(message,new EmbedBuilder()
                                                     .setTitle("Erreur")
-                                                 .setDescription("Un évènement avec le même nom existe déjà"),true);
+                                                    .setDescription("Un évènement avec le même nom existe déjà"),true);
                 return;
             }
             SaveValueToDB(message,bot,"Event",finalObjectEvent)
@@ -212,10 +220,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
     }catch(error) {
        if(error instanceof Error)
        {
-            handleError(message,error);
-       }
-       
-    }
-
-    
+            handleError(message,error,true);
+       }       
+    }    
 }

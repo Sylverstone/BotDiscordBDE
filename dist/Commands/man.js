@@ -48,13 +48,11 @@ const handleRun = async (version, message, args, bot) => {
     const author_name = message instanceof Message ? message.author : message.user;
     try {
         command = await import(pathToFileURL(path.join(__dirname, "Commands", commandName + ".js")).href);
-        if (message instanceof Message)
-            console.log("command success while", author_name, "was running");
         const embedText = new EmbedBuilder()
             .setTitle(`Comment utiliser ${commandName}`)
             .setDescription(command.howToUse)
             .setFooter({
-            text: "Au plaisr de vous aidez",
+            text: "Au plaisir de vous aidez",
             iconURL: bot.user?.displayAvatarURL() || ""
         });
         displayEmbedsMessage(message, embedText);
@@ -68,7 +66,6 @@ const handleRun = async (version, message, args, bot) => {
 };
 export const run = async (bot, message, args) => {
     const author_name = message instanceof Message ? message.author : message.user;
-    console.log(author_name, "is running man");
     if (message instanceof CommandInteraction) {
         console.log("there");
         handleRun(0, message, args, bot);

@@ -1,5 +1,5 @@
 import { EmbedBuilder, hyperlink, MessageFlags, SlashCommandNumberOption, SlashCommandStringOption } from "discord.js";
-import { setup_date, to_date_sql } from "../Fonctions/DateScript.js";
+import { setup_date } from "../Fonctions/DateScript.js";
 import { SaveValueToDB, getLastId, getValueFromDB } from "../Fonctions/DbFunctions.js";
 import 'dotenv/config';
 import transfromOptionToObject from "../Fonctions/transfromOptionToObject.js";
@@ -10,6 +10,9 @@ import make_log from "../Fonctions/makeLog.js";
 import { isMaxId } from "./reunion.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 import EmptyObject from "../Fonctions/LookIfObjectIsEmpty.js";
+import filterFuturEvent from "../Fonctions/filterFuturEvent.js";
+import makeEmbedABoutEvent from "../Fonctions/makeEmbedAboutEvent.js";
+import { EVentType } from "../Enum/EventType.js";
 export const description = "Cette commande vous renvoie les infos du prochain Event de votre serveur";
 export const name = "event";
 export const howToUse = "`/event` vous permet de faire *2* choses.\nPremière utilisation : `/event` en entrant cette commande il vous sera retourner des informations sur le dernier évènements.\nDeuxième utilisation : `/event 'name' 'datedebut' 'datefin' 'lieu' 'info_en_plus' 'heuredebut' 'heurefin'` pour définir un Evènement";
@@ -46,7 +49,7 @@ export const optionNum = [
         .setDescription("heure de fin l'évènements")
         .setRequired(false)
 ];
-function isEvent(object) {
+export function isEvent(object) {
     return (typeof object === 'object' &&
         object !== null &&
         'lieu' in object &&
@@ -57,7 +60,7 @@ function isEvent(object) {
         'heuredebut' in object &&
         'heurefin' in object);
 }
-function isEventArray(value) {
+export function isEventArray(value) {
     return Array.isArray(value) && value.every(item => isEvent(item));
 }
 const getDataEvent = (Ev) => {
@@ -74,16 +77,12 @@ export const run = async (bot, message) => {
             const objectEvent = await getValueFromDB(message, "lieu, info_en_plus, datedebut,datefin, name, heuredebut, heurefin", "Event", "id", bot);
             console.log(objectEvent);
             if (objectEvent === null)
-                return message.reply("Il n'y a pas d'Event planifié pour les prochains jours");
+                return message.editReply("Il n'y a pas d'Event planifié pour les prochains jours");
             if (!isEventArray(objectEvent))
                 return;
-            const DateAujourdhui = new Date();
-            const allFuturEvent = objectEvent.filter((row) => {
-                const date = row.datedebut;
-                if (!(date instanceof Date))
-                    return;
-                return date > DateAujourdhui;
-            });
+            const allFuturEvent = filterFuturEvent(objectEvent);
+            if (!(isEventArray(allFuturEvent)))
+                return;
             let NearestEvent;
             if (allFuturEvent.length > 0) {
                 NearestEvent = allFuturEvent[0];
@@ -105,26 +104,31 @@ export const run = async (bot, message) => {
             }
             if (isEvent(NearestEvent)) {
                 const textEnv = getDataEvent(NearestEvent);
+                /*
                 const embedText = new EmbedBuilder()
                     .setColor('#ff0000')
                     .setTitle(NearestEvent.name)
                     .setFooter({
-                    text: "Au plaisr de vous aidez",
-                    iconURL: bot.user?.displayAvatarURL() || ""
-                })
-                    .setDescription(textEnv);
+                        text: "Au plaisr de vous aidez",
+                        iconURL: bot.user?.displayAvatarURL() || ""
+                    })
+                    .setDescription(textEnv)
+                    */
+                if (!(NearestEvent.datedebut instanceof Date && NearestEvent.datefin instanceof Date))
+                    return;
+                const embedText = makeEmbedABoutEvent(bot, EVentType.Event, NearestEvent.name, [NearestEvent.datedebut, NearestEvent.datefin], [NearestEvent.heuredebut, NearestEvent.heurefin], NearestEvent.lieu, NearestEvent.info_en_plus);
                 make_log(true, message);
-                return message.reply({ embeds: [embedText] });
+                return message.editReply({ embeds: [embedText] });
             }
             make_log(true, message);
-            return message.reply("Il n'y a pas d'Event planifié pour les prochains jours");
+            return message.editReply("Il n'y a pas d'Event planifié pour les prochains jours");
         }
         else {
             if (!("info_en_plus" in optionObject)) {
                 optionObject["info_en_plus"] = "Aucune info en plus n'a été fournit";
             }
             if (!isEvent(optionObject))
-                return message.reply("La définition de l'Evenement n'est pas complète");
+                return message.editReply("La définition de l'Evenement n'est pas complète");
             const optionEvent = optionObject;
             const dateActu = new Date();
             if (optionEvent.datedebut instanceof Date || optionEvent.datefin instanceof Date)
@@ -142,8 +146,8 @@ export const run = async (bot, message) => {
             optionEvent.datefin = optionEvent.datefin.replace("/", "-").replace("/", "-");
             const finalObjectEvent = {
                 name: optionEvent.name,
-                datedebut: to_date_sql(optionEvent.datedebut),
-                datefin: to_date_sql(optionEvent.datefin),
+                datedebut: dateDebutEvent.toISOString().replace("T", " ").replace("Z", " "),
+                datefin: dateFinEvent.toISOString().replace("T", " ").replace("Z", " "),
                 heuredebut: optionEvent.heuredebut,
                 heurefin: optionEvent.heurefin,
                 lieu: optionEvent.lieu,
@@ -184,7 +188,7 @@ export const run = async (bot, message) => {
     }
     catch (error) {
         if (error instanceof Error) {
-            handleError(message, error);
+            handleError(message, error, true);
         }
     }
 };

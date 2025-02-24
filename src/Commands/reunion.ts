@@ -1,7 +1,7 @@
 import {CommandInteraction, EmbedBuilder, MessageFlags, SlashCommandNumberOption, SlashCommandStringOption} from 'discord.js';
 import { createDate, to_date_sql } from '../Fonctions/DateScript.js';
 import {getLastId, getValueFromDB, SaveValueToDB } from '../Fonctions/DbFunctions.js';
-import transfromOptionToObject, { listCommandObject_t } from '../Fonctions/transfromOptionToObject.js';
+import transfromOptionToObject from '../Fonctions/transfromOptionToObject.js';
 import __dirname from '../dirname.js';
 import CBot from '../Class/CBot.js';
 import CreateEvent from '../Fonctions/CreateEvent.js';
@@ -9,9 +9,10 @@ import handleError from '../Fonctions/handleError.js';
 import splitNumber from '../Fonctions/splitHeure.js';
 import make_log from '../Fonctions/makeLog.js';
 import displayEmbedsMessage from '../Fonctions/displayEmbedsMessage.js';
-import simpleEmbed from '../Fonctions/simpleEmbed.js';
 import EmptyObject from '../Fonctions/LookIfObjectIsEmpty.js';
-import { eventNames } from 'process';
+import filterFuturEvent from '../Fonctions/filterFuturEvent.js';
+import makeEmbedABoutEvent from '../Fonctions/makeEmbedAboutEvent.js';
+import { EVentType } from '../Enum/EventType.js';
 
 const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 
@@ -54,13 +55,14 @@ const optionNum = [
 ];
 
 
-interface reunion_t{
+export interface reunion_t{
     date : Date | string,
     sujet : string,
     lieu : string,
     info_en_plus : string,
     heuredebut : number,
-    heurefin : number
+    heurefin : number,
+    reunion_name : string,
 }
 
 interface maxId_t
@@ -75,7 +77,7 @@ export function isMaxId(result : unknown) : result is maxId_t
         && "maxId" in result && typeof result.maxId === "number"
     );
 }
-function isReunion(result : unknown) : result is reunion_t
+export function isReunion(result : unknown) : result is reunion_t
 {
     
     return (
@@ -88,7 +90,7 @@ function isReunion(result : unknown) : result is reunion_t
 
 
 
-function isReunionArray(result : unknown) : result is reunion_t[]
+export function isReunionArray(result : unknown) : result is reunion_t[]
 {
     return Array.isArray(result) && result.every(row => isReunion(row));
 }
@@ -114,21 +116,16 @@ async function handleRun(message : CommandInteraction, bot : CBot)
 {
     let optionObject = transfromOptionToObject(message);
     if(EmptyObject(optionObject)) {
-        await getValueFromDB(message,"date, heuredebut, heurefin, lieu, info_en_plus, sujet","Reunion","idReunion",bot)
-        .then(async(result) => {
-            
-            if(result === null) return message.reply("Il n'y a pas de reunion l'instant.");
+        await getValueFromDB(message,"date, heuredebut, heurefin, lieu, info_en_plus, sujet,reunion_name","Reunion","idReunion",bot)
+        .then(async(result) => {            
+            if(result === null) return message.editReply("Il n'y a pas de reunion l'instant.");
             if(isReunionArray(result))
             {
-                const dateTemp = new Date();
-                const dateActu = new Date(dateTemp.getFullYear(), dateTemp.getMonth(), dateTemp.getDate());
-                dateActu.setHours(dateTemp.getHours());
-                const allfuturReunion = result.filter((row) => {
-                    const date = row.date;
-                    if(!(date instanceof Date)) return;
-                    return date > dateActu;
+                result.forEach(r => {
+                    console.log(r.reunion_name);
                 })
-
+                const allfuturReunion = filterFuturEvent(result);
+                if(!(isReunionArray(allfuturReunion))) return;
                 let NearestReunion : reunion_t | null;
                 if(allfuturReunion.length > 0)
                 {
@@ -150,32 +147,21 @@ async function handleRun(message : CommandInteraction, bot : CBot)
                 if(isReunion(NearestReunion))
                 {
                     const {date, sujet, heuredebut,heurefin, lieu,info_en_plus} = NearestReunion;
-                    const infoEnPlusText = info_en_plus === "" ? "" : "Info en plus : " + info_en_plus;
-                    const [integerPart,DecimalPart] = splitNumber(heuredebut);
-                    const [integerPartFin,DecimalPartFin] = splitNumber(heurefin);
-                    if(typeof date === "string") return;
-                    const embedText = new EmbedBuilder()
-                        .setColor("#ff0000")
-                        .setTitle(`Prochaine réunion - ${sujet}`)
-                        .setDescription(`date : ${date.toDateString()}\n
-                                        heure : ${integerPart}h${DecimalPart} -> ${integerPartFin}h${DecimalPartFin}\n
-                                        lieu : ${lieu}\n
-                                        ${infoEnPlusText}`)
-                        .setFooter({
-                            text: "Au plaisir de vous aidez",
-                            iconURL: bot.user?.displayAvatarURL() || ""
-                        })
+                    if(!(date instanceof Date)) return;
+                    const embedText = makeEmbedABoutEvent(bot,EVentType.Reunion,sujet,[date,],[heuredebut,heurefin],
+                        lieu,info_en_plus
+                    )
                     make_log(true,message);
                     
-                    return message.reply({embeds : [embedText]})
+                    return message.editReply({embeds : [embedText]})
                 }
                 else
                 {
                     make_log(true,message);
-                    return message.reply("Il n'y a pas de prochaine reunion prévu pour l'instant.\n");
+                    return message.editReply("Il n'y a pas de prochaine reunion prévu pour l'instant.\n");
                 }
             }
-            return message.reply("Il n'y a pas de reunion l'instant.");
+            return message.editReply("Il n'y a pas de reunion l'instant.");
         });
     }
     else
@@ -185,70 +171,70 @@ async function handleRun(message : CommandInteraction, bot : CBot)
         {
             if(!message.guild) return;
             if(!("info_en_plus" in optionObject))
-                {
-                    optionObject["info_en_plus"] = "Pas d'informations en plus"
-                }
-                if(!isReunion(optionObject)) return message.reply("La définition de la réunion n'est pas complète :(");
-        8
-                const optionReunion : reunion_t = optionObject;
-                const dateActu = new Date();
-                if(optionReunion.date instanceof Date) return;
-                //date est un string
-                const dateDebut = createDate(optionReunion.date);
-                
-                const [stringIntegerPart,stringDecimalPart] = splitNumber(optionReunion.heuredebut);
-                const [stringIntegerPartFin, stringDecimalPartFin] = splitNumber(optionReunion.heurefin);
-                const dateFin = createDate(optionReunion.date);
-                if(!(dateFin instanceof Date && dateDebut instanceof Date)) throw Error("Erreur de développement, DateFIn et dateDebut ne sont pas de type Date") ;
-                dateDebut.setHours(+stringIntegerPart,stringDecimalPart);
-                dateFin.setHours(+stringIntegerPartFin,stringDecimalPartFin);
-                console.log("date debut  :",dateDebut,"\n",dateActu);
-                if(dateActu.getTime() > dateDebut.getTime()) return message.reply("La reunion ne peut pas être défini dans le passé");
-                //le changement de séparateur est obligatoire
-                optionReunion.date = optionReunion.date.replace("/","-").replace("/","-");
-                let name = `Reunion ${dateDebut.getDate()}/${dateDebut.getMonth()+1}`;
-                let EventList = await message.guild.scheduledEvents.fetch();
-                EventList = EventList.filter(event => event.name.startsWith(name));
-                if(EventList.size > 0)
-                {
-                    name = `Reunion ${dateDebut.getDate()}/${dateDebut.getMonth()+1} (${EventList.size})`;
-                }
-                const finalObjectEvent = {
-                    date : to_date_sql(optionReunion.date),
-                    sujet : optionReunion.sujet,
-                    lieu : optionReunion.lieu,
-                    info_en_plus : optionReunion.info_en_plus,
-                    heuredebut : optionReunion.heuredebut,
-                    heurefin : optionReunion.heurefin ,
-                    reunion_name : name
-                };
-        
-                SaveValueToDB(message,bot,"Reunion",finalObjectEvent)
-                .then(async result => {
-                    const sujet = optionReunion.sujet;
-                    const lieu = optionReunion.lieu;
-                    const info_en_plus = optionReunion.info_en_plus;
-                    console.log("date :",dateDebut,dateFin)
-                    const res  = await getLastId("Reunion","idReunion",bot);
-                    if(!isMaxId(res)) return;
-                    const id = res.maxId;
-                    CreateEvent(message,sujet,dateDebut,dateFin,lieu,info_en_plus,id,finalObjectEvent.reunion_name)
-                    .then((name) => {
-                        displayEmbedsMessage(message, new EmbedBuilder()
-                                                .setTitle("Reunion")
-                                                .setDescription("La reunion a été crée. Elle se nomme : " + name),true);
-                        make_log(true,message);
-                    })
-                    .catch(err => {
-                        displayEmbedsMessage(message, new EmbedBuilder()
-                                                .setTitle("Information")
-                                                .setDescription("Une erreur a eu lieu :("),true);
-                        make_log(false,message);
-                    });                            
+            {
+                optionObject["info_en_plus"] = "Pas d'informations en plus"
+            }
+            if(!isReunion(optionObject)) return message.editReply("La définition de la réunion n'est pas complète :(");
+    8
+            const optionReunion : reunion_t = optionObject;
+            const dateActu = new Date();
+            if(optionReunion.date instanceof Date) return;
+            //date est un string
+            const dateDebut = createDate(optionReunion.date);
+            
+            const [stringIntegerPart,stringDecimalPart] = splitNumber(optionReunion.heuredebut);
+            const [stringIntegerPartFin, stringDecimalPartFin] = splitNumber(optionReunion.heurefin);
+            const dateFin = createDate(optionReunion.date);
+            if(!(dateFin instanceof Date && dateDebut instanceof Date)) throw Error("Erreur de développement, DateFIn et dateDebut ne sont pas de type Date") ;
+            dateDebut.setHours(+stringIntegerPart,stringDecimalPart);
+            dateFin.setHours(+stringIntegerPartFin,stringDecimalPartFin);
+            console.log("date debut  :",dateDebut,"\n",dateActu);
+            if(dateActu.getTime() > dateDebut.getTime()) return message.editReply("La reunion ne peut pas être défini dans le passé");
+            //le changement de séparateur est obligatoire
+            optionReunion.date = optionReunion.date.replace("/","-").replace("/","-");
+            let name = `Reunion ${dateDebut.getDate()}/${dateDebut.getMonth()+1}`;
+            let EventList = await message.guild.scheduledEvents.fetch();
+            EventList = EventList.filter(event => event.name.startsWith(name));
+            if(EventList.size > 0)
+            {
+                name = `Reunion ${dateDebut.getDate()}/${dateDebut.getMonth()+1} (${EventList.size})`;
+            }
+            const finalObjectEvent = {
+                date : dateDebut.toISOString().replace("T"," ").replace("Z"," "),
+                sujet : optionReunion.sujet,
+                lieu : optionReunion.lieu,
+                info_en_plus : optionReunion.info_en_plus,
+                heuredebut : optionReunion.heuredebut,
+                heurefin : optionReunion.heurefin ,
+                reunion_name : name
+            };
+    
+            SaveValueToDB(message,bot,"Reunion",finalObjectEvent)
+            .then(async result => {
+                const sujet = optionReunion.sujet;
+                const lieu = optionReunion.lieu;
+                const info_en_plus = optionReunion.info_en_plus;
+                console.log("date :",dateDebut,dateFin)
+                const res  = await getLastId("Reunion","idReunion",bot);
+                if(!isMaxId(res)) return;
+                const id = res.maxId;
+                CreateEvent(message,sujet,dateDebut,dateFin,lieu,info_en_plus,id,finalObjectEvent.reunion_name)
+                .then((name) => {
+                    displayEmbedsMessage(message, new EmbedBuilder()
+                                            .setTitle("Reunion")
+                                            .setDescription("La reunion a été crée. Elle se nomme : " + name),true);
+                    make_log(true,message);
                 })
                 .catch(err => {
-                    handleError(message,err);
-                });
+                    displayEmbedsMessage(message, new EmbedBuilder()
+                                            .setTitle("Information")
+                                            .setDescription("Une erreur a eu lieu :("),true);
+                    make_log(false,message);
+                });                            
+            })
+            .catch(err => {
+                handleError(message,err,true);
+            });
         }
         catch (error) {
             console.log(error);            

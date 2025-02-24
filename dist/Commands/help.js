@@ -14,7 +14,7 @@ const displayMessageHelp = async (message, bot) => {
                     description: bot.commands.map(command => `**__Nom de commande__** : \`${command.name}\`.\n> ${command.description}`).join("\n\n") || "Aucune commande disponible",
                     color: 0xff0000,
                     footer: {
-                        text: "Au plaisr de vous aidez",
+                        text: "Au plaisir de vous aidez",
                         icon_url: bot.user?.displayAvatarURL() || ""
                     }
                 }],
