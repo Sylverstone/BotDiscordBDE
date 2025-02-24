@@ -135,10 +135,7 @@ export async function deleteFromTableWithId(table, champId, cibleId, bot, messag
         });
     });
 }
-export async function deleteFromTableWithName(table, champName, cibleName, bot, message) {
-    if (!message.guild)
-        return;
-    const guildId = message.guild.id;
+export async function deleteFromTableWithName(table, champName, cibleName, bot, guildId) {
     const commandSQL = `DELETE FROM ${table} WHERE ${champName} = '${cibleName}' AND GuildId = ${guildId}`;
     return new Promise((resolve, reject) => {
         bot.bd.query(commandSQL, (err, result) => {

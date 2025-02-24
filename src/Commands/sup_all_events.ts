@@ -35,11 +35,11 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                     tableName = Event.tableName;
                     champName = Event.name;
                 }
-                deleteFromTableWithName(tableName,champName,event.name,bot,message)
+                if(!message.guild) return;
+                deleteFromTableWithName(tableName,champName,event.name,bot,+message.guild.id)
                 .then(() => 
                 {
-                    return event.delete();
-    
+                    return event.delete();    
                 })
                 .then((status) => {
                     console.log(`Event ${status.name} deleted`);

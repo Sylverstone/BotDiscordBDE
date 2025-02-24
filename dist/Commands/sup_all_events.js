@@ -27,7 +27,9 @@ export const run = async (bot, message) => {
                     tableName = Event.tableName;
                     champName = Event.name;
                 }
-                deleteFromTableWithName(tableName, champName, event.name, bot, message)
+                if (!message.guild)
+                    return;
+                deleteFromTableWithName(tableName, champName, event.name, bot, +message.guild.id)
                     .then(() => {
                     return event.delete();
                 })

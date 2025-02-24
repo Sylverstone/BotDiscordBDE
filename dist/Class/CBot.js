@@ -9,7 +9,8 @@ export default class CBot extends Client {
                 GatewayIntentBits.MessageContent,
                 GatewayIntentBits.DirectMessages,
                 GatewayIntentBits.DirectMessageTyping,
-                GatewayIntentBits.GuildModeration
+                GatewayIntentBits.GuildModeration,
+                GatewayIntentBits.GuildScheduledEvents
             ],
             partials: [Partials.Channel],
         });

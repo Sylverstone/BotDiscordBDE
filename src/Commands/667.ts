@@ -1,4 +1,4 @@
-import { CommandInteraction,EmbedBuilder,SlashCommandStringOption, SlashCommandUserOption } from "discord.js";
+import { CommandInteraction,EmbedBuilder, SlashCommandUserOption } from "discord.js";
 import "dotenv/config"
 import CBot from "../Class/CBot.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
