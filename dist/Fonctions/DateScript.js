@@ -55,3 +55,5 @@ export function to_date_sql(date) {
     console.log("la date qui doit être transfo", date);
     return `${annee}-${mois}-${jour}`;
 }
+export function IsDate(date) {
+}

@@ -73,3 +73,9 @@ export function to_date_sql(date : string)
     return `${annee}-${mois}-${jour}`;
     
 }
+ 
+export function IsDate(date : string)
+{
+
+
+}

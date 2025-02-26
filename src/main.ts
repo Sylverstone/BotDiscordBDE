@@ -4,7 +4,7 @@ import loadEvenements from "./Loaders/EVents/loadEvenements.js"
 import "dotenv/config";
 import { connection } from "./Database/coDatabase.js";
 import CBot from "./Class/CBot.js";
-import actualise_events from "./Fonctions/actualise_event.js";
+import date from "./Class/Date/Date.js";
 
 let bot = new CBot(connection)
 
@@ -13,7 +13,6 @@ bot.bd.connect((err) => {
     if (err) throw err;
     console.log("Connected to MySQL!");
 });
-
 
 bot.once(Events.ClientReady, async() => {
     if(!bot.user) return;

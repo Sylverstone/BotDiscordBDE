@@ -10,7 +10,7 @@ const exec = async (bot, event) => {
         if (!event.guild)
             return;
         await deleteFromTableWithName(tableName, champName, event.name, bot, +event.guild.id);
-        console.log("Event :", event.name, "was deleted");
+        console.log("[LOG]", event.name, "was deleted");
     }
     catch (err) {
         console.error(err);

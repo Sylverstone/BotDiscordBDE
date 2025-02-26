@@ -4,6 +4,7 @@ import loadEvenements from "./Loaders/EVents/loadEvenements.js";
 import "dotenv/config";
 import { connection } from "./Database/coDatabase.js";
 import CBot from "./Class/CBot.js";
+import date from "./Class/Date/Date.js";
 let bot = new CBot(connection);
 bot.bd = connection;
 bot.bd.connect((err) => {
@@ -11,6 +12,8 @@ bot.bd.connect((err) => {
         throw err;
     console.log("Connected to MySQL!");
 });
+const d = new date();
+console.log(d.toString());
 bot.once(Events.ClientReady, async () => {
     if (!bot.user)
         return;

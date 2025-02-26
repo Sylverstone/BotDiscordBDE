@@ -9,11 +9,12 @@ import { Reunion } from "../Enum/Reunion.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 export const description = "Cette commande vous permet de supprimer une réunion";
 export const name = "sup_event";
-export const howToUse = "`/sup_event` vous permet de supprimer un Evènement grâce a son nom";
+export const howToUse = "`/sup_event 'nom_reunion'` vous permet de supprimer un evènement grâce a son nom";
 export const option = [
     new SlashCommandStringOption()
         .setName("nom_reunion")
         .setDescription("le nom de la reunion")
+        .setRequired(true)
 ];
 export const onlyGuild = true;
 export const run = async (bot, message, typeEvent) => {

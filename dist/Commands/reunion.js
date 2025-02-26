@@ -69,6 +69,7 @@ const run = async (bot, message) => {
 };
 export { description, name, run, option, optionNum, onlyGuild };
 async function handleRun(message, bot) {
+    new Date("2025-02-31");
     let optionObject = transfromOptionToObject(message);
     if (EmptyObject(optionObject)) {
         await getValueFromDB(message, "date, heuredebut, heurefin, lieu, info_en_plus, sujet,reunion_name", "Reunion", "idReunion", bot)
