@@ -4,8 +4,8 @@ export default async function CreateEvent(message, sujet, dateDebut, dateFin, li
         return;
     await message.guild.scheduledEvents.create({
         name: name,
-        scheduledStartTime: dateDebut,
-        scheduledEndTime: dateFin,
+        scheduledStartTime: dateDebut.toDate(),
+        scheduledEndTime: dateFin.toDate(),
         privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
         entityType: GuildScheduledEventEntityType.External,
         entityMetadata: {

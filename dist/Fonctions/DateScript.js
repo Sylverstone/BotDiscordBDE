@@ -1,6 +1,7 @@
 import { EmbedBuilder } from "discord.js";
 import displayEmbedsMessage from "./displayEmbedsMessage.js";
 import splitNumber from "./splitHeure.js";
+import date from "../Class/Date/Date.js";
 const convertToDate = (date) => {
     const [jour, mois, annee] = date.split("/");
     return new Date(`${annee}-${mois}-${jour}`);
@@ -14,20 +15,20 @@ export default function verifierDate(dateOrigine, NouvelleDate) {
         return NouvelleDate > dateOrigine && (NouvelleDate instanceof Date && dateOrigine instanceof Date);
     }
 }
-export function createDate(date) {
+export function createDate(ndate) {
     let jour = "";
     let mois = "";
     let annee = "";
-    if (date.includes("/")) {
-        [jour, mois, annee] = date.split("/");
+    if (ndate.includes("/")) {
+        [jour, mois, annee] = ndate.split("/");
     }
-    else if (date.includes("-")) {
-        [jour, mois, annee] = date.split("-");
+    else if (ndate.includes("-")) {
+        [jour, mois, annee] = ndate.split("-");
     }
     else {
         return undefined;
     }
-    return new Date(`${annee}-${mois}-${jour}`);
+    return new date(`${jour}-${mois}-${annee}`);
 }
 export function dateToOnlyDate(date) {
     if (!(date instanceof Date))
@@ -39,7 +40,7 @@ export function setup_date(dateDebut, DateFin, heureDebut, heureFin, message) {
     const dateFinEvent = createDate(DateFin);
     const [stringHeureDebutInt, stringHeureDebutDecimal] = splitNumber(heureDebut);
     const [stringHeureFintInt, stringHeureFinDecimal] = splitNumber(heureFin);
-    if (!(dateDebutEvent instanceof Date && dateFinEvent instanceof Date)) {
+    if (!(dateDebutEvent instanceof date && dateFinEvent instanceof date)) {
         displayEmbedsMessage(message, new EmbedBuilder()
             .setTitle("Erreur")
             .setDescription("Le format de date que vous avez transmis est incorrect :)"));

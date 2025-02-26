@@ -1,16 +1,21 @@
 import { readdirSync } from "fs";
 import * as path from "path";
 import { SlashCommandBuilder, REST, Routes } from "discord.js";
-import "dotenv/config";
 import __dirname from "../../dirname.js";
 import { pathToFileURL } from "url";
+import "dotenv/config";
 const setupLoad = async (bot, guildIds) => {
     const ext = ".js";
-    const listeFileCommands = readdirSync(path.join("dist", "Commands")).filter(file => file.endsWith(ext)).map(file => file.slice(0, file.length - ext.length));
+    const listeFileCommands = readdirSync(path.join(__dirname, "Commands"))
+        .filter(file => file.endsWith(ext))
+        .map(file => path.join(__dirname, "Commands", file));
+    const EventScript = readdirSync(path.join(__dirname, "Commands", "Event"))
+        .filter(file => file.endsWith(ext) && !file.startsWith("_"))
+        .map(file => path.join(__dirname, "Commands", "Event", file));
+    listeFileCommands.push(...EventScript);
     let SlashCommands = [];
     for (const file of listeFileCommands) {
-        const filePath = path.join(__dirname, "Commands", file + ext);
-        const fileUrl = pathToFileURL(filePath).href;
+        const fileUrl = pathToFileURL(file).href;
         const commande = await import(fileUrl);
         bot.commands.set(commande.name, commande);
         //creation de la slash commande

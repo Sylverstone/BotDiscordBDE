@@ -4,6 +4,7 @@ import Jour from "./Jour.js";
 import minute from "./Minutes.js";
 import mois from "./Mois.js";
 import seconde from "./Seconde.js";
+import * as util from "util";
 export default class date {
     constructor(date = "") {
         if (date !== "") {
@@ -40,19 +41,23 @@ export default class date {
             this._seconde = new seconde(parseInt(heurePart[2]));
         }
     }
-    set jour(jour) {
-        this._jour = new Jour(parseInt(jour));
+    [util.inspect.custom]() {
+        return `\nDate : ${this.toString()}\nDate (origin Date type) : ${this.toDate()}\n Time : ${this.getTime()}\n`;
     }
-    set mois(num_mois) {
-        this._mois = new mois(parseInt(num_mois));
+    toDate() {
+        return new Date(this.toString());
     }
-    set annee(num_annee) {
-        this._annee = new annee(parseInt(num_annee));
+    getHours() {
+        return `${this._heure.toString()}:${this._minute.toString()}:${this._seconde.toString()}`;
     }
     getTime() {
         return this._annee.toSeconde() + this._mois.toSeconde() + this._jour.toSeconde() + this._heure.toSeconde() + this._minute.toSeconde() + this._seconde.seconde;
     }
     toString() {
         return `${this._annee.toString()}-${this._mois.toNum()}-${this._jour.toString()} ${this._heure.toString()}:${this._minute.toString()}:${this._seconde.toString()}`;
+    }
+    setHours(hours, minutes) {
+        this._heure = new heure(hours);
+        this._minute = new minute(minutes);
     }
 }

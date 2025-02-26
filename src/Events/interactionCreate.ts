@@ -10,7 +10,9 @@ const exec = async (bot : CBot, interaction : CommandInteraction) =>  {
    
     if(!interaction.isChatInputCommand()) return;
     const commandName = interaction.commandName;
-    const {run} = await import(pathToFileURL(path.join(__dirname,"Commands",commandName + ".js")).href);
+    const filePath = commandName === "event" ? pathToFileURL(path.join(__dirname,"Commands","Event",commandName + ".js"))
+                                            : pathToFileURL(path.join(__dirname,"Commands",commandName + ".js"));
+    const {run} = await import(filePath.href);
     run(bot,interaction)
 }
 

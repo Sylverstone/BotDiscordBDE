@@ -1,4 +1,4 @@
-import { Evenement_t } from "../Commands/event.js";
+import { Evenement_t } from "../Commands/Event/event.js";
 import { isReunion, reunion_t } from "../Commands/reunion.js";
 import splitNumber from "./splitHeure.js";
 

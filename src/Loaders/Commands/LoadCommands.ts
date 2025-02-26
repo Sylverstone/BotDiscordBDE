@@ -1,21 +1,29 @@
 import { readdirSync } from "fs";
 import  * as path from "path";
 import { SlashCommandBuilder, REST, Routes } from "discord.js";
-import "dotenv/config"
 import __dirname from "../../dirname.js";
 import { pathToFileURL } from "url";
 import CBot, { script_t } from "../../Class/CBot.js";
-import make_log from "../../Fonctions/makeLog.js";
+import "dotenv/config"
 
 const setupLoad = async (bot : CBot, guildIds : string[]) =>
 {
-    const ext = ".js"
-    const listeFileCommands = readdirSync(path.join("dist","Commands")).filter(file => file.endsWith(ext)).map(file => file.slice(0, file.length - ext.length));
+    const ext = ".js";
+
+    const listeFileCommands = readdirSync(path.join(__dirname,"Commands"))
+        .filter(file => file.endsWith(ext))
+        .map(file => path.join(__dirname,"Commands", file));
+
+    const EventScript = readdirSync(path.join(__dirname,"Commands","Event"))
+        .filter(file => file.endsWith(ext) && !file.startsWith("_"))
+        .map(file => path.join(__dirname,"Commands","Event",file));
+
+    listeFileCommands.push(...EventScript);
+
     let SlashCommands : Array<SlashCommandBuilder> = [];
     for(const file of listeFileCommands)
     {
-        const filePath = path.join(__dirname,"Commands",file + ext);
-        const fileUrl = pathToFileURL(filePath).href
+        const fileUrl = pathToFileURL(file).href
         
         const commande : script_t = await import(fileUrl);
         bot.commands.set(commande.name, commande)

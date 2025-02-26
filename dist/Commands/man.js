@@ -22,9 +22,13 @@ export const option = [
 ];
 async function getChoices() {
     let choices = [];
-    const allCommandsScript = fs.readdirSync(path.join(__dirname, "Commands")).filter(file => file !== "man.js");
+    const allCommandsScript = fs.readdirSync(path.join(__dirname, "Commands")).filter(file => {
+        return file !== "man.js" && file.endsWith(".js");
+    }).map(command => path.join(__dirname, "Commands", command));
+    const EventScript = fs.readdirSync(path.join(__dirname, "Commands", "Event")).filter(file => !file.startsWith("_")).map(file => path.join(__dirname, "Commands", "Event", file));
+    allCommandsScript.push(...EventScript);
     for (const script of allCommandsScript) {
-        const { name } = await import(pathToFileURL(path.join(__dirname, "Commands", script)).href);
+        const { name } = await import(pathToFileURL(script).href);
         choices.push({ name: name, value: name });
     }
     return choices;

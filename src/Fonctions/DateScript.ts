@@ -1,6 +1,7 @@
 import { CommandInteraction, EmbedBuilder } from "discord.js";
 import displayEmbedsMessage from "./displayEmbedsMessage.js";
 import splitNumber from "./splitHeure.js";
+import date from "../Class/Date/Date.js";
 
 const convertToDate = (date : string) => 
 {
@@ -20,22 +21,22 @@ export default function verifierDate(dateOrigine : string | Date ,NouvelleDate :
     }
 }
 
-export function createDate(date : string) : undefined | Date
+export function createDate(ndate : string) : undefined | date
 {
     let jour : string = "";let mois : string = "";let annee : string = "";
-    if(date.includes("/"))
+    if(ndate.includes("/"))
     {
-        [jour,mois,annee] = date.split("/");
+        [jour,mois,annee] = ndate.split("/");
     }
-    else if(date.includes("-"))
+    else if(ndate.includes("-"))
     {
-        [jour,mois,annee] = date.split("-");
+        [jour,mois,annee] = ndate.split("-");
     }
     else
     {
         return undefined
     }
-    return new Date(`${annee}-${mois}-${jour}`);
+    return new date(`${jour}-${mois}-${annee}`);
 }
 
 export function dateToOnlyDate(date : Date)
@@ -44,13 +45,13 @@ export function dateToOnlyDate(date : Date)
     return `${date.getDay()}/${date.getMonth()+1}/${date.getFullYear()}`;
 }
 
-export function setup_date(dateDebut : string, DateFin : string, heureDebut : number, heureFin : number,message : CommandInteraction) : Date[] | null
+export function setup_date(dateDebut : string, DateFin : string, heureDebut : number, heureFin : number,message : CommandInteraction) : date[] | null
 {
     const dateDebutEvent = createDate(dateDebut);
     const dateFinEvent = createDate(DateFin);
     const [stringHeureDebutInt, stringHeureDebutDecimal] = splitNumber(heureDebut);
     const [stringHeureFintInt, stringHeureFinDecimal] = splitNumber(heureFin);
-    if(!(dateDebutEvent instanceof Date && dateFinEvent instanceof Date)) {
+    if(!(dateDebutEvent instanceof date && dateFinEvent instanceof date)) {
         displayEmbedsMessage(message,new EmbedBuilder()
                                             .setTitle("Erreur")
                                             .setDescription("Le format de date que vous avez transmis est incorrect :)")
