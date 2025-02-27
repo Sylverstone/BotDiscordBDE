@@ -5,10 +5,11 @@ import __dirname from "../dirname.js";
 import CBot from "../Class/CBot.js";
 
 const name = Events.InteractionCreate;
-const capFirstLetter = (str : string) => 
+export const capFirstLetter = (str : string) => 
 {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
 const exec = async (bot : CBot, interaction : CommandInteraction) =>  {
    
     if(!interaction.isChatInputCommand()) return;

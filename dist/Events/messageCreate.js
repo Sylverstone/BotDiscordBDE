@@ -3,6 +3,7 @@ import * as path from "path";
 import __dirname from "../dirname.js";
 import lookIfCommandsValid from "../Fonctions/lookIfCommandsValid.js";
 import { pathToFileURL } from "url";
+import { capFirstLetter } from "./interactionCreate.js";
 const name = Events.MessageCreate;
 const exec = async (bot, message) => {
     //ce script est executé pour tout messages en DM, mais également pour tout message en guild qui n'est pas une commande
@@ -29,8 +30,10 @@ const exec = async (bot, message) => {
     if (!lookIfCommandsValid(commandName)) {
         return message.reply(`La commande ${commandName} n'existe pas :(`);
     }
+    const additionnalFile = ["event", 'reunion'];
     const args = messageArray.slice(1);
-    const pathToCommand = pathToFileURL(path.join(commandsFolder, commandName + ".js")).href;
+    const pathToCommand = additionnalFile.includes(commandName) ? pathToFileURL(path.join(__dirname, "Commands", capFirstLetter(commandName), commandName)).href
+        : pathToFileURL(path.join(__dirname, "Commands", commandName)).href;
     const command = await import(pathToCommand);
     if (!command.onlyGuild) {
         command.run(bot, message, args);

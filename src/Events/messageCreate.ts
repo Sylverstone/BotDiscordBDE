@@ -2,8 +2,9 @@ import { Events, Message } from "discord.js"
 import * as path from "path";
 import __dirname from "../dirname.js";
 import lookIfCommandsValid from "../Fonctions/lookIfCommandsValid.js";
-import CBot, { commands_t, script_t } from "../Class/CBot.js";
+import CBot, { script_t } from "../Class/CBot.js";
 import { pathToFileURL } from "url";
+import { capFirstLetter } from "./interactionCreate.js";
 
 const name = Events.MessageCreate;
 type commandHelp_t = 
@@ -43,8 +44,10 @@ const exec = async (bot : CBot, message : Message) =>  {
     if(!lookIfCommandsValid(commandName)){
         return message.reply(`La commande ${commandName} n'existe pas :(`);
     } 
+    const additionnalFile = ["event",'reunion'];
     const args = messageArray.slice(1);
-    const pathToCommand = pathToFileURL(path.join(commandsFolder,commandName + ".js")).href;
+    const pathToCommand = additionnalFile.includes(commandName) ? pathToFileURL(path.join(__dirname,"Commands",capFirstLetter(commandName),commandName)).href
+                                                                    : pathToFileURL(path.join(__dirname,"Commands",commandName)).href;
     const command : script_t = await import(pathToCommand);
     if(!command.onlyGuild)
     {

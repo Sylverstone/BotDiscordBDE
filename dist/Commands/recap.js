@@ -18,8 +18,6 @@ export const run = async (bot, message) => {
     try {
         let haveParameters = false;
         haveParameters = message.options.data.length >= 1;
-        //quand retourVal est true, ça veut dire qu'il y avait des parametres dans la commande
-        //quand il n'y a pas de parametre, ça veut dire que c'est une commande pour set
         if (haveParameters) {
             //saving value
             await message.deferReply({ flags: MessageFlags.Ephemeral });

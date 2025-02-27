@@ -3,7 +3,7 @@ import * as path from "path";
 import { pathToFileURL } from "url";
 import __dirname from "../dirname.js";
 const name = Events.InteractionCreate;
-const capFirstLetter = (str) => {
+export const capFirstLetter = (str) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
 };
 const exec = async (bot, interaction) => {

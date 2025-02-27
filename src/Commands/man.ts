@@ -9,6 +9,7 @@ import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 import { pathToFileURL } from "url";
 import make_log from "../Fonctions/makeLog.js";
 import handleError from "../Fonctions/handleError.js";
+import { capFirstLetter } from "../Events/interactionCreate.js";
 
 export const description = "Cette commande vous permettra d'en apprendre plus sur l'utilisation d'une commande";
 export const name = "man";
@@ -35,15 +36,17 @@ async function getChoices(){
     }
     ).map(command => path.join(__dirname,"Commands",command));
 
+    console.log(allCommandsScript)
     const additionalFile = ["Event","Reunion"];
     for(let dos of additionalFile)
     {
         const additionalScript = fs.readdirSync(path.join(__dirname, "Commands", dos)).filter(
             file => !file.startsWith("_")
         ).map(file => path.join(__dirname,"Commands",dos,file));
+        console.log(dos,additionalScript);
         allCommandsScript.push(...additionalScript);
     }
-
+    
     for(const script of allCommandsScript)
     {
         const {name} = await import(pathToFileURL(script).href);
@@ -70,9 +73,9 @@ const handleRun = async(version : number,message : CommandInteraction | Message,
     if(!(typeof commandName === 'string')) return;
 
     if(!lookIfCommandsValid(commandName)) return message.reply(`La commande ${commandName} n'existe pas !`); //juste pour les dm
-    const author_name = message instanceof Message ? message.author : message.user;
     try {
-        command = await import(pathToFileURL(path.join(__dirname,"Commands",commandName + ".js")).href);
+        const importPath = commandName === "event" || commandName === "reunion" ? pathToFileURL(path.join(__dirname,"Commands",capFirstLetter(commandName), commandName + ".js")) : pathToFileURL(path.join(__dirname,"Commands",commandName + ".js")) ;
+        command = await import(importPath.href);
                 
         const embedText = new EmbedBuilder()
         .setTitle(`Comment utiliser ${commandName}`)
@@ -92,9 +95,7 @@ const handleRun = async(version : number,message : CommandInteraction | Message,
 }
 
 export const  run = async(bot : CBot, message : Message | CommandInteraction, args : Array<string>) => {
-    const author_name = message instanceof Message ? message.author : message.user;
     if(message instanceof CommandInteraction){
-        console.log("there")
         handleRun(0,message,args,bot)
         return;
     }
