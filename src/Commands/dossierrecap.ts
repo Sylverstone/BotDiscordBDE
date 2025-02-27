@@ -1,9 +1,10 @@
-import {CommandInteraction,SlashCommandStringOption } from "discord.js";
+import {CommandInteraction,EmbedBuilder,MessageFlags,SlashCommandStringOption } from "discord.js";
 import "dotenv/config";
 import { getMostRecentValueFromDB, SaveValueToDB } from "../Fonctions/DbFunctions.js";
 import CBot from "../Class/CBot.js";
 import handleError from "../Fonctions/handleError.js";
 import make_log from "../Fonctions/makeLog.js";
+import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 
 export const description = "Cette commande vous donnes le lien de l'endroit où sont stocker les récapitulatifs de vos réunion";
 export const name = "dossierrecap";
@@ -16,7 +17,7 @@ export const option =
         .setRequired(false),
 ];
 
-export const howToUse = "Vous n'avez qu'a tapez `/dossierRecap` et la commande renverra le lien vers le dossier contenant tout les récap";
+export const howToUse = "Cette commande vous permet de récuper le dossier dans lequel sont stocké les récap de réunion de votre serveur.\nPour simplement récuperer ce dossier vous devez entrer `/dossierrecap`.\n si vous voulez changer ce lien entrez la commande `/dossierrecap 'lien'` où lien est le nouveau lien du dossier.";
 
 export const  run = async(bot : CBot, message : CommandInteraction) => {
     let haveParameters = false;
@@ -24,31 +25,35 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
 
     if(!haveParameters)
     {
+        await message.deferReply();
         getMostRecentValueFromDB(message,"lien_dossier_recap","DossierRecap","idDossierRecap",bot)
         .then(async (result : unknown) => {
             if(result)
             {
-                await message.reply("Voici le lien vers le dossier de récap : "+ result);
+                await message.editReply("Voici le lien vers le dossier de récap : "+ result);
             }
             else
             {
-                await message.reply("Il n'y a pas de lien vers le dossier récap :(");
+                await message.editReply("Il n'y a pas de lien vers le dossier récap :(");
             }
             make_log(true,message);
         })
         .catch(async err => {
-            handleError(message,err);
+            handleError(message,err,true);
         })
     }
     else
     {
+        await message.deferReply({flags : MessageFlags.Ephemeral});
         SaveValueToDB(message,bot,"DossierRecap",undefined,true)
         .then(result => {
             make_log(true,message);
-            return message.reply({content : `Le changement a bien été fait! :)`});
+            return displayEmbedsMessage(message, new EmbedBuilder()
+                                                    .setTitle("Information")
+                                                    .setDescription("Le changement a bien été fait :)"),true);
         })
         .catch(async err => {
-            handleError(message,err);
+            handleError(message,err,true);
         });
     }
 

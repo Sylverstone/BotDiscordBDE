@@ -1,5 +1,5 @@
 import { Evenement_t } from "../Commands/Event/event.js";
-import { isReunion, reunion_t } from "../Commands/reunion.js";
+import { isReunion, reunion_t } from "../Commands/Reunion/reunion.js";
 import splitNumber from "./splitHeure.js";
 
 export default function filterFuturEvent(result : reunion_t[] | Evenement_t[])

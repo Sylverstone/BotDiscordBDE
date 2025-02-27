@@ -1,4 +1,4 @@
-import { isReunion } from "../Commands/reunion.js";
+import { isReunion } from "../Commands/Reunion/reunion.js";
 export default function filterFuturEvent(result) {
     const dateActu = new Date();
     const n = result.filter(row => {

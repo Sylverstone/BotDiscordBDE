@@ -1,9 +1,10 @@
-import { SlashCommandStringOption, CommandInteraction} from "discord.js";
+import { SlashCommandStringOption, CommandInteraction, MessageFlags, EmbedBuilder} from "discord.js";
 import { getMostRecentValueFromDB, SaveValueToDB } from "../Fonctions/DbFunctions.js";
 import "dotenv/config"
 import CBot from "../Class/CBot.js";
 import handleError from "../Fonctions/handleError.js";
 import make_log from "../Fonctions/makeLog.js";
+import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 
 
 export const description = "Cette commande permet de recuperer/set le dernier récap";
@@ -21,53 +22,50 @@ export const option =
 ];
     
 export const run = async(bot : CBot, message : CommandInteraction) => {
-        try
-        {        
-            handleRun(bot,message)
-        }
-        catch(error)
-        {
-            if(!(error instanceof Error)) return;
-            handleError(message,error)
-        }
-}
- async function handleRun(bot : CBot,message : CommandInteraction)
-    {
-        
+    try
+    {        
         let haveParameters = false;
         haveParameters = message.options.data.length >= 1;
-    
-        //quand retourVal est true, ça veut dire qu'il y avait des parametres dans la commande
-        //quand il n'y a pas de parametre, ça veut dire que c'est une commande pour set
+        
         if(haveParameters)
         {
+            //saving value
+            await message.deferReply({flags : MessageFlags.Ephemeral});
             SaveValueToDB(message,bot,"recapitulatif",undefined,true)
             .then(result => {
                 make_log(true,message);
-                return message.reply({content : `Le changement a bien été fait ! :)`})
+                displayEmbedsMessage(message, new EmbedBuilder()
+                                                .setTitle("Information")
+                                                .setDescription("Le changement a bien été fait :)"),true)
+                return ;
             })
-            .catch(err => handleError(message,err));
-        }     
-
+            .catch(err => handleError(message,err,true));
+        }  
         else
         {
+            //getting value
+            await message.deferReply();
             await getMostRecentValueFromDB(message,"lien_recap","recapitulatif","idRecap",bot)
             .then(async(result) => {
                 if(result)
                 {
                     make_log(true,message);
-                    return message.reply(`Le lien du dernier récap est actuellement : ${result}`);
+                    return message.editReply(`Le lien du dernier récap est actuellement : ${result}`);
                 }
                 else
                 {
                     make_log(true,message);
-                    return message.reply("Il n'y a pas de lien de recap actuellement :(");
+                    return message.editReply("Il n'y a pas de lien de recap actuellement :(");
                 }        
             }).catch(async(err) => {
-                handleError(message, err);
+                handleError(message, err,true);
             });
             
-        }
-        
-    
+        }   
     }
+    catch(error)
+    {
+        if(!(error instanceof Error)) return;
+        handleError(message,error,true);
+    }
+}

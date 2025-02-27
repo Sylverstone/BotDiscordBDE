@@ -1,9 +1,9 @@
 import { ActivityType, Events } from "discord.js";
 import { loadCommandsOnAllServers } from "./Loaders/Commands/LoadCommands.js";
 import loadEvenements from "./Loaders/EVents/loadEvenements.js";
-import "dotenv/config";
 import { connection } from "./Database/coDatabase.js";
 import CBot from "./Class/CBot.js";
+import "dotenv/config";
 let bot = new CBot(connection);
 bot.bd = connection;
 bot.bd.connect((err) => {

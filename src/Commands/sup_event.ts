@@ -40,7 +40,7 @@ export const  run = async(bot : CBot, message : CommandInteraction, typeEvent : 
         if(!guild)
         {
             make_log(true,message);
-            return message.editReply("not a guild");
+            throw new Error("Guild inexistanted");
         }
         else
         {

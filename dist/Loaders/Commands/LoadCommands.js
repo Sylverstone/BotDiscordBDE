@@ -9,10 +9,11 @@ const setupLoad = async (bot, guildIds) => {
     const listeFileCommands = readdirSync(path.join(__dirname, "Commands"))
         .filter(file => file.endsWith(ext))
         .map(file => path.join(__dirname, "Commands", file));
-    const EventScript = readdirSync(path.join(__dirname, "Commands", "Event"))
-        .filter(file => file.endsWith(ext) && !file.startsWith("_"))
-        .map(file => path.join(__dirname, "Commands", "Event", file));
-    listeFileCommands.push(...EventScript);
+    const additionalFile = ["Event", "Reunion"];
+    for (let dos of additionalFile) {
+        const additionalScript = readdirSync(path.join(__dirname, "Commands", dos)).filter(file => !file.startsWith("_")).map(file => path.join(__dirname, "Commands", dos, file));
+        listeFileCommands.push(...additionalScript);
+    }
     let SlashCommands = [];
     for (const file of listeFileCommands) {
         const fileUrl = pathToFileURL(file).href;

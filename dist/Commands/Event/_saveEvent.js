@@ -4,7 +4,7 @@ import date from "../../Class/Date/Date.js";
 import { setup_date } from "../../Fonctions/DateScript.js";
 import displayEmbedsMessage from "../../Fonctions/displayEmbedsMessage.js";
 import { getLastId, SaveValueToDB } from "../../Fonctions/DbFunctions.js";
-import { isMaxId } from "../reunion.js";
+import { isMaxId } from "../Reunion/reunion.js";
 import CreateEvent from "../../Fonctions/CreateEvent.js";
 import make_log from "../../Fonctions/makeLog.js";
 export default async function saveEvent(optionObject, message, bot) {
@@ -22,7 +22,6 @@ export default async function saveEvent(optionObject, message, bot) {
         return;
     const dateDebutEvent = DateResult[0];
     const dateFinEvent = DateResult[1];
-    console.log("date debut  :", dateDebutEvent.getHours(), "\n", dateFinEvent.getHours());
     if (dateActu.getTime() > dateDebutEvent.getTime())
         return message.reply("L'evenement ne peut pas être défini dans le passé");
     //on change le separateur pour date to sql, si la date n'était pas bonnes le programme se serait arreter.
@@ -49,7 +48,6 @@ export default async function saveEvent(optionObject, message, bot) {
         const name = optionEvent.name;
         const lieu = optionEvent.lieu;
         const info_en_plus = optionEvent.info_en_plus;
-        console.log("date :", dateDebutEvent, dateFinEvent);
         const res = await getLastId("Event", "id", bot);
         if (!isMaxId(res))
             return;

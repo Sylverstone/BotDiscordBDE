@@ -1,8 +1,9 @@
-import { SlashCommandStringOption } from "discord.js";
+import { SlashCommandStringOption, MessageFlags, EmbedBuilder } from "discord.js";
 import { getMostRecentValueFromDB, SaveValueToDB } from "../Fonctions/DbFunctions.js";
 import "dotenv/config";
 import handleError from "../Fonctions/handleError.js";
 import make_log from "../Fonctions/makeLog.js";
+import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 export const description = "Cette commande permet de recuperer/set le dernier récap";
 export const name = "recap";
 export const howToUse = "`/recap` vous permet de faire *2* choses.\nPremière utilisation : `/recap` en entrant cette commande il vous sera retourner le lien OneDrive du dernier récap de reunion.\nDeuxième utilisation : `/recap lien_recap` la commande sauvegarde le nouveau lien.";
@@ -15,40 +16,44 @@ export const option = [
 ];
 export const run = async (bot, message) => {
     try {
-        handleRun(bot, message);
+        let haveParameters = false;
+        haveParameters = message.options.data.length >= 1;
+        //quand retourVal est true, ça veut dire qu'il y avait des parametres dans la commande
+        //quand il n'y a pas de parametre, ça veut dire que c'est une commande pour set
+        if (haveParameters) {
+            //saving value
+            await message.deferReply({ flags: MessageFlags.Ephemeral });
+            SaveValueToDB(message, bot, "recapitulatif", undefined, true)
+                .then(result => {
+                make_log(true, message);
+                displayEmbedsMessage(message, new EmbedBuilder()
+                    .setTitle("Information")
+                    .setDescription("Le changement a bien été fait :)"), true);
+                return;
+            })
+                .catch(err => handleError(message, err, true));
+        }
+        else {
+            //getting value
+            await message.deferReply();
+            await getMostRecentValueFromDB(message, "lien_recap", "recapitulatif", "idRecap", bot)
+                .then(async (result) => {
+                if (result) {
+                    make_log(true, message);
+                    return message.editReply(`Le lien du dernier récap est actuellement : ${result}`);
+                }
+                else {
+                    make_log(true, message);
+                    return message.editReply("Il n'y a pas de lien de recap actuellement :(");
+                }
+            }).catch(async (err) => {
+                handleError(message, err, true);
+            });
+        }
     }
     catch (error) {
         if (!(error instanceof Error))
             return;
-        handleError(message, error);
+        handleError(message, error, true);
     }
 };
-async function handleRun(bot, message) {
-    let haveParameters = false;
-    haveParameters = message.options.data.length >= 1;
-    //quand retourVal est true, ça veut dire qu'il y avait des parametres dans la commande
-    //quand il n'y a pas de parametre, ça veut dire que c'est une commande pour set
-    if (haveParameters) {
-        SaveValueToDB(message, bot, "recapitulatif", undefined, true)
-            .then(result => {
-            make_log(true, message);
-            return message.reply({ content: `Le changement a bien été fait ! :)` });
-        })
-            .catch(err => handleError(message, err));
-    }
-    else {
-        await getMostRecentValueFromDB(message, "lien_recap", "recapitulatif", "idRecap", bot)
-            .then(async (result) => {
-            if (result) {
-                make_log(true, message);
-                return message.reply(`Le lien du dernier récap est actuellement : ${result}`);
-            }
-            else {
-                make_log(true, message);
-                return message.reply("Il n'y a pas de lien de recap actuellement :(");
-            }
-        }).catch(async (err) => {
-            handleError(message, err);
-        });
-    }
-}

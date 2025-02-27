@@ -25,8 +25,11 @@ async function getChoices() {
     const allCommandsScript = fs.readdirSync(path.join(__dirname, "Commands")).filter(file => {
         return file !== "man.js" && file.endsWith(".js");
     }).map(command => path.join(__dirname, "Commands", command));
-    const EventScript = fs.readdirSync(path.join(__dirname, "Commands", "Event")).filter(file => !file.startsWith("_")).map(file => path.join(__dirname, "Commands", "Event", file));
-    allCommandsScript.push(...EventScript);
+    const additionalFile = ["Event", "Reunion"];
+    for (let dos of additionalFile) {
+        const additionalScript = fs.readdirSync(path.join(__dirname, "Commands", dos)).filter(file => !file.startsWith("_")).map(file => path.join(__dirname, "Commands", dos, file));
+        allCommandsScript.push(...additionalScript);
+    }
     for (const script of allCommandsScript) {
         const { name } = await import(pathToFileURL(script).href);
         choices.push({ name: name, value: name });

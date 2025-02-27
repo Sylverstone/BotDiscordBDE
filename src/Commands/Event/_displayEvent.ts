@@ -15,7 +15,6 @@ export default async function displayEvent(message : CommandInteraction, bot : C
     if(EmptyObject(optionObject))
     {            
         const objectEvent = await getValueFromDB(message,"lieu, info_en_plus, datedebut,datefin, name, heuredebut, heurefin","Event","id",bot);
-        console.log(objectEvent)
         if(objectEvent === null) return message.editReply("Il n'y a pas d'Event planifié pour les prochains jours");
 
         if(!isEventArray(objectEvent)) return;

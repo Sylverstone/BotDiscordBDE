@@ -28,7 +28,7 @@ export const run = async (bot, message, typeEvent) => {
         const guild = message.guild;
         if (!guild) {
             make_log(true, message);
-            return message.editReply("not a guild");
+            throw new Error("Guild inexistanted");
         }
         else {
             const events = await guild.scheduledEvents.fetch();

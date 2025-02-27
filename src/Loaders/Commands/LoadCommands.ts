@@ -14,11 +14,14 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
         .filter(file => file.endsWith(ext))
         .map(file => path.join(__dirname,"Commands", file));
 
-    const EventScript = readdirSync(path.join(__dirname,"Commands","Event"))
-        .filter(file => file.endsWith(ext) && !file.startsWith("_"))
-        .map(file => path.join(__dirname,"Commands","Event",file));
-
-    listeFileCommands.push(...EventScript);
+    const additionalFile = ["Event","Reunion"];
+    for(let dos of additionalFile)
+    {
+        const additionalScript = readdirSync(path.join(__dirname, "Commands", dos)).filter(
+            file => !file.startsWith("_")
+        ).map(file => path.join(__dirname,"Commands",dos,file));
+        listeFileCommands.push(...additionalScript);
+    }
 
     let SlashCommands : Array<SlashCommandBuilder> = [];
     for(const file of listeFileCommands)
@@ -73,9 +76,8 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
     
     const clientId : string | undefined = process.env.CLIENTID;
     if(!(typeof clientId === 'string')) return;
-
     const rest = new REST().setToken(process.env.TOKEN);
-
+    
     (async () => {
         try {
             console.log(`Started refreshing ${SlashCommands.length} application (/) SlashCommands.`);
@@ -90,7 +92,7 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
                 );
             }
             console.log(`Successfully reloaded ${listeFileCommands.length} application (/) SlashCommands.`);
-        } catch (error) {
+        }catch (error) {
             console.error("[ERROR] error while loading SlashCommands\n", error);
             throw error;
         }
