@@ -23,6 +23,7 @@ export default class CBot extends Client{
 
     public commands : Collection<string,script_t>;
     public bd : Connection;
+    
     constructor(connection : Connection){
         super({
             intents: [

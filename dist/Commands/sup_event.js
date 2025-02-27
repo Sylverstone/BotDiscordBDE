@@ -1,5 +1,4 @@
 import { EmbedBuilder, MessageFlags, SlashCommandStringOption } from "discord.js";
-import 'dotenv/config';
 import handleError from "../Fonctions/handleError.js";
 import { deleteFromTableWithName } from "../Fonctions/DbFunctions.js";
 import make_log from "../Fonctions/makeLog.js";
@@ -7,7 +6,8 @@ import { EVentType } from "../Enum/EventType.js";
 import { Event } from "../Enum/Event.js";
 import { Reunion } from "../Enum/Reunion.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
-export const description = "Cette commande vous permet de supprimer une réunion";
+import 'dotenv/config';
+export const description = "Cette commande vous permet de supprimer un évènement grâce a son nom";
 export const name = "sup_event";
 export const howToUse = "`/sup_event 'nom_reunion'` vous permet de supprimer un evènement grâce a son nom";
 export const option = [
@@ -24,11 +24,10 @@ export const run = async (bot, message, typeEvent) => {
         ;
         const nom = nomEv?.value;
         if (!(typeof nom === "string"))
-            return message.editReply(typeof nom);
+            throw new Error("Le nom de la reunion n'a pas été renseigné");
         const guild = message.guild;
         if (!guild) {
-            make_log(true, message);
-            throw new Error("Guild inexistanted");
+            throw new Error("Guild inexistante");
         }
         else {
             const events = await guild.scheduledEvents.fetch();
@@ -44,18 +43,18 @@ export const run = async (bot, message, typeEvent) => {
                 console.log(event);
                 await event.delete();
                 if (!message.guild)
-                    return;
+                    throw new Error("Guild not found");
                 await deleteFromTableWithName(table, champName, event.name, bot, +message.guild.id);
-                displayEmbedsMessage(message, new EmbedBuilder()
+                await displayEmbedsMessage(message, new EmbedBuilder()
                     .setTitle("Information")
                     .setDescription("L'évènement a été supprimé"), true);
-                return;
+                return make_log(true, message);
             }
-            make_log(true, message);
-            displayEmbedsMessage(message, new EmbedBuilder()
+            await displayEmbedsMessage(message, new EmbedBuilder()
                 .setTitle("Information")
                 .setDescription("Aucun Event de ce nom n'existe"), true);
-            return;
+            return make_log(true, message);
+            ;
         }
     }
     catch (Err) {

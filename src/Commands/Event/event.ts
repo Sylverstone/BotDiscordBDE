@@ -8,6 +8,7 @@ import EmptyObject from "../../Fonctions/LookIfObjectIsEmpty.js";
 import date from "../../Class/Date/Date.js";
 import displayEvent from "./_displayEvent.js";
 import saveEvent from "./_saveEvent.js";
+import make_log from "../../Fonctions/makeLog.js";
 
 export const description = "Cette commande vous renvoie les infos du prochain Event de votre serveur";
 export const name = "event";
@@ -86,9 +87,11 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
         await message.deferReply({flags : MessageFlags.Ephemeral});
         let optionObject = transfromOptionToObject(message)
         if(EmptyObject(optionObject))
-            return displayEvent(message,bot,optionObject);
+            displayEvent(message,bot,optionObject);
         else
-            return saveEvent(optionObject,message,bot);
+            saveEvent(optionObject,message,bot);
+        return make_log(true,message);
+        
     }
     catch(error) {
        if(error instanceof Error)

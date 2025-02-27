@@ -41,13 +41,10 @@ export default async function displayReunion(message : CommandInteraction, bot :
                 const embedText = makeEmbedABoutEvent(bot,EVentType.Reunion,sujet,[date,],[heuredebut,heurefin],
                     lieu,info_en_plus
                 )
-                make_log(true,message);
-                
                 return message.editReply({embeds : [embedText]})
             }
             else
             {
-                make_log(true,message);
                 return message.editReply("Il n'y a pas de prochaine reunion prévu pour l'instant.\n");
             }
         }

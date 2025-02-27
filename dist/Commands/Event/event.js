@@ -5,6 +5,7 @@ import handleError from "../../Fonctions/handleError.js";
 import EmptyObject from "../../Fonctions/LookIfObjectIsEmpty.js";
 import displayEvent from "./_displayEvent.js";
 import saveEvent from "./_saveEvent.js";
+import make_log from "../../Fonctions/makeLog.js";
 export const description = "Cette commande vous renvoie les infos du prochain Event de votre serveur";
 export const name = "event";
 export const howToUse = "`/event` vous permet de faire *2* choses.\nPremière utilisation : `/event` en entrant cette commande il vous sera retourner des informations sur le dernier évènements.\nDeuxième utilisation : `/event 'name' 'datedebut' 'datefin' 'lieu' 'info_en_plus' 'heuredebut' 'heurefin'` pour définir un Evènement";
@@ -60,9 +61,10 @@ export const run = async (bot, message) => {
         await message.deferReply({ flags: MessageFlags.Ephemeral });
         let optionObject = transfromOptionToObject(message);
         if (EmptyObject(optionObject))
-            return displayEvent(message, bot, optionObject);
+            displayEvent(message, bot, optionObject);
         else
-            return saveEvent(optionObject, message, bot);
+            saveEvent(optionObject, message, bot);
+        return make_log(true, message);
     }
     catch (error) {
         if (error instanceof Error) {

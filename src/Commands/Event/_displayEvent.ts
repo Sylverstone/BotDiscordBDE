@@ -5,7 +5,6 @@ import { isEvent, isEventArray } from "./event.js";
 import filterFuturEvent from "../../Fonctions/filterFuturEvent.js";
 import makeEmbedABoutEvent from "../../Fonctions/makeEmbedAboutEvent.js";
 import { EVentType } from "../../Enum/EventType.js";
-import make_log from "../../Fonctions/makeLog.js";
 import CBot from "../../Class/CBot.js";
 import { listCommandObject_t } from "../../Fonctions/transfromOptionToObject.js";
 import { Evenement_t } from "./event.js";
@@ -46,10 +45,8 @@ export default async function displayEvent(message : CommandInteraction, bot : C
                 NearestEvent.lieu,
                 NearestEvent.info_en_plus
             );
-            make_log(true,message);
             return message.editReply({embeds : [embedText]})
         }
-        make_log(true,message);
         return message.editReply("Il n'y a pas d'Event planifié pour les prochains jours");
     }
 }

@@ -39,7 +39,7 @@ export const run = async(bot : CBot, message : CommandInteraction) => {
                                                 .setDescription("Le changement a bien été fait :)"),true)
                 return ;
             })
-            .catch(err => handleError(message,err,true));
+            .catch(err => {throw err});
         }  
         else
         {
@@ -58,7 +58,7 @@ export const run = async(bot : CBot, message : CommandInteraction) => {
                     return message.editReply("Il n'y a pas de lien de recap actuellement :(");
                 }        
             }).catch(async(err) => {
-                handleError(message, err,true);
+                throw err;
             });
             
         }   

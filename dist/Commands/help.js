@@ -34,15 +34,12 @@ const displayMessageHelp = async (message, bot) => {
                 }],
         });
     }
-    const author_name = message instanceof Message ? message.author : message.user;
     if (message instanceof CommandInteraction)
         make_log(true, message);
 };
 export const run = async (bot, message) => {
     if (bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message)) {
-        const author_name = message instanceof Message ? message.author : message.user;
         try {
-            console.log(author_name, "is running help");
             displayMessageHelp(message, bot);
         }
         catch (error) {

@@ -8,7 +8,6 @@ import { getLastId, SaveValueToDB } from "../../Fonctions/DbFunctions.js";
 import CBot from "../../Class/CBot.js";
 import { isMaxId } from "../Reunion/reunion.js";
 import CreateEvent from "../../Fonctions/CreateEvent.js";
-import make_log from "../../Fonctions/makeLog.js";
 
 export default async function saveEvent(optionObject :listCommandObject_t, message : CommandInteraction, bot : CBot)
 {
@@ -55,7 +54,7 @@ export default async function saveEvent(optionObject :listCommandObject_t, messa
             const lieu = optionEvent.lieu;
             const info_en_plus = optionEvent.info_en_plus;
             const res  = await getLastId("Event","id",bot);
-            if(!isMaxId(res)) return;                
+            if(!isMaxId(res)) throw new Error("res n'est pas la valeur attendu");                
             const id = res.maxId;
             //on envoie le mess dans ça
             CreateEvent(message,name,dateDebutEvent,dateFinEvent,lieu,info_en_plus,id,optionEvent.name)
@@ -63,8 +62,6 @@ export default async function saveEvent(optionObject :listCommandObject_t, messa
                 displayEmbedsMessage(message, new EmbedBuilder()
                                                     .setTitle("Evènement")
                                                     .setDescription("L'Evènement a été crée. il se nomme : " + name),true);
-                make_log(true,message);
-
             }).catch(err => {                    
                 throw err;
             })

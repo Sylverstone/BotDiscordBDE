@@ -13,9 +13,7 @@ type commandHelp_t =
 }
 
 const exec = async (bot : CBot, message : Message) =>  {
-    //ce script est executé pour tout messages en DM, mais également pour tout message en guild qui n'est pas une commande
-    const commandsFolder = path.join(__dirname, "Commands");
-    
+    //ce script est executé pour tout messages en DM, mais également pour tout message en guild qui n'est pas une commande    
     const isCommand = message.content.startsWith("!");
     
     if(!isCommand)

@@ -19,7 +19,6 @@ export const run = async (bot, message) => {
     if (!param_name)
         return;
     const cible = param_name.value;
-    console.log(cible);
     const listOfMembers = await message.guild.members.fetch();
     const member = listOfMembers.find(m => m.user.id === cible);
     listOfMembers.forEach(member => console.log(member.user.username, member.user.globalName));

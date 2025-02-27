@@ -4,6 +4,7 @@ import handleError from '../../Fonctions/handleError.js';
 import EmptyObject from '../../Fonctions/LookIfObjectIsEmpty.js';
 import displayReunion from './_displayReunion.js';
 import saveReunion from './_saveReunion.js';
+import make_log from '../../Fonctions/makeLog.js';
 const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 const name = "reunion";
 const onlyGuild = true;
@@ -53,12 +54,11 @@ const run = async (bot, message) => {
     await message.deferReply({ flags: MessageFlags.Ephemeral });
     try {
         let optionObject = transfromOptionToObject(message);
-        if (EmptyObject(optionObject)) {
+        if (EmptyObject(optionObject))
             displayReunion(message, bot);
-        }
-        else {
+        else
             saveReunion(message, bot, optionObject);
-        }
+        return make_log(true, message);
     }
     catch (error) {
         if (error instanceof Error) {

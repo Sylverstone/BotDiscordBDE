@@ -6,7 +6,6 @@ import displayEmbedsMessage from "../../Fonctions/displayEmbedsMessage.js";
 import { getLastId, SaveValueToDB } from "../../Fonctions/DbFunctions.js";
 import { isMaxId } from "../Reunion/reunion.js";
 import CreateEvent from "../../Fonctions/CreateEvent.js";
-import make_log from "../../Fonctions/makeLog.js";
 export default async function saveEvent(optionObject, message, bot) {
     if (!("info_en_plus" in optionObject)) {
         optionObject["info_en_plus"] = "Aucune info en plus n'a été fournit";
@@ -50,7 +49,7 @@ export default async function saveEvent(optionObject, message, bot) {
         const info_en_plus = optionEvent.info_en_plus;
         const res = await getLastId("Event", "id", bot);
         if (!isMaxId(res))
-            return;
+            throw new Error("res n'est pas la valeur attendu");
         const id = res.maxId;
         //on envoie le mess dans ça
         CreateEvent(message, name, dateDebutEvent, dateFinEvent, lieu, info_en_plus, id, optionEvent.name)
@@ -58,7 +57,6 @@ export default async function saveEvent(optionObject, message, bot) {
             displayEmbedsMessage(message, new EmbedBuilder()
                 .setTitle("Evènement")
                 .setDescription("L'Evènement a été crée. il se nomme : " + name), true);
-            make_log(true, message);
         }).catch(err => {
             throw err;
         });

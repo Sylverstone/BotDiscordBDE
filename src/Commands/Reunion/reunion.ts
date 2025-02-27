@@ -6,6 +6,8 @@ import handleError from '../../Fonctions/handleError.js';
 import EmptyObject from '../../Fonctions/LookIfObjectIsEmpty.js';
 import displayReunion from './_displayReunion.js';
 import saveReunion from './_saveReunion.js';
+import make_log from '../../Fonctions/makeLog.js';
+import date from '../../Class/Date/Date.js';
 
 const description = "Cette commande permet de récuperer/set des infos sur la prochaine reunion";
 
@@ -50,7 +52,7 @@ const optionNum = [
 
 
 export interface reunion_t{
-    date : Date | string,
+    date : Date | string | date,
     sujet : string,
     lieu : string,
     info_en_plus : string,
@@ -94,13 +96,12 @@ const run = async (bot : CBot, message : CommandInteraction) =>
     await message.deferReply({flags : MessageFlags.Ephemeral});
     try {
         let optionObject = transfromOptionToObject(message);
-        if(EmptyObject(optionObject)) {
-            displayReunion(message,bot)
-        }
-        else
-        {
+        if(EmptyObject(optionObject)) 
+            displayReunion(message,bot)        
+        else        
             saveReunion(message,bot,optionObject);
-        }    
+        return make_log(true,message);
+        
     } 
     catch (error) {
         if(error instanceof Error) {

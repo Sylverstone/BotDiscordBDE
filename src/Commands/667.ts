@@ -24,9 +24,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
     const param_name = message.options.get("cible");
     if(!param_name) return;
     
-    const cible = param_name.value;
-    console.log(cible);
-    
+    const cible = param_name.value;    
     const listOfMembers = await message.guild.members.fetch();
 
     const member = listOfMembers.find(m => m.user.id === cible);

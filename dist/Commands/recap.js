@@ -29,7 +29,7 @@ export const run = async (bot, message) => {
                     .setDescription("Le changement a bien été fait :)"), true);
                 return;
             })
-                .catch(err => handleError(message, err, true));
+                .catch(err => { throw err; });
         }
         else {
             //getting value
@@ -45,7 +45,7 @@ export const run = async (bot, message) => {
                     return message.editReply("Il n'y a pas de lien de recap actuellement :(");
                 }
             }).catch(async (err) => {
-                handleError(message, err, true);
+                throw err;
             });
         }
     }

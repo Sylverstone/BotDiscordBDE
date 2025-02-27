@@ -6,6 +6,11 @@ import mois from "./Mois.js";
 import seconde from "./Seconde.js";
 import * as util from "util";
 export default class date {
+    /**
+     * @constructor
+     * @param {string} date  Date au format jj-mm-yyyy HH:mm:ss où l'heure n'est pas obligatoire.
+     * @returns retourne la date rentrée en string ou la date actuelle si rien n'est mit en paramètre
+     */
     constructor(date = "") {
         if (date !== "") {
             const dateSplit = date.split(" ");
@@ -44,18 +49,53 @@ export default class date {
     [util.inspect.custom]() {
         return `\nDate : ${this.toString()}\nDate (origin Date type) : ${this.toDate()}\n Time : ${this.getTime()}\n`;
     }
+    /**
+     *
+     * @returns {Date} - une date au format Date équivalente
+     */
     toDate() {
         return new Date(this.toString());
     }
+    /**
+     *
+     * @returns {string} - l'heure au format HH:mm:ss
+     */
     getHours() {
         return `${this._heure.toString()}:${this._minute.toString()}:${this._seconde.toString()}`;
     }
+    /**
+     *
+     * @returns {number} - la date converti en seconde, utile pour les comparaison de date !
+     */
     getTime() {
         return this._annee.toSeconde() + this._mois.toSeconde() + this._jour.toSeconde() + this._heure.toSeconde() + this._minute.toSeconde() + this._seconde.seconde;
     }
+    /**
+     *
+     * @returns {number} - le jour de la date
+     */
+    getDay() {
+        return this._jour.numJour;
+    }
+    /**
+     *
+     * @returns {number} - le mois de la date
+     */
+    getMonth() {
+        return this._mois.numMois;
+    }
+    /**
+     * Retourne un format date compatible avec le type MySQL Timestamp
+     * @returns {string} - date au format sql timestamp
+     */
     toString() {
         return `${this._annee.toString()}-${this._mois.toNum()}-${this._jour.toString()} ${this._heure.toString()}:${this._minute.toString()}:${this._seconde.toString()}`;
     }
+    /**
+     *
+     * @param {number} hours - l'heure de la date
+     * @param {number} minutes - les minutes de la date
+     */
     setHours(hours, minutes) {
         this._heure = new heure(hours);
         this._minute = new minute(minutes);

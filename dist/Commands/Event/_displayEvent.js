@@ -4,7 +4,6 @@ import { isEvent, isEventArray } from "./event.js";
 import filterFuturEvent from "../../Fonctions/filterFuturEvent.js";
 import makeEmbedABoutEvent from "../../Fonctions/makeEmbedAboutEvent.js";
 import { EVentType } from "../../Enum/EventType.js";
-import make_log from "../../Fonctions/makeLog.js";
 export default async function displayEvent(message, bot, optionObject) {
     if (EmptyObject(optionObject)) {
         const objectEvent = await getValueFromDB(message, "lieu, info_en_plus, datedebut,datefin, name, heuredebut, heurefin", "Event", "id", bot);
@@ -38,10 +37,8 @@ export default async function displayEvent(message, bot, optionObject) {
             if (!(NearestEvent.datedebut instanceof Date && NearestEvent.datefin instanceof Date))
                 return;
             const embedText = makeEmbedABoutEvent(bot, EVentType.Event, NearestEvent.name, [NearestEvent.datedebut, NearestEvent.datefin], [NearestEvent.heuredebut, NearestEvent.heurefin], NearestEvent.lieu, NearestEvent.info_en_plus);
-            make_log(true, message);
             return message.editReply({ embeds: [embedText] });
         }
-        make_log(true, message);
         return message.editReply("Il n'y a pas d'Event planifié pour les prochains jours");
     }
 }

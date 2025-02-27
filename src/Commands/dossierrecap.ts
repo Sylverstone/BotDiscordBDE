@@ -20,41 +20,50 @@ export const option =
 export const howToUse = "Cette commande vous permet de récuper le dossier dans lequel sont stocké les récap de réunion de votre serveur.\nPour simplement récuperer ce dossier vous devez entrer `/dossierrecap`.\n si vous voulez changer ce lien entrez la commande `/dossierrecap 'lien'` où lien est le nouveau lien du dossier.";
 
 export const  run = async(bot : CBot, message : CommandInteraction) => {
-    let haveParameters = false;
-    haveParameters = message.options.data.length >= 1;
-
-    if(!haveParameters)
-    {
-        await message.deferReply();
-        getMostRecentValueFromDB(message,"lien_dossier_recap","DossierRecap","idDossierRecap",bot)
-        .then(async (result : unknown) => {
-            if(result)
-            {
-                await message.editReply("Voici le lien vers le dossier de récap : "+ result);
-            }
-            else
-            {
-                await message.editReply("Il n'y a pas de lien vers le dossier récap :(");
-            }
-            make_log(true,message);
-        })
-        .catch(async err => {
-            handleError(message,err,true);
-        })
+    try{
+        let haveParameters = false;
+        haveParameters = message.options.data.length >= 1;
+    
+        if(!haveParameters)
+        {
+            await message.deferReply();
+            getMostRecentValueFromDB(message,"lien_dossier_recap","DossierRecap","idDossierRecap",bot)
+            .then(async (result : unknown) => {
+                if(result)
+                {
+                    await message.editReply("Voici le lien vers le dossier de récap : "+ result);
+                }
+                else
+                {
+                    await message.editReply("Il n'y a pas de lien vers le dossier récap :(");
+                }
+                make_log(true,message);
+            })
+            .catch(err => {
+                throw err;
+            })
+        }
+        else
+        {
+            await message.deferReply({flags : MessageFlags.Ephemeral});
+            SaveValueToDB(message,bot,"DossierRecap",undefined,true)
+            .then(async result => {
+                
+                await displayEmbedsMessage(message, new EmbedBuilder()
+                                                        .setTitle("Information")
+                                                        .setDescription("Le changement a bien été fait :)"),true);
+                return make_log(true,message);
+            })
+            .catch(err => {
+                throw err
+            });
+        }
     }
-    else
+    catch(error)
     {
-        await message.deferReply({flags : MessageFlags.Ephemeral});
-        SaveValueToDB(message,bot,"DossierRecap",undefined,true)
-        .then(result => {
-            make_log(true,message);
-            return displayEmbedsMessage(message, new EmbedBuilder()
-                                                    .setTitle("Information")
-                                                    .setDescription("Le changement a bien été fait :)"),true);
-        })
-        .catch(async err => {
-            handleError(message,err,true);
-        });
+        if(error instanceof Error)
+            handleError(message,error,true);
     }
+    
 
 }

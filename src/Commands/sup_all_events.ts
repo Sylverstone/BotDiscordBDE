@@ -6,6 +6,7 @@ import { deleteFromTableWithName } from "../Fonctions/DbFunctions.js";
 import { Reunion } from "../Enum/Reunion.js";
 import { Event } from "../Enum/Event.js";
 import handleError from "../Fonctions/handleError.js";
+import make_log from "../Fonctions/makeLog.js";
 
 export const description = "Cette commande supprimera touts les Evènements de votre serveur discord";
 export const name = "sup_all_events";
@@ -13,12 +14,12 @@ export const onlyGuild = true;
 export const howToUse = "Vous n'avez qu'a tapez `/sup_events` et la commande rsupprimera tout les évènements du discord";
 
 export const  run = async(bot : CBot, message : CommandInteraction) => {
-    if(!message.guild) return;
-
-    await message.deferReply({flags : MessageFlags.Ephemeral});
-    
+   
     try
     {
+        if(!message.guild) throw new Error("Guild not found");
+
+        await message.deferReply({flags : MessageFlags.Ephemeral});
         const Events = message.guild.scheduledEvents.cache;
         if(Events.size > 0)
         {
@@ -35,14 +36,14 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                     tableName = Event.tableName;
                     champName = Event.name;
                 }
-                if(!message.guild) return;
+                if(!message.guild) throw new Error("Guild not found");
                 deleteFromTableWithName(tableName,champName,event.name,bot,+message.guild.id)
                 .then(() => 
                 {
                     return event.delete();    
                 })
                 .then((status) => {
-                    console.log(`Event ${status.name} deleted`);
+                    console.log(`[LOG] Event ${status.name} deleted`);
                     
                 }).catch(err => {
                     throw err;
@@ -50,15 +51,17 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                 
             })
     
-            return displayEmbedsMessage(message, new EmbedBuilder()
+            await displayEmbedsMessage(message, new EmbedBuilder()
                 .setTitle("Information")
                 .setDescription("Fini :)"),true);
+            return make_log(true,message);
         }
         else
         {
-            return displayEmbedsMessage(message, new EmbedBuilder()
+            await displayEmbedsMessage(message, new EmbedBuilder()
                                                     .setTitle("Information")
-                                                    .setDescription("Il n'y a pas d'évènement"),true);                                         
+                                                    .setDescription("Il n'y a pas d'évènement"),true);   
+            return make_log(true,message);                                      
         }   
     }
     catch(Err)

@@ -6,8 +6,7 @@ import { pathToFileURL } from "url";
 import { capFirstLetter } from "./interactionCreate.js";
 const name = Events.MessageCreate;
 const exec = async (bot, message) => {
-    //ce script est executé pour tout messages en DM, mais également pour tout message en guild qui n'est pas une commande
-    const commandsFolder = path.join(__dirname, "Commands");
+    //ce script est executé pour tout messages en DM, mais également pour tout message en guild qui n'est pas une commande    
     const isCommand = message.content.startsWith("!");
     if (!isCommand) {
         if (message.content.startsWith("/")) {

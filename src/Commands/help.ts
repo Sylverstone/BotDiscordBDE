@@ -11,6 +11,7 @@ export const onlyGuild = false;
 
 const displayMessageHelp = async(message : Message | CommandInteraction ,bot : CBot) => 
 {
+    
     if(message instanceof CommandInteraction)
     {
         await message.reply({
@@ -46,19 +47,14 @@ const displayMessageHelp = async(message : Message | CommandInteraction ,bot : C
             }], 
         });
     }
-    const author_name = message instanceof Message ? message.author : message.user;
     if(message instanceof CommandInteraction)
         make_log(true,message)
 }
 
 export const  run = async(bot : CBot, message : Message | CommandInteraction) => {
     if (bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message)) {
-        const author_name = message instanceof Message ? message.author : message.user;
-        try {
-            
-            console.log(author_name,"is running help");
-
-            displayMessageHelp(message,bot)
+        try {            
+            displayMessageHelp(message,bot)            
         } catch (error) {
             if(message instanceof CommandInteraction && error instanceof Error)
                 handleError(message,error);

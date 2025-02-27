@@ -3,7 +3,6 @@ import { isReunion, isReunionArray } from "./reunion.js";
 import filterFuturEvent from "../../Fonctions/filterFuturEvent.js";
 import makeEmbedABoutEvent from "../../Fonctions/makeEmbedAboutEvent.js";
 import { EVentType } from "../../Enum/EventType.js";
-import make_log from "../../Fonctions/makeLog.js";
 export default async function displayReunion(message, bot) {
     await getValueFromDB(message, "date, heuredebut, heurefin, lieu, info_en_plus, sujet,reunion_name", "Reunion", "idReunion", bot)
         .then(async (result) => {
@@ -37,11 +36,9 @@ export default async function displayReunion(message, bot) {
                 if (!(date instanceof Date))
                     return;
                 const embedText = makeEmbedABoutEvent(bot, EVentType.Reunion, sujet, [date,], [heuredebut, heurefin], lieu, info_en_plus);
-                make_log(true, message);
                 return message.editReply({ embeds: [embedText] });
             }
             else {
-                make_log(true, message);
                 return message.editReply("Il n'y a pas de prochaine reunion prévu pour l'instant.\n");
             }
         }
