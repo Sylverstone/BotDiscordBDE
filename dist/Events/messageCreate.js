@@ -1,9 +1,10 @@
-import { Events } from "discord.js";
+import { EmbedBuilder, Events } from "discord.js";
 import * as path from "path";
 import __dirname from "../dirname.js";
 import lookIfCommandsValid from "../Fonctions/lookIfCommandsValid.js";
 import { pathToFileURL } from "url";
 import { capFirstLetter } from "./interactionCreate.js";
+import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 const name = Events.MessageCreate;
 const exec = async (bot, message) => {
     //ce script est executé pour tout messages en DM, mais également pour tout message en guild qui n'est pas une commande    
@@ -27,7 +28,11 @@ const exec = async (bot, message) => {
     const messageArray = messageWithoutPrefix.split(" ");
     const commandName = messageArray[0];
     if (!lookIfCommandsValid(commandName)) {
-        return message.reply(`La commande ${commandName} n'existe pas :(`);
+        if (!message.guild)
+            return message.reply(`La commande ${commandName} n'existe pas :(`);
+        return displayEmbedsMessage(message, new EmbedBuilder()
+            .setTitle("Information")
+            .setDescription("La commande ${commandName} n'existe pas"));
     }
     const additionnalFile = ["event", 'reunion'];
     const args = messageArray.slice(1);

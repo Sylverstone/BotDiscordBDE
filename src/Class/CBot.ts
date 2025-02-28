@@ -1,6 +1,6 @@
 import { Client, Collection, GatewayIntentBits, CommandInteraction, Partials, SlashCommandStringOption, SlashCommandIntegerOption, SlashCommandUserOption, SlashCommandNumberOption } from "discord.js"
-import { Connection } from "mysql2/typings/mysql/lib/Connection";
-
+import { Connection, ConnectionOptions } from "mysql2/typings/mysql/lib/Connection";
+import * as mysql from "mysql2"
 
 export interface commands_t{
     [key: string]: any;
@@ -19,6 +19,9 @@ export type script_t =
     optionNum : SlashCommandNumberOption[] | undefined;
 
 }
+
+
+
 export default class CBot extends Client{
 
     public commands : Collection<string,script_t>;

@@ -1,10 +1,11 @@
-import { Events, Message } from "discord.js"
+import { EmbedBuilder, Events, Message } from "discord.js"
 import * as path from "path";
 import __dirname from "../dirname.js";
 import lookIfCommandsValid from "../Fonctions/lookIfCommandsValid.js";
 import CBot, { script_t } from "../Class/CBot.js";
 import { pathToFileURL } from "url";
 import { capFirstLetter } from "./interactionCreate.js";
+import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 
 const name = Events.MessageCreate;
 type commandHelp_t = 
@@ -40,7 +41,11 @@ const exec = async (bot : CBot, message : Message) =>  {
     const messageArray = messageWithoutPrefix.split(" ");
     const commandName = messageArray[0];
     if(!lookIfCommandsValid(commandName)){
-        return message.reply(`La commande ${commandName} n'existe pas :(`);
+        if(!message.guild)
+            return message.reply(`La commande ${commandName} n'existe pas :(`);
+        return displayEmbedsMessage(message, new EmbedBuilder()
+                                                .setTitle("Information")
+                                                .setDescription("La commande ${commandName} n'existe pas"))
     } 
     const additionnalFile = ["event",'reunion'];
     const args = messageArray.slice(1);
