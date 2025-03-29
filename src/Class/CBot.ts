@@ -6,6 +6,7 @@ export interface commands_t{
     [key: string]: any;
 }
 
+//Type représentant l'import d'un script commande
 export type script_t = 
 {
     name : string;
@@ -20,7 +21,12 @@ export type script_t =
 
 }
 
-
+//Renvoie true si le paramètre est un script_t
+export const isScript_t = (script : unknown) : script is script_t =>
+{
+    return script !== null && typeof script === "object"  && "name" in script && "description" in script
+            && "howToUse" in script && "run" in script && "onlyGuild" in script;
+}
 
 export default class CBot extends Client{
 

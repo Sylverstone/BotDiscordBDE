@@ -1,10 +1,17 @@
-import { CommandInteraction, EmbedBuilder, Message , MessageFlags} from "discord.js";
+import {
+    CommandInteraction,
+    EmbedBuilder,
+    Message,
+    MessageFlags,
+    StringSelectMenuBuilder,
+    StringSelectMenuInteraction
+} from "discord.js";
 
-export default async function displayEmbedsMessage(message: CommandInteraction | Message,embedText : EmbedBuilder, edit = false)
+export default async function displayEmbedsMessage(message: CommandInteraction | Message | StringSelectMenuInteraction,embedText : EmbedBuilder, edit = false)
 {
     
     
-    if(message instanceof CommandInteraction)
+    if(message instanceof CommandInteraction || message instanceof StringSelectMenuInteraction)
     {
         if(!edit)
         {
@@ -26,3 +33,5 @@ export default async function displayEmbedsMessage(message: CommandInteraction |
         });
     }
 }
+
+

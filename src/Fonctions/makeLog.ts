@@ -11,7 +11,7 @@ export const messageCommandToString = (message : CommandInteraction) : string =>
 
 export default function make_log(succes : boolean,message : CommandInteraction)
 {
-    ;
+
     if(succes)
     {
         console.log(`[LOG] Commande effectuée avec succès : ${messageCommandToString(message)}`);

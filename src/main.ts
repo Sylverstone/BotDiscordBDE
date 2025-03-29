@@ -1,12 +1,14 @@
 import { ActivityType, Events} from "discord.js";
 import {loadCommandsOnAllServers} from "./Loaders/Commands/LoadCommands.js";
 import loadEvenements from "./Loaders/EVents/loadEvenements.js"
-import { connection } from "./Database/coDatabase.js";
 import CBot from "./Class/CBot.js";
 import "dotenv/config";
+import createConnection from "./Database/createConnection.js";
 
+let connection = createConnection();
+console.log(connection);
 let bot = new CBot(connection)
-
+ 
 bot.bd = connection;
 bot.bd.connect((err) => {
     if (err) throw err;
@@ -16,7 +18,7 @@ bot.bd.connect((err) => {
 bot.once(Events.ClientReady, async() => {
     if(!bot.user) return;
     console.log("bot",bot.user.tag,"is online :)");
-    bot.user.setUsername("Yoichi")
+    await bot.user.setUsername("Yoichi")
     bot.user.setPresence({activities : [{name : "Vinland Saga" , type : ActivityType.Watching}], status : "dnd"});
     await loadCommandsOnAllServers(bot);
     await loadEvenements(bot);

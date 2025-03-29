@@ -51,7 +51,7 @@ const setupLoad = async (bot, guildIds) => {
     if (!(typeof clientId === 'string'))
         return;
     const rest = new REST().setToken(process.env.TOKEN);
-    (async () => {
+    await (async () => {
         try {
             console.log(`Started refreshing ${SlashCommands.length} application (/) SlashCommands.`);
             //permet au slash commande d'être visible sur le serveur

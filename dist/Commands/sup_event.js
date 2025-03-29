@@ -1,61 +1,81 @@
-import { EmbedBuilder, MessageFlags, SlashCommandStringOption } from "discord.js";
+import { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType, MessageFlags, EmbedBuilder } from "discord.js";
 import handleError from "../Fonctions/handleError.js";
-import { deleteFromTableWithName } from "../Fonctions/DbFunctions.js";
-import make_log from "../Fonctions/makeLog.js";
-import { EVentType } from "../Enum/EventType.js";
-import { Event } from "../Enum/Event.js";
-import { Reunion } from "../Enum/Reunion.js";
-import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 import 'dotenv/config';
+import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
+import { Color } from "../Enum/Color.js";
 export const description = "Cette commande vous permet de supprimer un évènement grâce a son nom";
 export const name = "sup_event";
 export const howToUse = "`/sup_event 'nom_reunion'` vous permet de supprimer un evènement grâce a son nom";
+/*
 export const option = [
     new SlashCommandStringOption()
-        .setName("nom_reunion")
-        .setDescription("le nom de la reunion")
-        .setRequired(true)
+    .setName("nom_reunion")
+    .setDescription("le nom de la reunion")
+    .setRequired(true)
 ];
+*/
 export const onlyGuild = true;
-export const run = async (bot, message, typeEvent) => {
+export const run = async (bot, message) => {
     try {
-        await message.deferReply({ flags: MessageFlags.Ephemeral });
-        const nomEv = message.options.get("nom_reunion");
-        ;
-        const nom = nomEv?.value;
-        if (!(typeof nom === "string"))
-            throw new Error("Le nom de la reunion n'a pas été renseigné");
         const guild = message.guild;
         if (!guild) {
             throw new Error("Guild inexistante");
         }
-        else {
-            const events = await guild.scheduledEvents.fetch();
-            const event = events.find(e => {
-                if (e.scheduledStartTimestamp) {
-                    const temp_date = new Date(e.scheduledStartTimestamp);
-                    return e.name.toLowerCase() === nom.toLowerCase() && temp_date.getTime();
-                }
-            });
-            if (event) {
-                const champName = typeEvent === EVentType.Event ? Event.name : Reunion.name;
-                const table = typeEvent === EVentType.Event ? Event.tableName : Reunion.tableName;
-                console.log(event);
-                await event.delete();
-                if (!message.guild)
-                    throw new Error("Guild not found");
-                await deleteFromTableWithName(table, champName, event.name, bot, +message.guild.id);
-                await displayEmbedsMessage(message, new EmbedBuilder()
-                    .setTitle("Information")
-                    .setDescription("L'évènement a été supprimé"), true);
-                return make_log(true, message);
+        const events = await guild.scheduledEvents.fetch();
+        let eventList = [];
+        events.forEach((e) => {
+            const data = {
+                label: e.name,
+                value: e.name,
+            };
+            if (e.description)
+                data.description = e.description;
+            eventList.push(data);
+        });
+        const selectMenu = new StringSelectMenuBuilder()
+            .setCustomId(message.id)
+            .setPlaceholder("Choisissez l'évènement")
+            .setMinValues(0)
+            .setMaxValues(eventList.length)
+            .addOptions(eventList.map((eventData) => new StringSelectMenuOptionBuilder()
+            .setLabel(eventData.label)
+            .setDescription(eventData.description !== undefined ? eventData.description : "")
+            .setValue(eventData.value)));
+        const actionRow = new ActionRowBuilder().addComponents(selectMenu);
+        if (!message.isChatInputCommand())
+            return;
+        const reply = await message.reply({ components: [actionRow] });
+        //Recuperer la réponse de l'utilisateur quand il a validé sa saisie
+        const collector = reply.createMessageComponentCollector({
+            componentType: ComponentType.StringSelect,
+            filter: (i) => i.user.id === message.user.id && i.customId === message.id,
+            time: 60000
+        });
+        collector.on("collect", async (interaction) => {
+            await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+            const length = interaction.values.length;
+            if (!length) {
+                interaction.editReply("OK");
             }
-            await displayEmbedsMessage(message, new EmbedBuilder()
-                .setTitle("Information")
-                .setDescription("Aucun Event de ce nom n'existe"), true);
-            return make_log(true, message);
-            ;
-        }
+            else {
+                for (const eventName of interaction.values) {
+                    const events = await guild.scheduledEvents.fetch();
+                    const cibleEvent = events.find((e) => e.name === eventName);
+                    if (cibleEvent)
+                        await cibleEvent.delete();
+                }
+                let phrase = length > 0 ? "Les évènements : " : "L'évènement :";
+                for (let i = 0; i < interaction.values.length - 1; i++) {
+                    phrase += interaction.values[i] + ", ";
+                }
+                phrase += interaction.values[interaction.values.length - 1];
+                phrase += length > 0 ? " ont été supprimés" : " a été supprimé";
+                await displayEmbedsMessage(interaction, new EmbedBuilder()
+                    .setTitle("Reussite")
+                    .setDescription(phrase)
+                    .setColor(Color.successColor), true);
+            }
+        });
     }
     catch (Err) {
         if (Err instanceof Error) {
