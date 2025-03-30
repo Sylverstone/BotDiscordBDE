@@ -1,4 +1,10 @@
-import {CommandInteraction, MessageFlags, SlashCommandNumberOption, SlashCommandStringOption} from 'discord.js';
+import {
+    CommandInteraction,
+    MessageFlags,
+    SlashCommandBooleanOption,
+    SlashCommandNumberOption,
+    SlashCommandStringOption
+} from 'discord.js';
 import transfromOptionToObject from '../../Fonctions/transfromOptionToObject.js';
 import __dirname from '../../dirname.js';
 import CBot from '../../Class/CBot.js';
@@ -16,40 +22,13 @@ const onlyGuild = true;
 
 export const howToUse = "`/reunion` vous permet de faire *2* choses.\nPremière utilisation : `/reunion` en entrant cette commande il vous sera retourner la date de la prochaine reunion, si elle existe.\nDeuxième utilisation : `/reunion 'date' 'sujet' 'lieu' 'info_en_plus' 'heuredebut' 'heurefin'`. Une deuxième réunion sera alors sauvegarder";
 
-const option = [
-    new SlashCommandStringOption()
-    .setName("date")
-    .setRequired(false)
-    .setDescription("Paramètre permettant de définir une nouvelles dates :)"),
-
-    new SlashCommandStringOption()
-    .setName("sujet")
-    .setRequired(false)
-    .setDescription("indiquez le lieu de sujet de la reunion"),
-    
-    new SlashCommandStringOption()
-    .setName("lieu")
-    .setRequired(false)
-    .setDescription("Indiquez le lieu de la réunion"),
-    
-    new SlashCommandStringOption()
-    .setName("info_en_plus")
-    .setRequired(false)
-    .setDescription("Indiquez des infos supplémentaire si vous le souhaite")
-];
-    
-
-const optionNum = [
-    new SlashCommandNumberOption()
-    .setName("heuredebut")
-    .setRequired(false)
-    .setDescription("Indiquez l'heure de début de la réunion"),
-    new SlashCommandNumberOption()
-    .setName("heurefin")
-    .setRequired(false)
-    .setDescription("Indiquez l'heure de fin de la réunion")
-];
-
+export const optionBoolean =
+[
+    new SlashCommandBooleanOption()
+        .setName("creer_reunion")
+        .setDescription("True si vous voulez creer une réunion, False sinon.")
+        .setRequired(true)
+]
 
 export interface reunion_t{
     date : Date | string | date,
@@ -59,6 +38,16 @@ export interface reunion_t{
     heuredebut : number,
     heurefin : number,
     reunion_name : string,
+}
+
+interface optionData_t
+{
+    creer_reunion : boolean;
+}
+
+const isOptionData_t = (elt : unknown) : elt is optionData_t =>
+{
+    return elt !== null && typeof elt === "object" && "creer_reunion" in elt;
 }
 
 interface maxId_t
@@ -93,17 +82,21 @@ export function isReunionArray(result : unknown) : result is reunion_t[]
 
 const run = async (bot : CBot, message : CommandInteraction) =>
 {
-    await message.deferReply({flags : MessageFlags.Ephemeral});
+
     try {
         let optionObject = transfromOptionToObject(message);
-        if(EmptyObject(optionObject)) 
-            displayReunion(message,bot)        
+        if(!isOptionData_t(optionObject)) return;
+        const {creer_reunion} = optionObject;
+
+        if(!creer_reunion)
+            await displayReunion(message,bot)
         else        
-            saveReunion(message,bot,optionObject);
+            await saveReunion(message,bot);
         return make_log(true,message);
         
     } 
     catch (error) {
+        console.log(error);
         if(error instanceof Error) {
             handleError(message,error,true);
         }        
@@ -111,5 +104,5 @@ const run = async (bot : CBot, message : CommandInteraction) =>
     
 };
 
-export{description,name,run,option,optionNum,onlyGuild}
+export{description,name,run,onlyGuild}
 

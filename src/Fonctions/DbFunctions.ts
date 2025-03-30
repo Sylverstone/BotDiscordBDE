@@ -1,4 +1,4 @@
-import { CommandInteraction} from 'discord.js';
+import {ButtonInteraction, CommandInteraction, ModalSubmitInteraction} from 'discord.js';
 import transfromOptionToObject from './transfromOptionToObject.js';
 import EmptyObject from './LookIfObjectIsEmpty.js';
 import CBot from '../Class/CBot.js';
@@ -7,11 +7,11 @@ import { listCommandObject_t } from './transfromOptionToObject.js';
 import createConnection from '../Database/createConnection.js';
 import testCo from '../Database/testCo.js';
 
-export async function SaveValueToDB(message : CommandInteraction,bot : CBot,table : string,object = {}, deleteAllOtherValues = false)
+export async function SaveValueToDB(message : CommandInteraction | ModalSubmitInteraction | ButtonInteraction,bot : CBot,table : string,object = {}, deleteAllOtherValues = false)
 {
-    if(!message.guild || !(message instanceof CommandInteraction)) return;
+    if(!message.guild) return;
     let optionObject : listCommandObject_t ;
-    if(EmptyObject(object))
+    if(EmptyObject(object) && message instanceof CommandInteraction)
     {
         optionObject = transfromOptionToObject(message);  
     }
@@ -21,7 +21,6 @@ export async function SaveValueToDB(message : CommandInteraction,bot : CBot,tabl
       optionObject = object;
     }
 
-    if(!(optionObject instanceof Object)) return false;
 
     optionObject["GuildId"] = message.guild.id;
     if(deleteAllOtherValues)

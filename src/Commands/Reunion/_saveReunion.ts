@@ -1,20 +1,34 @@
-import { CommandInteraction, EmbedBuilder } from "discord.js";
+import {
+    ActionRowBuilder,
+    ButtonInteraction,
+    CommandInteraction,
+    EmbedBuilder,
+    MessageFlags,
+    ModalBuilder,
+    ModalSubmitInteraction,
+    TextInputBuilder,
+    TextInputStyle
+} from "discord.js";
+
 import CBot from "../../Class/CBot.js";
 import CreateEvent from "../../Fonctions/CreateEvent.js";
-import { createDate } from "../../Fonctions/DateScript.js";
-import { SaveValueToDB, getLastId } from "../../Fonctions/DbFunctions.js";
+import {createDate, setup_date, verifLogicDate, verifLogicDateWithoutHour} from "../../Fonctions/DateScript.js";
+import {SaveValueToDB} from "../../Fonctions/DbFunctions.js";
 import displayEmbedsMessage from "../../Fonctions/displayEmbedsMessage.js";
 import handleError from "../../Fonctions/handleError.js";
-import make_log from "../../Fonctions/makeLog.js";
-import splitNumber from "../../Fonctions/splitHeure.js";
-import { listCommandObject_t } from "../../Fonctions/transfromOptionToObject.js";
-import { isReunion, reunion_t, isMaxId } from "./reunion.js";
-import date from "../../Class/Date/Date.js";
+import {Color} from "../../Enum/Color.js";
+import {sendButton} from "../../Fonctions/sendButton.js";
+import {customId} from "../../Enum/customId.js";
+import {getHeureDebutField} from "../../Fonctions/Fields/getHeureDebutField.js";
+import {getLieuField} from "../../Fonctions/Fields/getLieuField.js";
+import {getHeureFinField} from "../../Fonctions/Fields/getHeureFinField.js";
+import {getDescriptionField} from "../../Fonctions/Fields/getDescriptionField.js";
+import {getCustomField} from "../../Fonctions/Fields/getCustomField.js";
 
 
-
-export default async function saveReunion(message : CommandInteraction, bot : CBot, optionObject : listCommandObject_t)
+export default async function saveReunion(message : CommandInteraction | ButtonInteraction, bot : CBot, phase = 1)
 {
+    /*
     if(!message.guild) throw new Error("Aucune guild n'est dispo");
     if(!("info_en_plus" in optionObject))
     {
@@ -77,4 +91,187 @@ export default async function saveReunion(message : CommandInteraction, bot : CB
     .catch(err => {
         throw err;
     });
+
+     */
+    if(!message.guild) return;
+    console.log(phase);
+    console.log("create reunion")
+
+    const popup = new ModalBuilder({
+        customId : "CreateReunion1",
+        title : "Créer votre Reunion (" + phase + "/2)",
+    })
+
+    //Nom
+    const sujetFieldActionRow : ActionRowBuilder<TextInputBuilder> = getCustomField("sujetField","Sujet",TextInputStyle.Short,true,"C'est quoi le sujet de cette réunion ?");
+   
+    //date de début
+    const dateFieldActionRow : ActionRowBuilder<TextInputBuilder> = getCustomField("dateField","Date",TextInputStyle.Short,true,"Format : jj-mm-aaaa ou jj/mm/aaaa");
+
+    const lieuFieldActionRow = getLieuField()
+
+    //heure de début. customId : heureDebut
+    const heureDebutFieldActionRow = getHeureDebutField();
+
+    //heure de fin
+    const heureFinFieldActionRow : ActionRowBuilder<TextInputBuilder> = getHeureFinField();
+
+    //info en plus
+    const additionalInfoFieldActionRow : ActionRowBuilder<TextInputBuilder> = getDescriptionField();
+    if(phase === 1)
+    {
+        popup.addComponents(sujetFieldActionRow)
+            .addComponents(lieuFieldActionRow)
+            .addComponents(dateFieldActionRow)
+    }
+    else{
+        popup.addComponents(heureDebutFieldActionRow)
+            .addComponents(heureFinFieldActionRow)
+            .addComponents(additionalInfoFieldActionRow)
+    }
+
+    await message.showModal(popup)
+    const filter = (interaction : ModalSubmitInteraction) => interaction.customId === "CreateReunion1";
+
+    try {
+        message.awaitModalSubmit({filter, time : 300_000_00})
+            .then(async result => {
+
+                if(!result.guild) return;
+                const id = result.guild.id;
+                if(phase === 1)
+                {
+                    try {
+                        bot.reunionData[+id].sujet = result.fields.getTextInputValue("sujetField");
+                        bot.reunionData[+id].date = result.fields.getTextInputValue("dateField");
+                        //la date de l'évènement, sert pour verifier sa conformité
+                        const tdate = bot.reunionData[+id].date
+                        if(!(typeof tdate === "string")) return;
+                        const tDate1 = createDate(tdate);
+                        if (tDate1 === undefined)
+                        {
+                            await displayEmbedsMessage(result, new EmbedBuilder()
+                                .setColor(Color.failureColor)
+                                .setDescription("La date n'est pas bonnes")
+                                .setTitle("Erreur de saisie")
+                            );
+                            return;
+                        }
+                        //Verification de la date
+                        if(!verifLogicDateWithoutHour(tDate1, tDate1)){
+                            await displayEmbedsMessage(result, new EmbedBuilder()
+                                .setColor(Color.failureColor)
+                                .setDescription("La date n'est pas bonne.\nRaison possible : Définition dans le passé")
+                                .setTitle("Erreur"));
+                            return;
+                        }
+                        let name = `Reunion ${tDate1.getDay()}/${tDate1.getMonth()}`;
+                        let EventList = await result.guild.scheduledEvents.fetch();
+                        EventList = EventList.filter(event => event.name.startsWith(name));
+                        if(EventList.size > 0)
+                        {
+                            name = `Reunion ${tDate1.getDay()}/${tDate1.getMonth()} (${EventList.size})`;
+                        }
+                        bot.reunionData[+id].reunion_name = name;
+                        bot.reunionData[+id].lieu = result.fields.getTextInputValue("lieu");
+                        await sendButton(result,customId.reunion);
+                    }
+                    catch (e)
+                    {
+                        if(e instanceof Error)
+                        {
+                            console.log(e);
+                            handleError(result,e)
+                        }
+                    }
+                }
+                else {
+                    try {
+                        await result.deferReply({flags: MessageFlags.Ephemeral});
+                        bot.reunionData[+id].info_en_plus = result.fields.getTextInputValue("info_en_plus");
+
+                        const heureDebut: string = result.fields.getTextInputValue("heureDebut");
+                        const heureFin: string = result.fields.getTextInputValue("heureFin");
+                        if (isNaN(parseFloat(heureDebut)) || isNaN(parseFloat(heureFin))) {
+                            await displayEmbedsMessage(result, new EmbedBuilder()
+                                    .setColor(Color.failureColor)
+                                    .setDescription("Les heures ne sont pas bonnes")
+                                    .setTitle("Erreur")
+                                , true);
+                            return;
+                        }
+                        bot.reunionData[+id].heuredebut = parseFloat(heureDebut);
+                        bot.reunionData[+id].heurefin = parseFloat(heureFin);
+
+                        console.table(bot.reunionData);
+                        const optionReunion = bot.reunionData;
+                        if (!(typeof optionReunion[+id].date === "string")) return;
+                        //Contient la date de fin et de début
+                        const tdateDebut = optionReunion[+id].date;
+                        if(!(typeof tdateDebut === "string")) return;
+                        const DateCreation = setup_date(tdateDebut,
+                            tdateDebut,
+                            optionReunion[+id].heuredebut,
+                            optionReunion[+id].heurefin, result)
+                        if (!DateCreation) return;
+                        const dateDebut = DateCreation[0];
+                        const dateFin = DateCreation[1];
+                        if(!verifLogicDate(dateDebut, dateDebut)){
+                            await displayEmbedsMessage(result, new EmbedBuilder()
+                                .setColor(Color.failureColor)
+                                .setDescription("La date n'est pas bonne.\nRaison possible : Définition dans le passé")
+                                .setTitle("Erreur"),true);
+                            return;
+                        }
+                        const finalObjectEvent = {
+                            date : dateDebut.toString(),
+                            sujet : optionReunion[+id].sujet,
+                            lieu : optionReunion[+id].lieu,
+                            info_en_plus : optionReunion[+id].info_en_plus,
+                            heuredebut : optionReunion[+id].heuredebut,
+                            heurefin : optionReunion[+id].heurefin ,
+                            reunion_name : optionReunion[+id].reunion_name,
+                        };
+
+                        SaveValueToDB(result,bot,"Reunion",finalObjectEvent)
+                            .then(async()  => {
+                                const sujet = optionReunion[+id].sujet;
+                                const lieu = optionReunion[+id].lieu;
+                                const info_en_plus = optionReunion[+id].info_en_plus;
+
+                                CreateEvent(result,sujet,dateDebut,dateFin,lieu,info_en_plus,finalObjectEvent.reunion_name)
+                                    .then(async(name) => {
+                                        await displayEmbedsMessage(result, new EmbedBuilder()
+                                            .setTitle("Reunion")
+                                            .setDescription("La reunion a été crée. Elle se nomme : " + name)
+                                            .setColor(Color.successColor),true);
+                                    })
+                                    .catch(async(e) => {
+                                        console.log(e);
+                                        await displayEmbedsMessage(result, new EmbedBuilder()
+                                            .setTitle("Information")
+                                            .setDescription("Une erreur a eu lieu :(")
+                                            .setColor(Color.failureColor),true);
+                                    });
+                            })
+                            .catch(err => {
+                                throw err;
+                            });
+                        bot.clearReunion(+id);
+                    }
+                    catch(error)
+                    {
+                        console.log(error);
+                        if(error instanceof  Error)
+                            handleError(result,error,true);
+                    }
+                }
+
+            })
+    }
+    catch (e)
+    {
+
+    }
+
 }

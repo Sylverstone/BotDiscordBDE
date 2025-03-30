@@ -9,10 +9,9 @@ import CBot from "../../Class/CBot.js";
 import { listCommandObject_t } from "../../Fonctions/transfromOptionToObject.js";
 import { Evenement_t } from "./event.js";
 
-export default async function displayEvent(message : CommandInteraction, bot : CBot, optionObject : listCommandObject_t)
+export default async function displayEvent(message : CommandInteraction, bot : CBot)
 {
-    if(EmptyObject(optionObject))
-    {            
+        await message.deferReply();
         const objectEvent = await getValueFromDB(message,"lieu, info_en_plus, datedebut,datefin, name, heuredebut, heurefin","Event","id",bot);
         if(objectEvent === null) return message.editReply("Il n'y a pas d'Event planifié pour les prochains jours");
 
@@ -40,6 +39,8 @@ export default async function displayEvent(message : CommandInteraction, bot : C
         if(isEvent(NearestEvent))
         {
             if(!(NearestEvent.datedebut instanceof Date && NearestEvent.datefin instanceof Date)) return;
+            if(!(typeof NearestEvent.name === "string" && typeof NearestEvent.heuredebut === "number" && typeof NearestEvent.heurefin === "number"
+            && typeof NearestEvent.lieu === "string" && typeof NearestEvent.info_en_plus === "string")) return;
             const embedText = makeEmbedABoutEvent(bot,EVentType.Event,NearestEvent.name,
                 [NearestEvent.datedebut,NearestEvent.datefin],[NearestEvent.heuredebut,NearestEvent.heurefin],
                 NearestEvent.lieu,
@@ -48,5 +49,5 @@ export default async function displayEvent(message : CommandInteraction, bot : C
             return message.editReply({embeds : [embedText]})
         }
         return message.editReply("Il n'y a pas d'Event planifié pour les prochains jours");
-    }
+
 }

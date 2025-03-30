@@ -21,5 +21,47 @@ export default class CBot extends Client {
         });
         this.commands = new Collection();
         this.bd = connection;
+        this.eventData = {};
+        this.reunionData = {};
+    }
+    setDefaultEventDataGuild(guildId) {
+        this.eventData[guildId] = {
+            info_en_plus: "",
+            lieu: "",
+            datedebut: "",
+            datefin: "",
+            heuredebut: 0,
+            heurefin: 0,
+            name: ""
+        };
+        return this.eventData;
+    }
+    setDefaultReunionDataGuild(guildId) {
+        this.reunionData[guildId] = {
+            info_en_plus: "",
+            lieu: "",
+            date: "",
+            sujet: "",
+            heuredebut: 0,
+            heurefin: 0,
+            reunion_name: ""
+        };
+        return this.reunionData;
+    }
+    ClearEvent() {
+        this.eventData = {};
+    }
+    clearReunion() {
+        this.reunionData = {
+            0: {
+                reunion_name: "",
+                info_en_plus: "",
+                date: "",
+                heuredebut: 0,
+                heurefin: 0,
+                lieu: "",
+                sujet: ""
+            }
+        };
     }
 }

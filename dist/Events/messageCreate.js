@@ -8,7 +8,11 @@ import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 const name = Events.MessageCreate;
 const exec = async (bot, message) => {
     //ce script est executé pour tout messages en DM, mais également pour tout message en guild qui n'est pas une commande    
+    if (!bot.user)
+        return;
     const isCommand = message.content.startsWith("!");
+    const specialCommand = ["+event", "+reunion"];
+    const botSendThat = message.author.id === bot.user.id;
     if (!isCommand) {
         if (message.content.startsWith("/")) {
             let pathToCommand;

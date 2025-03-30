@@ -4,11 +4,12 @@ import filterFuturEvent from "../../Fonctions/filterFuturEvent.js";
 import makeEmbedABoutEvent from "../../Fonctions/makeEmbedAboutEvent.js";
 import { EVentType } from "../../Enum/EventType.js";
 import make_log from "../../Fonctions/makeLog.js";
-import { CommandInteraction } from "discord.js";
+import {CommandInteraction, MessageFlags} from "discord.js";
 import CBot from "../../Class/CBot.js";
 
 export default async function displayReunion(message : CommandInteraction, bot : CBot, )
 {
+    await message.deferReply();
     await getValueFromDB(message,"date, heuredebut, heurefin, lieu, info_en_plus, sujet,reunion_name","Reunion","idReunion",bot)
     .then(async(result) => {            
         if(result === null) return message.editReply("Il n'y a pas de reunion l'instant.");

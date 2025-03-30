@@ -1,9 +1,15 @@
-import { CommandInteraction, EmbedBuilder, GuildScheduledEventEntityType, GuildScheduledEventPrivacyLevel } from "discord.js";
+import {
+    CommandInteraction,
+    EmbedBuilder,
+    GuildScheduledEventEntityType,
+    GuildScheduledEventPrivacyLevel,
+    ModalSubmitInteraction
+} from "discord.js";
 import displayEmbedsMessage from "./displayEmbedsMessage.js";
 import date from "../Class/Date/Date.js";
 
-export default async function CreateEvent(message : CommandInteraction,sujet : string, dateDebut : date, dateFin : date,
-    lieu : string, more : string, id : number, name : string = "") : Promise<string | undefined>
+export default async function CreateEvent(message : CommandInteraction | ModalSubmitInteraction,sujet : string, dateDebut : date, dateFin : date,
+    lieu : string, more : string, name : string = "") : Promise<string | undefined>
 {
     if(!message.guild) return;
     
@@ -17,7 +23,7 @@ export default async function CreateEvent(message : CommandInteraction,sujet : s
         entityMetadata : {
             location : lieu,
         },
-        description : `Sujet : ${sujet}\n${more}\nid : ${id}`,
+        description : `Sujet : ${sujet}\n${more}\n`,
     })
     return name;
 

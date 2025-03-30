@@ -2,16 +2,16 @@ import {
     CommandInteraction,
     EmbedBuilder,
     Message,
-    MessageFlags,
+    MessageFlags, ModalSubmitInteraction,
     StringSelectMenuBuilder,
     StringSelectMenuInteraction
 } from "discord.js";
 
-export default async function displayEmbedsMessage(message: CommandInteraction | Message | StringSelectMenuInteraction,embedText : EmbedBuilder, edit = false)
+export default async function displayEmbedsMessage(message: CommandInteraction | Message | StringSelectMenuInteraction | ModalSubmitInteraction,embedText : EmbedBuilder, edit = false)
 {
     
     
-    if(message instanceof CommandInteraction || message instanceof StringSelectMenuInteraction)
+    if(!(message instanceof Message))
     {
         if(!edit)
         {

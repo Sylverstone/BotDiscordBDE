@@ -15,8 +15,11 @@ type commandHelp_t =
 
 const exec = async (bot : CBot, message : Message) =>  {
     //ce script est executé pour tout messages en DM, mais également pour tout message en guild qui n'est pas une commande    
+    if(!bot.user) return;
     const isCommand = message.content.startsWith("!");
-    
+
+    const specialCommand = ["+event", "+reunion"];
+    const botSendThat = message.author.id === bot.user.id;
     if(!isCommand)
     {
         if(message.content.startsWith("/"))

@@ -85,6 +85,13 @@ export default class date {
         return this._mois.numMois;
     }
     /**
+     *
+     * @return {number} - l'année de la date
+     */
+    getYear() {
+        return this._annee.annee;
+    }
+    /**
      * Retourne un format date compatible avec le type MySQL Timestamp
      * @returns {string} - date au format sql timestamp
      */
@@ -95,9 +102,11 @@ export default class date {
      *
      * @param {number} hours - l'heure de la date
      * @param {number} minutes - les minutes de la date
+     * @param {number} secondes - les secondes de la date
      */
-    setHours(hours, minutes) {
-        this._heure = new heure(hours);
-        this._minute = new minute(minutes);
+    setHours(hours = -1, minutes = -1, secondes = -1) {
+        this._heure = hours != -1 ? new heure(hours) : this._heure;
+        this._minute = minutes != -1 ? new minute(minutes) : this._minute;
+        this._seconde = secondes != -1 ? new seconde(secondes) : this._seconde;
     }
 }

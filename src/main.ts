@@ -6,7 +6,6 @@ import "dotenv/config";
 import createConnection from "./Database/createConnection.js";
 
 let connection = createConnection();
-console.log(connection);
 let bot = new CBot(connection)
  
 bot.bd = connection;

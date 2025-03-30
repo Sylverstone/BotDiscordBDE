@@ -1,6 +1,6 @@
-import { CommandInteraction, MessageFlags, StringSelectMenuInteraction } from "discord.js";
+import { Message, MessageFlags } from "discord.js";
 export default async function displayEmbedsMessage(message, embedText, edit = false) {
-    if (message instanceof CommandInteraction || message instanceof StringSelectMenuInteraction) {
+    if (!(message instanceof Message)) {
         if (!edit) {
             await message.reply({
                 embeds: [embedText],

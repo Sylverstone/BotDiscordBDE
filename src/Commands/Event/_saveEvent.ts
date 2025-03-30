@@ -1,72 +1,195 @@
-import { CommandInteraction, EmbedBuilder } from "discord.js";
-import { listCommandObject_t } from "../../Fonctions/transfromOptionToObject.js";
-import { Evenement_t, isEvent } from "./event.js";
-import date from "../../Class/Date/Date.js";
-import { setup_date } from "../../Fonctions/DateScript.js";
+import {
+    ActionRowBuilder, ButtonInteraction,
+    CommandInteraction,
+    EmbedBuilder, MessageFlags,
+    ModalBuilder, ModalSubmitInteraction,
+    TextInputBuilder,
+    TextInputStyle
+} from "discord.js";
+
+import {createDate, setup_date, verifLogicDateWithoutHour} from "../../Fonctions/DateScript.js";
 import displayEmbedsMessage from "../../Fonctions/displayEmbedsMessage.js";
-import { getLastId, SaveValueToDB } from "../../Fonctions/DbFunctions.js";
+import { SaveValueToDB } from "../../Fonctions/DbFunctions.js";
 import CBot from "../../Class/CBot.js";
-import { isMaxId } from "../Reunion/reunion.js";
 import CreateEvent from "../../Fonctions/CreateEvent.js";
+import handleError from "../../Fonctions/handleError.js";
+import {Color} from "../../Enum/Color.js";
+import {sendButton} from "../../Fonctions/sendButton.js";
+import {customId} from "../../Enum/customId.js";
+import {getLieuField} from "../../Fonctions/Fields/getLieuField.js";
+import {getHeureDebutField} from "../../Fonctions/Fields/getHeureDebutField.js";
+import {getHeureFinField} from "../../Fonctions/Fields/getHeureFinField.js";
+import {getDescriptionField} from "../../Fonctions/Fields/getDescriptionField.js";
+import {getCustomField} from "../../Fonctions/Fields/getCustomField.js";
 
-export default async function saveEvent(optionObject :listCommandObject_t, message : CommandInteraction, bot : CBot)
+export default async function saveEvent(message : CommandInteraction | ButtonInteraction, bot : CBot, phase = 1)
 {
-        if(!("info_en_plus" in optionObject))
-        {
-            optionObject["info_en_plus"] = "Aucune info en plus n'a été fournit"
-        }
-        if(!isEvent(optionObject)) return message.editReply("La définition de l'Evenement n'est pas complète");
-        const optionEvent : Evenement_t = optionObject;
-        const dateActu = new date();
-        if(!(typeof optionEvent.datedebut === "string" && typeof optionEvent.datefin === "string")) return ;
-        const DateResult : null | date[] = setup_date(optionEvent.datedebut, optionEvent.datefin,optionEvent.heuredebut,optionEvent.heurefin,
-            message);
-        if(DateResult === null) return ;
+    console.log(phase);
+    console.log("create event")
 
-        const dateDebutEvent = DateResult[0];
-        const dateFinEvent = DateResult[1];
-        if(dateActu.getTime() > dateDebutEvent.getTime()) return message.reply("L'evenement ne peut pas être défini dans le passé");
-        //on change le separateur pour date to sql, si la date n'était pas bonnes le programme se serait arreter.
-        optionEvent.datedebut = optionEvent.datedebut.replace("/","-").replace("/","-");
-        optionEvent.datefin = optionEvent.datefin.replace("/","-").replace("/","-");
-        
-        const finalObjectEvent = {
-            name : optionEvent.name,
-            datedebut : dateDebutEvent.toString(),
-            datefin : dateFinEvent.toString(),
-            heuredebut : optionEvent.heuredebut,
-            heurefin : optionEvent.heurefin,
-            lieu : optionEvent.lieu,
-            info_en_plus : optionEvent.info_en_plus,
-        }
+    const popup = new ModalBuilder({
+        customId : "CreateEvent1",
+        title : "Créer votre évènement (" + phase + "/2)",
+    })
 
-        const EventList = await message.guild?.scheduledEvents.fetch();
-        if(typeof EventList?.find(event => event.name === optionEvent.name) !== "undefined") 
-        {
-            displayEmbedsMessage(message,new EmbedBuilder()
-                                                .setTitle("Erreur")
-                                                .setDescription("Un évènement avec le même nom existe déjà"),true);
-            return;
-        }
-        SaveValueToDB(message,bot,"Event",finalObjectEvent)
+    //Nom
+    const eventNameActionRow : ActionRowBuilder<TextInputBuilder> = getCustomField("eventName","Nom",TextInputStyle.Short,true,"Rentrez le nom de votre super évènement");
+
+    //date de début
+    const dateDebutFieldActionRow : ActionRowBuilder<TextInputBuilder> = getCustomField("dateDebut","Date de début",TextInputStyle.Short,true,"Format : jj-mm-aaaa où jj/mm/aaaa");
+
+    //Date de fin
+    const dateFinFieldActionRow : ActionRowBuilder<TextInputBuilder> = getCustomField("dateFin","Date de fin",TextInputStyle.Short,true,"Format : jj-mm-aaaa où jj/mm/aaaa");
+
+    //lieu. customId : lieu
+    const lieuFieldActionRow = getLieuField()
+
+    //heure de début. customId : heureDebut
+    const heureDebutFieldActionRow = getHeureDebutField();
+
+    //heure de fin
+    const heureFinFieldActionRow : ActionRowBuilder<TextInputBuilder> = getHeureFinField();
+
+    //info en plus
+    const additionalInfoFieldActionRow : ActionRowBuilder<TextInputBuilder> = getDescriptionField();
+
+    if(phase === 1)
+    {
+        popup.addComponents(eventNameActionRow)
+            .addComponents(lieuFieldActionRow)
+            .addComponents(dateDebutFieldActionRow)
+            .addComponents(dateFinFieldActionRow)
+
+    }
+    else{
+        popup.addComponents(heureDebutFieldActionRow)
+            .addComponents(heureFinFieldActionRow)
+            .addComponents(additionalInfoFieldActionRow)
+    }
+
+
+    await message.showModal(popup)
+    const filter = (interaction : ModalSubmitInteraction) => interaction.customId === "CreateEvent1";
+
+    message.awaitModalSubmit({filter, time : 300_000_00})
         .then(async result => {
-            const name = optionEvent.name;
-            const lieu = optionEvent.lieu;
-            const info_en_plus = optionEvent.info_en_plus;
-            const res  = await getLastId("Event","id",bot);
-            if(!isMaxId(res)) throw new Error("res n'est pas la valeur attendu");                
-            const id = res.maxId;
-            //on envoie le mess dans ça
-            CreateEvent(message,name,dateDebutEvent,dateFinEvent,lieu,info_en_plus,id,optionEvent.name)
-            .then( name => {
-                displayEmbedsMessage(message, new EmbedBuilder()
-                                                    .setTitle("Evènement")
-                                                    .setDescription("L'Evènement a été crée. il se nomme : " + name),true);
-            }).catch(err => {                    
-                throw err;
-            })
+            if(!result.guild) return;
+            const id = result.guild.id;
+            if(phase === 1)
+            {
+                try {
+
+
+                    bot.eventData[+id].name = result.fields.getTextInputValue("eventName");
+                    bot.eventData[+id].datedebut = result.fields.getTextInputValue("dateDebut");
+                    bot.eventData[+id].datefin = result.fields.getTextInputValue("dateFin");
+                    const tdate = bot.eventData[+id].datedebut;
+                    const tdate2 = bot.eventData[+id].datefin;
+                    if(typeof tdate !== "string" || typeof  tdate2 !== "string") return;
+                    const tDate1 = createDate(tdate);
+                    const tDate2 = createDate(tdate2);
+                    if (tDate1 === undefined || tDate2 === undefined) {
+                        await displayEmbedsMessage(result, new EmbedBuilder()
+                            .setColor(Color.failureColor)
+                            .setDescription("Les dates ne sont pas bonnes")
+                            .setTitle("Erreur")
+                        );
+                        return;
+                    }
+                    if(!verifLogicDateWithoutHour(tDate1, tDate2)){
+                        await displayEmbedsMessage(result, new EmbedBuilder()
+                            .setColor(Color.failureColor)
+                            .setDescription("La date n'est pas bonne.\nRaison possible :\n-Définition dans le passé\n-date de fin > date début")
+                            .setTitle("Erreur"));
+                        return;
+                    }
+                    bot.eventData[+id].lieu = result.fields.getTextInputValue("lieu");
+                    await sendButton(result,customId.event);
+                }
+                catch (e)
+                {
+                    if(e instanceof Error)
+                    {
+                        handleError(result,e)
+                    }
+                }
+            }
+            else {
+                try {
+                    await result.deferReply({flags: MessageFlags.Ephemeral});
+                    bot.eventData[+id].info_en_plus = result.fields.getTextInputValue("info_en_plus");
+
+                    const heureDebut: string = result.fields.getTextInputValue("heureDebut");
+                    const heureFin: string = result.fields.getTextInputValue("heureFin");
+                    if (isNaN(parseFloat(heureDebut)) || isNaN(parseFloat(heureFin))) {
+                        await displayEmbedsMessage(result, new EmbedBuilder()
+                                .setColor(Color.failureColor)
+                                .setDescription("Les heures ne sont pas bonnes")
+                                .setTitle("Erreur")
+                            , true);
+                        return;
+                    }
+                    bot.eventData[+id].heuredebut = parseFloat(heureDebut);
+                    bot.eventData[+id].heurefin = parseFloat(heureFin);
+                    console.table(bot.eventData);
+                    const optionEvent = bot.eventData;
+                    const tdate = bot.eventData[+id].datedebut;
+                    const tdate2 = bot.eventData[+id].datefin;
+                    if(typeof tdate !== "string" || typeof  tdate2 !== "string") return;
+                    const DateCreation = setup_date(tdate,
+                        tdate2,
+                        optionEvent[+id].heuredebut,
+                        optionEvent[+id].heurefin, result)
+                    if (!DateCreation) return;
+                    const dateDebutEvent = DateCreation[0];
+                    const dateFinEvent = DateCreation[1];
+                    const finalObjectEvent = {
+                        name: optionEvent[+id].name,
+                        datedebut: dateDebutEvent.toString(),
+                        datefin: dateFinEvent.toString(),
+                        heuredebut: optionEvent[+id].heuredebut,
+                        heurefin: optionEvent[+id].heurefin,
+                        lieu: optionEvent[+id].lieu,
+                        info_en_plus: optionEvent[+id].info_en_plus,
+                    }
+
+                    const EventList = await message.guild?.scheduledEvents.fetch();
+                    if (typeof EventList?.find(event => event.name === optionEvent[+id].name) !== "undefined") {
+                        await displayEmbedsMessage(result, new EmbedBuilder()
+                            .setTitle("Erreur")
+                            .setDescription("Un évènement avec le même nom existe déjà"), true);
+                        return;
+                    }
+                    SaveValueToDB(result, bot, "Event", finalObjectEvent)
+                        .then(async r => {
+                            const name = optionEvent[+id].name;
+                            const lieu = optionEvent[+id].lieu;
+                            const info_en_plus = optionEvent[+id].info_en_plus;
+                            if (name === undefined || lieu === undefined || info_en_plus === undefined) return;
+                            //on envoie le mess dans ça
+                            CreateEvent(result, name, dateDebutEvent, dateFinEvent, lieu, info_en_plus, optionEvent[+id].name)
+                                .then(name => {
+                                    displayEmbedsMessage(result, new EmbedBuilder()
+                                        .setTitle("Evènement")
+                                        .setDescription("L'Evènement a été crée. il se nomme : " + name), true);
+                                }).catch(err => {
+                                throw err;
+                            })
+                        })
+                        .catch(err => {
+                            throw err;
+                        });
+                    bot.ClearEvent(+id);
+                }
+                catch(error)
+                {
+                    if(error instanceof  Error)
+                        handleError(result,error,true);
+                }
+            }
+
         })
-        .catch(err => {
-            throw err;
-        });            
+
+
+
 }

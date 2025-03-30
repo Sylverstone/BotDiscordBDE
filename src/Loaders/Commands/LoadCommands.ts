@@ -44,6 +44,7 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
             }
             
         }
+
         if(commande.optionInt !== undefined)
         {
             for(const option of commande.optionInt)
@@ -69,6 +70,14 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
             }
         }
 
+        if(commande.optionBoolean !== undefined)
+        {
+            for (const option of commande.optionBoolean)
+            {
+                slashCommand.addBooleanOption(option);
+            }
+        }
+
         SlashCommands.push(slashCommand);
     }
 
@@ -86,6 +95,8 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
             //load commands for every guild
             for(const guildId of guildIds)
             {
+                bot.setDefaultReunionDataGuild(+guildId)
+                bot.setDefaultEventDataGuild(+guildId);
                 await rest.put(
                     Routes.applicationGuildCommands(clientId, guildId),
                     { body: SlashCommands },

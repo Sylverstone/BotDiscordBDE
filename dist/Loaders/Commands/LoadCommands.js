@@ -43,6 +43,11 @@ const setupLoad = async (bot, guildIds) => {
                 slashCommand.addNumberOption(option);
             }
         }
+        if (commande.optionBoolean !== undefined) {
+            for (const option of commande.optionBoolean) {
+                slashCommand.addBooleanOption(option);
+            }
+        }
         SlashCommands.push(slashCommand);
     }
     if (!(typeof process.env.TOKEN === 'string'))
@@ -58,6 +63,8 @@ const setupLoad = async (bot, guildIds) => {
             console.log("guilds of bots :", guildIds);
             //load commands for every guild
             for (const guildId of guildIds) {
+                bot.setDefaultReunionDataGuild(+guildId);
+                bot.setDefaultEventDataGuild(+guildId);
                 await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: SlashCommands });
             }
             console.log(`Successfully reloaded ${listeFileCommands.length} application (/) SlashCommands.`);

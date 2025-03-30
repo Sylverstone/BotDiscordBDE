@@ -4,6 +4,7 @@ import filterFuturEvent from "../../Fonctions/filterFuturEvent.js";
 import makeEmbedABoutEvent from "../../Fonctions/makeEmbedAboutEvent.js";
 import { EVentType } from "../../Enum/EventType.js";
 export default async function displayReunion(message, bot) {
+    await message.deferReply();
     await getValueFromDB(message, "date, heuredebut, heurefin, lieu, info_en_plus, sujet,reunion_name", "Reunion", "idReunion", bot)
         .then(async (result) => {
         if (result === null)

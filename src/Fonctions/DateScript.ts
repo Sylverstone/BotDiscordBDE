@@ -1,4 +1,4 @@
-import { CommandInteraction, EmbedBuilder } from "discord.js";
+import {CommandInteraction, EmbedBuilder, ModalSubmitInteraction} from "discord.js";
 import displayEmbedsMessage from "./displayEmbedsMessage.js";
 import splitNumber from "./splitHeure.js";
 import date from "../Class/Date/Date.js";
@@ -26,11 +26,17 @@ export function createDate(ndate : string) : undefined | date
     let jour : string = "";let mois : string = "";let annee : string = "";
     if(ndate.includes("/"))
     {
-        [jour,mois,annee] = ndate.split("/");
+        const split = ndate.split("/");
+        if(split.length !== 3)
+            return undefined;
+        [jour,mois,annee] = split;
     }
     else if(ndate.includes("-"))
     {
-        [jour,mois,annee] = ndate.split("-");
+        const split = ndate.split("-");
+        if(split.length !== 3)
+            return undefined;
+        [jour,mois,annee] = split;
     }
     else
     {
@@ -41,11 +47,10 @@ export function createDate(ndate : string) : undefined | date
 
 export function dateToOnlyDate(date : Date)
 {
-    if(!(date instanceof Date)) return;
     return `${date.getDay()}/${date.getMonth()+1}/${date.getFullYear()}`;
 }
 
-export function setup_date(dateDebut : string, DateFin : string, heureDebut : number, heureFin : number,message : CommandInteraction) : date[] | null
+export function setup_date(dateDebut : string, DateFin : string, heureDebut : number, heureFin : number,message : CommandInteraction | ModalSubmitInteraction) : date[] | null
 {
     const dateDebutEvent = createDate(dateDebut);
     const dateFinEvent = createDate(DateFin);
@@ -79,4 +84,23 @@ export function IsDate(date : string)
 {
 
 
+}
+
+//Verifie que les dates soient cohérentes. Soit dateFin >= dateDebut et dateDebut => dateActu
+export function verifLogicDate(dateDebut : date, dateFin : date) : boolean
+{
+    const dateActu = new date();
+    return dateFin.getTime() >= dateDebut.getTime() && dateDebut.getTime() >= dateActu.getTime();
+}
+
+//Verifies que les dates soient cohérentes. Soit dateFin >= dateDebut et dateDebut => dateActu
+//La subtilité est que les heures ne sont pas pris en compte. Sert quand l'heure de la date de début et de fin ne sont pas encore définit
+export function verifLogicDateWithoutHour(dateDebut : date, dateFin : date) : boolean
+{
+    const dateActu = new date();
+    dateActu.setHours(0,0,0);
+    console.log(dateActu);
+    console.log(dateActu);
+    console.log(dateFin);
+    return dateFin.getTime() >= dateDebut.getTime() && dateDebut.getTime() >= dateActu.getTime();
 }

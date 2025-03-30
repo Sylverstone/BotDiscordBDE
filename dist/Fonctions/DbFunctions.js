@@ -4,18 +4,16 @@ import EmptyObject from './LookIfObjectIsEmpty.js';
 import createConnection from '../Database/createConnection.js';
 import testCo from '../Database/testCo.js';
 export async function SaveValueToDB(message, bot, table, object = {}, deleteAllOtherValues = false) {
-    if (!message.guild || !(message instanceof CommandInteraction))
+    if (!message.guild)
         return;
     let optionObject;
-    if (EmptyObject(object)) {
+    if (EmptyObject(object) && message instanceof CommandInteraction) {
         optionObject = transfromOptionToObject(message);
     }
     else {
         console.log(object, "obejct");
         optionObject = object;
     }
-    if (!(optionObject instanceof Object))
-        return false;
     optionObject["GuildId"] = message.guild.id;
     if (deleteAllOtherValues)
         await deleteAllOtherValue(message.guild.id, table, bot);

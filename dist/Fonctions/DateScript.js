@@ -20,10 +20,16 @@ export function createDate(ndate) {
     let mois = "";
     let annee = "";
     if (ndate.includes("/")) {
-        [jour, mois, annee] = ndate.split("/");
+        const split = ndate.split("/");
+        if (split.length !== 3)
+            return undefined;
+        [jour, mois, annee] = split;
     }
     else if (ndate.includes("-")) {
-        [jour, mois, annee] = ndate.split("-");
+        const split = ndate.split("-");
+        if (split.length !== 3)
+            return undefined;
+        [jour, mois, annee] = split;
     }
     else {
         return undefined;
@@ -31,8 +37,6 @@ export function createDate(ndate) {
     return new date(`${jour}-${mois}-${annee}`);
 }
 export function dateToOnlyDate(date) {
-    if (!(date instanceof Date))
-        return;
     return `${date.getDay()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 }
 export function setup_date(dateDebut, DateFin, heureDebut, heureFin, message) {
@@ -57,4 +61,19 @@ export function to_date_sql(date) {
     return `${annee}-${mois}-${jour}`;
 }
 export function IsDate(date) {
+}
+//Verifie que les dates soient cohérentes. Soit dateFin >= dateDebut et dateDebut => dateActu
+export function verifLogicDate(dateDebut, dateFin) {
+    const dateActu = new date();
+    return dateFin.getTime() >= dateDebut.getTime() && dateDebut.getTime() >= dateActu.getTime();
+}
+//Verifies que les dates soient cohérentes. Soit dateFin >= dateDebut et dateDebut => dateActu
+//La subtilité est que les heures ne sont pas pris en compte. Sert quand l'heure de la date de début et de fin ne sont pas encore définit
+export function verifLogicDateWithoutHour(dateDebut, dateFin) {
+    const dateActu = new date();
+    dateActu.setHours(0, 0, 0);
+    console.log(dateActu);
+    console.log(dateActu);
+    console.log(dateFin);
+    return dateFin.getTime() >= dateDebut.getTime() && dateDebut.getTime() >= dateActu.getTime();
 }

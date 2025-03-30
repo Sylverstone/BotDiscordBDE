@@ -1,11 +1,12 @@
-import { CommandInteraction,DiscordAPIError, EmbedBuilder} from "discord.js";
+import {CommandInteraction, DiscordAPIError, EmbedBuilder, ModalSubmitInteraction} from "discord.js";
 import displayEmbedsMessage from "./displayEmbedsMessage.js";
 import make_log from "./makeLog.js";
 import {Color} from "../Enum/Color.js";
 
-export default function handleError(message : CommandInteraction , error : Error,edit = false)
+export default async function handleError(message : CommandInteraction | ModalSubmitInteraction, error : Error,edit = false)
 {
-    make_log(false,message);
+    if(message instanceof CommandInteraction)
+        make_log(false,message);
     console.log("[error] " + error);
     if(error instanceof DiscordAPIError){
         displayEmbedsMessage(message,new EmbedBuilder()
