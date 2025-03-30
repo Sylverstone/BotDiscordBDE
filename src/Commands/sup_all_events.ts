@@ -20,10 +20,11 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
         if(!message.guild) throw new Error("Guild not found");
 
         await message.deferReply({flags : MessageFlags.Ephemeral});
-        const Events = message.guild.scheduledEvents.cache;
+        const Events = await message.guild.scheduledEvents.fetch();
         if(Events.size > 0)
         {
-            Events.forEach(event => {
+            for(const e of Events){
+                const event = e[1];
                 let tableName : string;
                 let champName : string;
                 if(event.name.startsWith("Reunion"))
@@ -37,7 +38,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                     champName = Event.name;
                 }
                 if(!message.guild) throw new Error("Guild not found");
-                deleteFromTableWithName(tableName,champName,event.name,bot,+message.guild.id)
+                await deleteFromTableWithName(tableName,champName,event.name,bot,+message.guild.id)
                 .then(() => 
                 {
                     return event.delete();    
@@ -49,7 +50,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                     throw err;
                 })
                 
-            })
+            }
     
             await displayEmbedsMessage(message, new EmbedBuilder()
                 .setTitle("Information")

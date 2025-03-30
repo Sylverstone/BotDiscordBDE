@@ -3,7 +3,7 @@ import * as path from "path";
 import __dirname from "../dirname.js";
 import lookIfCommandsValid from "../Fonctions/lookIfCommandsValid.js";
 import { pathToFileURL } from "url";
-import { capFirstLetter } from "./interactionCreate.js";
+import { capFirstLetter } from "./CommandInteraction.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 const name = Events.MessageCreate;
 const exec = async (bot, message) => {

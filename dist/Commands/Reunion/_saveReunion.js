@@ -222,7 +222,7 @@ export default async function saveReunion(message, bot, phase = 1) {
                         .catch(err => {
                         throw err;
                     });
-                    bot.clearReunion();
+                    bot.clearReunion(+id);
                 }
                 catch (error) {
                     console.log(error);

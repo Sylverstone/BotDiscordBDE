@@ -55,6 +55,15 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                 data.description = e.description;
             eventList.push(data);
         })
+        if(eventList.length <= 0)
+        {
+            await displayEmbedsMessage(message, new EmbedBuilder()
+                .setTitle("Aucun évènement")
+                .setDescription("Il n'y a pas d'évènement !")
+                .setColor(Color.successColor));
+            return;
+        }
+
 
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId(message.id)
@@ -82,11 +91,10 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
 
         collector.on("collect",async(interaction) => {
 
-            await interaction.deferReply({flags : MessageFlags.Ephemeral});
             const length : number = interaction.values.length;
             if(!length)
             {
-                interaction.editReply("OK");
+                interaction.reply("OK");
             }
             else
             {
@@ -107,7 +115,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                 await displayEmbedsMessage(interaction, new EmbedBuilder()
                     .setTitle("Reussite")
                     .setDescription(phrase)
-                    .setColor(Color.successColor),true);
+                    .setColor(Color.successColor));
             }
 
         })
@@ -116,7 +124,7 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
     {
         if(Err instanceof Error)
         {
-            handleError(message,Err,true);
+            handleError(message,Err);
         }
         
     }

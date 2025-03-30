@@ -3,7 +3,7 @@ import displayEmbedsMessage from "./displayEmbedsMessage.js";
 import make_log from "./makeLog.js";
 import {Color} from "../Enum/Color.js";
 
-export default async function handleError(message : CommandInteraction | ModalSubmitInteraction, error : Error,edit = false)
+export default function handleError(message : CommandInteraction | ModalSubmitInteraction, error : Error,edit = false)
 {
     if(message instanceof CommandInteraction)
         make_log(false,message);

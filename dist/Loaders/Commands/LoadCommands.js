@@ -23,6 +23,7 @@ const setupLoad = async (bot, guildIds) => {
         let slashCommand = new SlashCommandBuilder()
             .setName(commande.name)
             .setDescription(commande.description);
+        //Récupération des options de la slashCommand
         if (commande.option !== undefined) {
             for (const option of commande.option) {
                 slashCommand.addStringOption(option);

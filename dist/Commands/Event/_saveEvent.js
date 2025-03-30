@@ -146,7 +146,7 @@ export default async function saveEvent(message, bot, phase = 1) {
                     .catch(err => {
                     throw err;
                 });
-                bot.ClearEvent();
+                bot.ClearEvent(+id);
             }
             catch (error) {
                 if (error instanceof Error)

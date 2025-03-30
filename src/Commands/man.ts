@@ -2,38 +2,25 @@ import {
     ActionRowBuilder,
     CommandInteraction,
     StringSelectMenuBuilder, StringSelectMenuOptionBuilder,
-    ComponentType, MessageFlags, EmbedBuilder
+    ComponentType, EmbedBuilder
 } from "discord.js";
 
 import "dotenv/config"
 import * as path from "path";
 import * as fs from "fs";
 import __dirname from "../dirname.js";
-import CBot, {commands_t, isScript_t} from "../Class/CBot.js";
+import CBot, { isScript_t} from "../Class/CBot.js";
 import { pathToFileURL } from "url";
 
 import handleError from "../Fonctions/handleError.js";
 import {Color} from "../Enum/Color.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 
-
 export const description = "Cette commande vous permettra d'en apprendre plus sur l'utilisation d'une commande";
 export const name = "man";
 
 export const howToUse = "J'imagine que vous savez déjà utilsier /man :)"
 export const onlyGuild = true;
-
-/*
-let choices = await getChoices()
-export const option = 
-[
-    new SlashCommandStringOption()
-        .setName("commande")
-        .setDescription("La commande que tu veux apprendre a utiliser")
-        .setRequired(true)
-        .addChoices(...choices),
-];
-*/
 
 interface scriptData_t
 {
@@ -85,49 +72,10 @@ async function getChoices(){
 
 export const  run = async(bot : CBot, message : CommandInteraction) => {
     try {
-        /*
-        let command;
-        let commandName;
-        if(message instanceof CommandInteraction)
-        {
-            const option = message.options.get("commande");
-            commandName = option?.value;
-        }
-        else
-        {
-            if(args.length === 0) return message.reply("La commande !man doit OBLIGATOIREMENT avoir un paramètre");
-            commandName = args[0];
-        }
-
-        if(!(typeof commandName === 'string')) throw new Error("Command name must be a string");
-
-        if(!lookIfCommandsValid(commandName)) return message.reply(`La commande ${commandName} n'existe pas !`); 
-        //juste pour les dm
-        
-        const importPath = commandName === "event" || commandName === "reunion" ? 
-            pathToFileURL(path.join(__dirname,"Commands",capFirstLetter(commandName), commandName + ".js")) 
-            : pathToFileURL(path.join(__dirname,"Commands",commandName + ".js"));
-
-        command = await import(importPath.href);
-                
-        const embedText = new EmbedBuilder()
-        .setTitle(`Comment utiliser ${commandName}`)
-        .setColor(Colors.Blue)
-        .setDescription(command.howToUse)
-        .setFooter({
-            text: "Au plaisir de vous aidez",
-            iconURL: bot.user?.displayAvatarURL() || ""
-        });
-       
-        await displayEmbedsMessage(message,embedText);
-        if(message instanceof CommandInteraction)
-            make_log(true,message);
-
-         */
         const listeScript = await getChoices();
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId(message.id)
-            .setPlaceholder("Choisissez la commande sur laquelle vous voulez en savoir plus :)")
+            .setPlaceholder("Choisissez une commande")
             .setMinValues(1)
             .setMaxValues(1)
             .setOptions(listeScript.map(v => new StringSelectMenuOptionBuilder()
@@ -141,32 +89,27 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
 
         const collector = reply.createMessageComponentCollector({
             componentType : ComponentType.StringSelect,
-            filter : (i) => i.user.id === message.user.id && i.customId === message.id,
-            time : 60_000
+            time : 100_000
         })
 
         collector.on("collect", async(interaction) => {
-            await interaction.deferReply();
             if(!interaction.values.length){
-                await interaction.editReply("OK");
+                await interaction.reply("OK");
                 return;
             }
-
             if(interaction.values.length > 1)
             {
-                await interaction.editReply("HOW");
+                await interaction.reply("HOW");
                 return;
             }
-
             const pathToCommand = interaction.values[0];
             console.log(pathToCommand);
             const command = await import(pathToFileURL(pathToCommand).href);
             if(!isScript_t(command))
             {
-                await interaction.editReply("ERR");
+                await interaction.reply("ERR");
                 return;
             }
-
             const {howToUse, name} = command;
             const embedText = new EmbedBuilder()
                 .setTitle(`Comment utiliser ${name}`)
@@ -176,12 +119,11 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
                     text: "Au plaisir de vous aidez",
                     iconURL: bot.user?.displayAvatarURL() || ""
                 });
-
-            await displayEmbedsMessage(interaction,embedText,true);
-
+            await displayEmbedsMessage(interaction,embedText);
         })
     } 
     catch (error) {
+        console.log(error);
         if(error instanceof Error)
             handleError(message,error);
     }

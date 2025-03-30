@@ -23,6 +23,7 @@ export default async function displayEmbedsMessage(message: CommandInteraction |
         else
         {
             await message.editReply({content : "",embeds : [embedText]});
+
         }
         
     }

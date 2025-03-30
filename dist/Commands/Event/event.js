@@ -1,4 +1,4 @@
-import { SlashCommandBooleanOption } from "discord.js";
+import { SlashCommandBooleanOption, } from "discord.js";
 import 'dotenv/config';
 import transfromOptionToObject from "../../Fonctions/transfromOptionToObject.js";
 import handleError from "../../Fonctions/handleError.js";

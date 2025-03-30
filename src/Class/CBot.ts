@@ -2,13 +2,19 @@ import {
     Client,
     Collection,
     GatewayIntentBits,
-    CommandInteraction,
     Partials,
     SlashCommandStringOption,
     SlashCommandIntegerOption,
     SlashCommandUserOption,
     SlashCommandNumberOption,
-    SlashCommandBooleanOption
+    SlashCommandBooleanOption,
+    ModalSubmitInteraction,
+    ButtonInteraction,
+    Message,
+    CommandInteraction,
+    Events,
+    Guild,
+    GuildScheduledEvent
 } from "discord.js"
 import { Connection,  } from "mysql2/typings/mysql/lib/Connection";
 import {Evenement_t} from "../Commands/Event/event";
@@ -24,16 +30,22 @@ export type script_t =
     name : string;
     description : string;
     howToUse : string;
-    run : any;
-    option : SlashCommandStringOption[] | undefined ;
-    optionInt : SlashCommandIntegerOption[] | undefined;
+    run : (bot : CBot, interaction : Message | CommandInteraction | ModalSubmitInteraction | ButtonInteraction, args : string[]) => any;
     onlyGuild : boolean;
-    optionUser : SlashCommandUserOption[] | undefined;
-    optionNum : SlashCommandNumberOption[] | undefined;
-    optionBoolean : SlashCommandBooleanOption[] | undefined;
-
+    option? : SlashCommandStringOption[];
+    optionInt? : SlashCommandIntegerOption[] ;
+    optionUser? : SlashCommandUserOption[] ;
+    optionNum? : SlashCommandNumberOption[] ;
+    optionBoolean? : SlashCommandBooleanOption[] ;
 }
 
+export type interaction_t = CommandInteraction | Message | Guild | GuildScheduledEvent | ModalSubmitInteraction | ButtonInteraction;
+
+export type scriptEvent_t =
+{
+    name : Events,
+    exec : (bot : CBot, interaction : interaction_t) => any;
+}
 //Renvoie true si le paramètre est un script_t
 export const isScript_t = (script : unknown) : script is script_t =>
 {

@@ -35,25 +35,21 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
         let slashCommand = new SlashCommandBuilder()
             .setName(commande.name)
             .setDescription(commande.description)
-        
+
+        //Récupération des options de la slashCommand
         if(commande.option !== undefined)
         {
-            for(const option of commande.option)
-            {
+            for(const option of commande.option) {
                 slashCommand.addStringOption(option);
             }
-            
         }
-
         if(commande.optionInt !== undefined)
         {
             for(const option of commande.optionInt)
             {
                 slashCommand.addIntegerOption(option);
             }
-            
         }
-        
         if(commande.optionUser !== undefined)
         {
             for (const option of commande.optionUser)
@@ -61,7 +57,6 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
                 slashCommand.addUserOption(option);
             }
         }
-
         if(commande.optionNum !== undefined)
         {
             for (const option of commande.optionNum)
@@ -69,7 +64,6 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
                 slashCommand.addNumberOption(option);
             }
         }
-
         if(commande.optionBoolean !== undefined)
         {
             for (const option of commande.optionBoolean)
@@ -77,7 +71,6 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
                 slashCommand.addBooleanOption(option);
             }
         }
-
         SlashCommands.push(slashCommand);
     }
 

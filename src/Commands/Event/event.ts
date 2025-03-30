@@ -1,18 +1,11 @@
 import {
-    ActionRow,
-    ActionRowBuilder,
     CommandInteraction,
-    MessageFlags, ModalBuilder, ModalSubmitInteraction,
     SlashCommandBooleanOption,
-    SlashCommandNumberOption,
-    SlashCommandStringOption, TextInputBuilder, TextInputStyle
 } from "discord.js";
 import 'dotenv/config'
-import __dirname from "../../dirname.js";
 import transfromOptionToObject from "../../Fonctions/transfromOptionToObject.js";
 import CBot from "../../Class/CBot.js";
 import handleError from "../../Fonctions/handleError.js";
-import EmptyObject from "../../Fonctions/LookIfObjectIsEmpty.js";
 import date from "../../Class/Date/Date.js";
 import displayEvent from "./_displayEvent.js";
 import saveEvent from "./_saveEvent.js";

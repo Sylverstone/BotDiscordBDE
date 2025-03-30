@@ -15,9 +15,10 @@ export const run = async (bot, message) => {
         if (!message.guild)
             throw new Error("Guild not found");
         await message.deferReply({ flags: MessageFlags.Ephemeral });
-        const Events = message.guild.scheduledEvents.cache;
+        const Events = await message.guild.scheduledEvents.fetch();
         if (Events.size > 0) {
-            Events.forEach(event => {
+            for (const e of Events) {
+                const event = e[1];
                 let tableName;
                 let champName;
                 if (event.name.startsWith("Reunion")) {
@@ -30,7 +31,7 @@ export const run = async (bot, message) => {
                 }
                 if (!message.guild)
                     throw new Error("Guild not found");
-                deleteFromTableWithName(tableName, champName, event.name, bot, +message.guild.id)
+                await deleteFromTableWithName(tableName, champName, event.name, bot, +message.guild.id)
                     .then(() => {
                     return event.delete();
                 })
@@ -39,7 +40,7 @@ export const run = async (bot, message) => {
                 }).catch(err => {
                     throw err;
                 });
-            });
+            }
             await displayEmbedsMessage(message, new EmbedBuilder()
                 .setTitle("Information")
                 .setDescription("Fini :)"), true);

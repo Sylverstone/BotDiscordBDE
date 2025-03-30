@@ -1,4 +1,4 @@
-import { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType, MessageFlags, EmbedBuilder } from "discord.js";
+import { ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ComponentType, EmbedBuilder } from "discord.js";
 import handleError from "../Fonctions/handleError.js";
 import 'dotenv/config';
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
@@ -32,6 +32,13 @@ export const run = async (bot, message) => {
                 data.description = e.description;
             eventList.push(data);
         });
+        if (eventList.length <= 0) {
+            await displayEmbedsMessage(message, new EmbedBuilder()
+                .setTitle("Aucun évènement")
+                .setDescription("Il n'y a pas d'évènement !")
+                .setColor(Color.successColor));
+            return;
+        }
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId(message.id)
             .setPlaceholder("Choisissez l'évènement")
@@ -52,10 +59,9 @@ export const run = async (bot, message) => {
             time: 60000
         });
         collector.on("collect", async (interaction) => {
-            await interaction.deferReply({ flags: MessageFlags.Ephemeral });
             const length = interaction.values.length;
             if (!length) {
-                interaction.editReply("OK");
+                interaction.reply("OK");
             }
             else {
                 for (const eventName of interaction.values) {
@@ -73,13 +79,13 @@ export const run = async (bot, message) => {
                 await displayEmbedsMessage(interaction, new EmbedBuilder()
                     .setTitle("Reussite")
                     .setDescription(phrase)
-                    .setColor(Color.successColor), true);
+                    .setColor(Color.successColor));
             }
         });
     }
     catch (Err) {
         if (Err instanceof Error) {
-            handleError(message, Err, true);
+            handleError(message, Err);
         }
     }
 };

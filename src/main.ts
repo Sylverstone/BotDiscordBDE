@@ -7,8 +7,7 @@ import createConnection from "./Database/createConnection.js";
 
 let connection = createConnection();
 let bot = new CBot(connection)
- 
-bot.bd = connection;
+
 bot.bd.connect((err) => {
     if (err) throw err;
     console.log("Connected to MySQL!");

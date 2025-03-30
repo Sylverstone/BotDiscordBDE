@@ -1,7 +1,8 @@
-import { Client, CommandInteraction, Message, MessageFlags } from "discord.js";
+import { CommandInteraction, MessageFlags } from "discord.js";
 import "dotenv/config";
 import make_log from "../Fonctions/makeLog.js";
 import handleError from "../Fonctions/handleError.js";
+import { Color } from "../Enum/Color.js";
 export const description = "Cette commande vous indiquera les commandes du bot ainsi que leur description";
 export const name = "help";
 export const howToUse = "Vous n'avez qu'a écrire `/help` et des indications sur toutes les commandes seront retournés";
@@ -26,7 +27,7 @@ const displayMessageHelp = async (message, bot) => {
             embeds: [{
                     title: "Liste des commandes",
                     description: bot.commands.map(command => `**__Nom de commande__** : \`${command.name}\`.\n> ${command.description}`).join("\n\n") || "Aucune commande disponible",
-                    color: 0xff0000,
+                    color: Color.successColor,
                     footer: {
                         text: "Au plaisr de vous aidez",
                         icon_url: bot.user?.displayAvatarURL() || ""
@@ -38,13 +39,11 @@ const displayMessageHelp = async (message, bot) => {
         make_log(true, message);
 };
 export const run = async (bot, message) => {
-    if (bot instanceof Client && (message instanceof CommandInteraction || message instanceof Message)) {
-        try {
-            displayMessageHelp(message, bot);
-        }
-        catch (error) {
-            if (message instanceof CommandInteraction && error instanceof Error)
-                handleError(message, error);
-        }
+    try {
+        await displayMessageHelp(message, bot);
+    }
+    catch (error) {
+        if (message instanceof CommandInteraction && error instanceof Error)
+            handleError(message, error);
     }
 };

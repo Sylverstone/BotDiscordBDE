@@ -4,10 +4,11 @@ import __dirname from "../dirname.js";
 import lookIfCommandsValid from "../Fonctions/lookIfCommandsValid.js";
 import CBot, { script_t } from "../Class/CBot.js";
 import { pathToFileURL } from "url";
-import { capFirstLetter } from "./interactionCreate.js";
+import { capFirstLetter } from "./CommandInteraction.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 
 const name = Events.MessageCreate;
+
 type commandHelp_t = 
 {
     run : (message : Message) => Promise<void>
@@ -57,7 +58,7 @@ const exec = async (bot : CBot, message : Message) =>  {
     const command : script_t = await import(pathToCommand);
     if(!command.onlyGuild)
     {
-        command.run(bot,message,args)
+        command.run(bot,message,args);
     }
     else
     {

@@ -48,20 +48,10 @@ export default class CBot extends Client {
         };
         return this.reunionData;
     }
-    ClearEvent() {
-        this.eventData = {};
+    ClearEvent(id) {
+        this.setDefaultEventDataGuild(id);
     }
-    clearReunion() {
-        this.reunionData = {
-            0: {
-                reunion_name: "",
-                info_en_plus: "",
-                date: "",
-                heuredebut: 0,
-                heurefin: 0,
-                lieu: "",
-                sujet: ""
-            }
-        };
+    clearReunion(id) {
+        this.setDefaultReunionDataGuild(id);
     }
 }
