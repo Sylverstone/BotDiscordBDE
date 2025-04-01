@@ -7,13 +7,24 @@ export default class annee {
             value = 0;
         this._annee = value;
     }
+    isBissextile() {
+        return this._annee % 4 === 0 && (this._annee % 100 === 0 || this._annee % 400 === 0);
+    }
     get annee() {
         return this._annee;
     }
     toString() {
         return this._annee.toString();
     }
+    getNbJour() {
+        if (this._annee === 0)
+            return 0;
+        const ancienneAnne = new annee(this._annee - 1);
+        if (this.isBissextile())
+            return 366 + ancienneAnne.getNbJour();
+        return 365 + ancienneAnne.getNbJour();
+    }
     toSeconde() {
-        return this._annee * 365 * 24 * 60 * 60;
+        return this.getNbJour() * 24 * 60 * 60;
     }
 }

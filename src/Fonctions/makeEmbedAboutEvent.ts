@@ -80,14 +80,12 @@ export default function makeEmbedABoutEvent(bot : CBot, typeEnv : EVentType, nom
     const [integerPartFin,DecimalPartFin] = splitNumber(heureArray[1]);
     let strDecimalPart = decimalPartToStr(DecimalPart);
     let strDecmialPartFin = decimalPartToStr(DecimalPartFin);
-    const infoEnPlusText = info_en_plus === "" ? "Aucun info en plus n'a été fourni" : "Info en plus : " + info_en_plus;
+    const infoEnPlusText = info_en_plus === "" ? "Aucun description n'a été fourni" : "Description : " + info_en_plus;
+    const description = `${date}\nheure : ${integerPart}h${strDecimalPart} -> ${integerPartFin}h${strDecmialPartFin}\nlieu : ${lieu}\n${infoEnPlusText}`
     return new EmbedBuilder()
                     .setColor("#ff0000")
                     .setTitle(title)
-                    .setDescription(`${date}\n
-                                    heure : ${integerPart}h${strDecimalPart} -> ${integerPartFin}h${strDecmialPartFin}\n
-                                    lieu : ${lieu}\n
-                                    ${infoEnPlusText}`)
+                    .setDescription(description)
                     .setFooter({
                         text: "Au plaisir de vous aidez",
                         iconURL: bot.user?.displayAvatarURL() || ""

@@ -16,6 +16,6 @@ export default class heure {
         return this._numHeure < 10 ? `0${this._numHeure}` : `${this._numHeure}`;
     }
     toSeconde() {
-        return this._numHeure * 3600;
+        return this._numHeure * 60 * 60;
     }
 }

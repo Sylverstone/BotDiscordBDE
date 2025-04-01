@@ -32,8 +32,9 @@ export default class date
             if(datePart.length !== 3) throw new Error("Date invalide");
             
             this._jour = new Jour(parseInt(datePart[0]));
-            this._mois = new mois(parseInt(datePart[1]));
             this._annee = new annee(parseInt(datePart[2]));
+            this._mois = new mois(parseInt(datePart[1]),this._annee);
+
     
             const heurePart = dateSplit[1].split(":");
             if(heurePart.length!== 3) throw new Error("Heure invalide");
@@ -51,8 +52,8 @@ export default class date
             if(datePart.length !== 3) throw new Error("Date invalide");
             
             this._jour = new Jour(parseInt(datePart[2]));
-            this._mois = new mois(parseInt(datePart[1]));
             this._annee = new annee(parseInt(datePart[0]));
+            this._mois = new mois(parseInt(datePart[1]),this._annee);
             
             const heurePart = dateSplit[1].split(":");
             if(heurePart.length!== 3) throw new Error("Heure invalide");

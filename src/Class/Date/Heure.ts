@@ -28,6 +28,6 @@ export default class heure
 
     public toSeconde() : number 
     {
-        return this._numHeure * 3600;
+        return this._numHeure * 60 * 60;
     }
 }

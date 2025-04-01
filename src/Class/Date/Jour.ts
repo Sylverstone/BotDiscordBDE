@@ -36,4 +36,5 @@ export default class Jour
     {
         return this._numJour * 24 * 60 * 60;
     }
+
 }

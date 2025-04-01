@@ -1,14 +1,17 @@
-export default class mois 
+import annee  from "./Annee";
+export default class mois
 {
     private _numMois : number;
     private maxJour : number;
     private Bissextile : boolean;
+    private year : annee;
 
-    constructor(numMois : number)
+    constructor(numMois : number, year : annee)
     {
         this._numMois = numMois;
         this.maxJour = this.getMaxJour();
-        this.Bissextile = this.isBissextile();
+        this.Bissextile = year.isBissextile();
+        this.year = year;
     }
 
     set numMois(numMois : number)
@@ -54,8 +57,17 @@ export default class mois
 
     
 
-    public toSeconde() : number 
+    //Renvoie le nombre de jour
+    public getNbJour() : number
     {
-        return this.numMois * this.maxJour * 24 * 60 * 60;
+        if(this.numMois == 1)
+            return 0;
+        const ancienneMois = new mois(this._numMois - 1,this.year);
+        return ancienneMois.getMaxJour() + ancienneMois.getNbJour();
+    }
+
+    public toSeconde() : number
+    {
+        return this.getNbJour() * 24 * 60 *60;
     }
 }

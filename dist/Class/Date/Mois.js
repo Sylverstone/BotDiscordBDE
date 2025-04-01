@@ -1,8 +1,9 @@
 export default class mois {
-    constructor(numMois) {
+    constructor(numMois, year) {
         this._numMois = numMois;
         this.maxJour = this.getMaxJour();
-        this.Bissextile = this.isBissextile();
+        this.Bissextile = year.isBissextile();
+        this.year = year;
     }
     set numMois(numMois) {
         if (numMois < 1)
@@ -32,7 +33,14 @@ export default class mois {
     toNum() {
         return this.numMois < 10 ? `0${this._numMois}` : `${this._numMois}`;
     }
+    //Renvoie le nombre de jour
+    getNbJour() {
+        if (this.numMois == 1)
+            return 0;
+        const ancienneMois = new mois(this._numMois - 1, this.year);
+        return ancienneMois.getMaxJour() + ancienneMois.getNbJour();
+    }
     toSeconde() {
-        return this.numMois * this.maxJour * 24 * 60 * 60;
+        return this.getNbJour() * 24 * 60 * 60;
     }
 }
