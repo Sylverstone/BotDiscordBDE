@@ -17,8 +17,8 @@ import {
     GuildScheduledEvent
 } from "discord.js"
 import { Connection,  } from "mysql2/typings/mysql/lib/Connection";
-import {Evenement_t} from "../Commands/Event/event";
-import {reunion_t} from "../Commands/Reunion/reunion";
+import {CEvenement} from "./Evenement/Evenement.js";
+import {CReunion} from "./Evenement/Reunion.js";
 
 export interface commands_t{
     [key: string]: any;
@@ -55,12 +55,12 @@ export const isScript_t = (script : unknown) : script is script_t =>
 
 export interface reunionData_t
 {
-    [key : number]: reunion_t;
+    [key : number]: CReunion;
 }
 
 export interface eventData_t
 {
-    [key : number]: Evenement_t;
+    [key : number]: CEvenement;
 }
 export default class CBot extends Client{
 
@@ -90,28 +90,12 @@ export default class CBot extends Client{
     }
 
     public setDefaultEventDataGuild(guildId : number) : eventData_t {
-        this.eventData[guildId] = {
-            info_en_plus :"",
-            lieu : "",
-            datedebut : "",
-            datefin  : "",
-            heuredebut  : 0,
-            heurefin  : 0,
-            name  : ""
-        }
+        this.eventData[guildId] = new CEvenement();
         return this.eventData
     }
 
     public setDefaultReunionDataGuild(guildId : number) : reunionData_t {
-        this.reunionData[guildId] = {
-            info_en_plus :"",
-            lieu : "",
-            date : "",
-            sujet : "",
-            heuredebut  : 0,
-            heurefin  : 0,
-            reunion_name  : ""
-        }
+        this.reunionData[guildId] = new CReunion();
         return this.reunionData
     }
 

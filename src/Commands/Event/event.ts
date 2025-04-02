@@ -1,6 +1,6 @@
 import {
     CommandInteraction,
-    SlashCommandBooleanOption,
+    SlashCommandBooleanOption, SlashCommandStringOption,
 } from "discord.js";
 import 'dotenv/config'
 import transfromOptionToObject from "../../Fonctions/transfromOptionToObject.js";
@@ -42,21 +42,16 @@ export const option = [
 ];
 */
 
-interface optionData
-{
-    creer_evenement : boolean;
-}
 
-const isOptionData_t = (option : unknown): option is optionData =>
-{
-    return option !== null && typeof option === "object" && "creer_evenement" in option;
-}
-export const optionBoolean = [
-        new SlashCommandBooleanOption()
-            .setName("creer_evenement")
-            .setDescription("True si vous voulez creer un évènement, False sinon.")
-            .setRequired(true)
-]
+export const option =
+    [
+        new SlashCommandStringOption()
+            .setName("creer-evenement")
+            .setDescription("Oui si vous voulez en creer un. Rien sinon")
+            .setRequired(false)
+            .addChoices({name : "Oui", value : "Oui"})
+    ]
+
 export const onlyGuild = true;
 
 /*
@@ -105,13 +100,8 @@ export function isEventArray(value: unknown): value is Evenement_t[] {
 export const  run = async(bot : CBot, message : CommandInteraction) => {
     
     try {
-        //await message.deferReply({flags : MessageFlags.Ephemeral});
-        let optionObject = transfromOptionToObject(message)
-        console.log(optionObject)
-        if(!isOptionData_t(optionObject)) return;
-        const {creer_evenement} = optionObject;
-
-        if(!creer_evenement)
+        const length = message.options.data.length;
+        if( length <= 0 )
             await displayEvent(message,bot);
         else
         {

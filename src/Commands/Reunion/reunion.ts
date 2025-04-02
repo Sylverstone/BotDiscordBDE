@@ -1,15 +1,10 @@
 import {
     CommandInteraction,
-    MessageFlags,
-    SlashCommandBooleanOption,
-    SlashCommandNumberOption,
     SlashCommandStringOption
 } from 'discord.js';
-import transfromOptionToObject from '../../Fonctions/transfromOptionToObject.js';
-import __dirname from '../../dirname.js';
+
 import CBot from '../../Class/CBot.js';
 import handleError from '../../Fonctions/handleError.js';
-import EmptyObject from '../../Fonctions/LookIfObjectIsEmpty.js';
 import displayReunion from './_displayReunion.js';
 import saveReunion from './_saveReunion.js';
 import make_log from '../../Fonctions/makeLog.js';
@@ -22,12 +17,13 @@ const onlyGuild = true;
 
 export const howToUse = "`/reunion` vous permet de faire *2* choses.\nPremière utilisation : `/reunion` en entrant cette commande il vous sera retourner la date de la prochaine reunion, si elle existe.\nDeuxième utilisation : `/reunion 'date' 'sujet' 'lieu' 'info_en_plus' 'heuredebut' 'heurefin'`. Une deuxième réunion sera alors sauvegarder";
 
-export const optionBoolean =
+export const option =
 [
-    new SlashCommandBooleanOption()
-        .setName("creer_reunion")
-        .setDescription("True si vous voulez creer une réunion, False sinon.")
-        .setRequired(true)
+    new SlashCommandStringOption()
+        .setName("creer-reunion")
+        .setDescription("Oui si vous voulez en creer une. Rien sinon")
+        .setRequired(false)
+        .addChoices({name : "Oui", value : "Oui"})
 ]
 
 export interface reunion_t{
@@ -40,28 +36,6 @@ export interface reunion_t{
     reunion_name : string,
 }
 
-interface optionData_t
-{
-    creer_reunion : boolean;
-}
-
-const isOptionData_t = (elt : unknown) : elt is optionData_t =>
-{
-    return elt !== null && typeof elt === "object" && "creer_reunion" in elt;
-}
-
-interface maxId_t
-{
-    maxId : number
-}
-
-export function isMaxId(result : unknown) : result is maxId_t
-{
-    return (
-        result !== null && typeof result === "object"
-        && "maxId" in result && typeof result.maxId === "number"
-    );
-}
 export function isReunion(result : unknown) : result is reunion_t
 {
     
@@ -79,16 +53,12 @@ export function isReunionArray(result : unknown) : result is reunion_t[]
     return Array.isArray(result) && result.every(row => isReunion(row));
 }
 
-
 const run = async (bot : CBot, message : CommandInteraction) =>
 {
 
     try {
-        let optionObject = transfromOptionToObject(message);
-        if(!isOptionData_t(optionObject)) return;
-        const {creer_reunion} = optionObject;
-
-        if(!creer_reunion)
+        const length : number = message.options.data.length;
+        if(length <= 0)
             await displayReunion(message,bot)
         else        
             await saveReunion(message,bot);

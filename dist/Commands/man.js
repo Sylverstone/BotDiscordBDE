@@ -56,6 +56,11 @@ export const run = async (bot, message) => {
             componentType: ComponentType.StringSelect,
             time: 100000
         });
+        collector.on("end", async (interaction) => {
+            selectMenu.setPlaceholder("Out of time");
+            selectMenu.setDisabled(true);
+            reply.edit({ components: [actionRow] });
+        });
         collector.on("collect", async (interaction) => {
             if (!interaction.values.length) {
                 await interaction.reply("OK");

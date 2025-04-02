@@ -37,6 +37,7 @@ export const run = async (bot, message) => {
                 })
                     .then((status) => {
                     console.log(`[LOG] Event ${status.name} deleted`);
+                    message.editReply(`Event ${status.name} deleted`);
                 }).catch(err => {
                     throw err;
                 });

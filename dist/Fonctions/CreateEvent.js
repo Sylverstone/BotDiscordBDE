@@ -11,7 +11,7 @@ export default async function CreateEvent(message, sujet, dateDebut, dateFin, li
         entityMetadata: {
             location: lieu,
         },
-        description: `Sujet : ${sujet}\n${more}\n`,
+        description: `Sujet : ${sujet}\n> ${more}\n`,
     });
     return name;
 }

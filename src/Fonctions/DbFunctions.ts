@@ -17,7 +17,7 @@ export async function SaveValueToDB(message : CommandInteraction | ModalSubmitIn
     }
     else
     {
-      console.log(object, "obejct")
+      console.log(object, "object")
       optionObject = object;
     }
 

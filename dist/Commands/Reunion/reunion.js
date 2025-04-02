@@ -1,5 +1,4 @@
-import { SlashCommandBooleanOption } from 'discord.js';
-import transfromOptionToObject from '../../Fonctions/transfromOptionToObject.js';
+import { SlashCommandStringOption } from 'discord.js';
 import handleError from '../../Fonctions/handleError.js';
 import displayReunion from './_displayReunion.js';
 import saveReunion from './_saveReunion.js';
@@ -8,19 +7,13 @@ const description = "Cette commande permet de récuperer/set des infos sur la pr
 const name = "reunion";
 const onlyGuild = true;
 export const howToUse = "`/reunion` vous permet de faire *2* choses.\nPremière utilisation : `/reunion` en entrant cette commande il vous sera retourner la date de la prochaine reunion, si elle existe.\nDeuxième utilisation : `/reunion 'date' 'sujet' 'lieu' 'info_en_plus' 'heuredebut' 'heurefin'`. Une deuxième réunion sera alors sauvegarder";
-export const optionBoolean = [
-    new SlashCommandBooleanOption()
-        .setName("creer_reunion")
-        .setDescription("True si vous voulez creer une réunion, False sinon.")
-        .setRequired(true)
+export const option = [
+    new SlashCommandStringOption()
+        .setName("creer-reunion")
+        .setDescription("Oui si vous voulez en creer une. Rien sinon")
+        .setRequired(false)
+        .addChoices({ name: "Oui", value: "Oui" })
 ];
-const isOptionData_t = (elt) => {
-    return elt !== null && typeof elt === "object" && "creer_reunion" in elt;
-};
-export function isMaxId(result) {
-    return (result !== null && typeof result === "object"
-        && "maxId" in result && typeof result.maxId === "number");
-}
 export function isReunion(result) {
     return (result !== null && typeof result === "object"
         && "date" in result && "sujet" in result
@@ -32,11 +25,8 @@ export function isReunionArray(result) {
 }
 const run = async (bot, message) => {
     try {
-        let optionObject = transfromOptionToObject(message);
-        if (!isOptionData_t(optionObject))
-            return;
-        const { creer_reunion } = optionObject;
-        if (!creer_reunion)
+        const length = message.options.data.length;
+        if (length <= 0)
             await displayReunion(message, bot);
         else
             await saveReunion(message, bot);

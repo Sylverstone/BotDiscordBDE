@@ -15,16 +15,16 @@ export const capFirstLetter = (str : string) =>
 }
 
 const exec = async (bot : CBot, interaction : CommandInteraction  ) =>  {
-    if(interaction.isChatInputCommand())
-    {
-        const commandName = interaction.commandName;
-        const additionalFile = ["event","reunion"];
-        const filePath = additionalFile.includes(commandName) ? pathToFileURL(path.join(__dirname,"Commands",capFirstLetter(commandName),commandName + ".js"))
-            : pathToFileURL(path.join(__dirname,"Commands",commandName + ".js"));
-        const command : script_t = await import(filePath.href);
-        const { run } = command;
-        run(bot,interaction,[])
-    }
+    if(!interaction.isChatInputCommand()) return;
+
+    const commandName = interaction.commandName;
+    const additionalFile = ["event","reunion"];
+    const filePath = additionalFile.includes(commandName) ? pathToFileURL(path.join(__dirname,"Commands",capFirstLetter(commandName),commandName + ".js"))
+        : pathToFileURL(path.join(__dirname,"Commands",commandName + ".js"));
+    const command : script_t = await import(filePath.href);
+    const { run } = command;
+    run(bot,interaction,[])
+
 }
 
 export{name,exec}

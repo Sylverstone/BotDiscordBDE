@@ -64,7 +64,6 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             return;
         }
 
-
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId(message.id)
             .setPlaceholder("Choisissez l'évènement")

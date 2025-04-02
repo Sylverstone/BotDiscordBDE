@@ -23,7 +23,7 @@ export default async function CreateEvent(message : CommandInteraction | ModalSu
         entityMetadata : {
             location : lieu,
         },
-        description : `Sujet : ${sujet}\n${more}\n`,
+        description : `Sujet : ${sujet}\n> ${more}\n`,
     })
     return name;
 

@@ -5,15 +5,19 @@ import minute from "./Minutes.js";
 import mois from "./Mois.js";
 import seconde from "./Seconde.js";
 import * as util from "util";
+import { InvalidDateError } from "../Errors/InvalidDate.js";
 export default class date {
     /**
      * @constructor
-     * @param {string} date  Date au format jj-mm-yyyy HH:mm:ss où l'heure n'est pas obligatoire.
-     * @returns retourne la date rentrée en string ou la date actuelle si rien n'est mit en paramètre
+     * @param {string} strDate  Date au format jj-mm-yyyy HH:mm:ss où l'heure n'est pas obligatoire.
+     * @returns retourne la date rentrée en string ou la date actuelle si rien n'est mis en paramètre.
+     * @exception {InvalidDateError} Quand la date n'est pas dans un format valide
      */
-    constructor(date = "") {
-        if (date !== "") {
-            const dateSplit = date.split(" ");
+    constructor(strDate = "") {
+        if (strDate !== "") {
+            if (!date.IsDate(strDate))
+                throw new InvalidDateError("Invalid date");
+            const dateSplit = strDate.split(" ");
             if (dateSplit.length === 1)
                 dateSplit.push("00:00:00");
             const datePart = dateSplit[0].split("-");
@@ -48,6 +52,21 @@ export default class date {
     }
     [util.inspect.custom]() {
         return `\nDate : ${this.toString()}\nDate (origin Date type) : ${this.toDate()}\n Time : ${this.getTime()}\n`;
+    }
+    //Renvoie true si ndate est une date cohérente (au niveau du format.)
+    static IsDate(ndate) {
+        let jour = "";
+        let mois = "";
+        let annee = "";
+        if (ndate.includes("/")) {
+            const split = ndate.split("/");
+            return split.length === 3;
+        }
+        else if (ndate.includes("-")) {
+            const split = ndate.split("-");
+            return split.length === 3;
+        }
+        return false;
     }
     /**
      *

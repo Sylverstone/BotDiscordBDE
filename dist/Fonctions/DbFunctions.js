@@ -11,7 +11,7 @@ export async function SaveValueToDB(message, bot, table, object = {}, deleteAllO
         optionObject = transfromOptionToObject(message);
     }
     else {
-        console.log(object, "obejct");
+        console.log(object, "object");
         optionObject = object;
     }
     optionObject["GuildId"] = message.guild.id;

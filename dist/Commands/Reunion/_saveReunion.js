@@ -1,7 +1,5 @@
-import { EmbedBuilder, MessageFlags, ModalBuilder, TextInputStyle } from "discord.js";
-import CreateEvent from "../../Fonctions/CreateEvent.js";
-import { createDate, setup_date, verifLogicDate, verifLogicDateWithoutHour } from "../../Fonctions/DateScript.js";
-import { SaveValueToDB } from "../../Fonctions/DbFunctions.js";
+import { CommandInteraction, EmbedBuilder, MessageFlags, ModalBuilder, TextInputStyle } from "discord.js";
+import { verifLogicDate, verifLogicDateWithoutHour } from "../../Fonctions/DateScript.js";
 import displayEmbedsMessage from "../../Fonctions/displayEmbedsMessage.js";
 import handleError from "../../Fonctions/handleError.js";
 import { Color } from "../../Enum/Color.js";
@@ -11,6 +9,7 @@ import { getLieuField } from "../../Fonctions/Fields/getLieuField.js";
 import { getHeureFinField } from "../../Fonctions/Fields/getHeureFinField.js";
 import { getDescriptionField } from "../../Fonctions/Fields/getDescriptionField.js";
 import { getCustomField } from "../../Fonctions/Fields/getCustomField.js";
+import { InvalidDateError } from "../../Class/Errors/InvalidDate.js";
 export default async function saveReunion(message, bot, phase = 1) {
     /*
     if(!message.guild) throw new Error("Aucune guild n'est dispo");
@@ -108,45 +107,38 @@ export default async function saveReunion(message, bot, phase = 1) {
     }
     await message.showModal(popup);
     const filter = (interaction) => interaction.customId === "CreateReunion1";
+    let mess2;
     try {
-        message.awaitModalSubmit({ filter, time: 30000000 })
+        message.awaitModalSubmit({ filter, time: 300000000 })
             .then(async (result) => {
+            mess2 = result;
             if (!result.guild)
                 return;
             const id = result.guild.id;
             if (phase === 1) {
                 try {
                     bot.reunionData[+id].sujet = result.fields.getTextInputValue("sujetField");
-                    bot.reunionData[+id].date = result.fields.getTextInputValue("dateField");
-                    //la date de l'évènement, sert pour verifier sa conformité
-                    const tdate = bot.reunionData[+id].date;
-                    if (!(typeof tdate === "string"))
-                        return;
-                    const tDate1 = createDate(tdate);
-                    if (tDate1 === undefined) {
-                        await displayEmbedsMessage(result, new EmbedBuilder()
-                            .setColor(Color.failureColor)
-                            .setDescription("La date n'est pas bonnes")
-                            .setTitle("Erreur de saisie"));
-                        return;
-                    }
+                    bot.reunionData[+id].dateDebut = result.fields.getTextInputValue("dateField");
+                    bot.reunionData[+id].dateFin = result.fields.getTextInputValue("dateField");
                     //Verification de la date
-                    if (!verifLogicDateWithoutHour(tDate1, tDate1)) {
+                    const datedebut = bot.reunionData[+id].dateDebut;
+                    const datefin = bot.reunionData[+id].dateFin;
+                    if (!verifLogicDateWithoutHour(datedebut, datefin)) {
                         await displayEmbedsMessage(result, new EmbedBuilder()
                             .setColor(Color.failureColor)
                             .setDescription("La date n'est pas bonne.\nRaison possible : Définition dans le passé")
                             .setTitle("Erreur"));
                         return;
                     }
-                    let name = `Reunion ${tDate1.getDay()}/${tDate1.getMonth()}`;
+                    let name = `Reunion ${datedebut.getDay()}/${datedebut.getMonth()}`;
                     let EventList = await result.guild.scheduledEvents.fetch();
                     EventList = EventList.filter(event => event.name.startsWith(name));
                     if (EventList.size > 0) {
-                        name = `Reunion ${tDate1.getDay()}/${tDate1.getMonth()} (${EventList.size})`;
+                        name = `Reunion ${datedebut.getDay()}/${datedebut.getMonth()} (${EventList.size})`;
                     }
-                    bot.reunionData[+id].reunion_name = name;
+                    bot.reunionData[+id].name = name;
                     bot.reunionData[+id].lieu = result.fields.getTextInputValue("lieu");
-                    await sendButton(result, "+reunion" /* customId.reunion */);
+                    await sendButton("Continuer le formulaire", result, "+reunion" /* customId.reunion */, bot);
                 }
                 catch (e) {
                     if (e instanceof Error) {
@@ -158,7 +150,7 @@ export default async function saveReunion(message, bot, phase = 1) {
             else {
                 try {
                     await result.deferReply({ flags: MessageFlags.Ephemeral });
-                    bot.reunionData[+id].info_en_plus = result.fields.getTextInputValue("info_en_plus");
+                    bot.reunionData[+id].description = result.fields.getTextInputValue("info_en_plus");
                     const heureDebut = result.fields.getTextInputValue("heureDebut");
                     const heureFin = result.fields.getTextInputValue("heureFin");
                     if (isNaN(parseFloat(heureDebut)) || isNaN(parseFloat(heureFin))) {
@@ -168,21 +160,12 @@ export default async function saveReunion(message, bot, phase = 1) {
                             .setTitle("Erreur"), true);
                         return;
                     }
-                    bot.reunionData[+id].heuredebut = parseFloat(heureDebut);
-                    bot.reunionData[+id].heurefin = parseFloat(heureFin);
-                    console.table(bot.reunionData);
+                    bot.reunionData[+id].heureDebut = parseFloat(heureDebut);
+                    bot.reunionData[+id].heureFin = parseFloat(heureFin);
                     const optionReunion = bot.reunionData;
-                    if (!(typeof optionReunion[+id].date === "string"))
-                        return;
-                    //Contient la date de fin et de début
-                    const tdateDebut = optionReunion[+id].date;
-                    if (!(typeof tdateDebut === "string"))
-                        return;
-                    const DateCreation = setup_date(tdateDebut, tdateDebut, optionReunion[+id].heuredebut, optionReunion[+id].heurefin, result);
-                    if (!DateCreation)
-                        return;
-                    const dateDebut = DateCreation[0];
-                    const dateFin = DateCreation[1];
+                    //règle les heures des dates
+                    bot.reunionData[+id].setupHours(optionReunion[+id].heureDebut, optionReunion[+id].heureFin);
+                    const dateDebut = optionReunion[+id].dateDebut;
                     if (!verifLogicDate(dateDebut, dateDebut)) {
                         await displayEmbedsMessage(result, new EmbedBuilder()
                             .setColor(Color.failureColor)
@@ -190,39 +173,18 @@ export default async function saveReunion(message, bot, phase = 1) {
                             .setTitle("Erreur"), true);
                         return;
                     }
-                    const finalObjectEvent = {
-                        date: dateDebut.toString(),
-                        sujet: optionReunion[+id].sujet,
-                        lieu: optionReunion[+id].lieu,
-                        info_en_plus: optionReunion[+id].info_en_plus,
-                        heuredebut: optionReunion[+id].heuredebut,
-                        heurefin: optionReunion[+id].heurefin,
-                        reunion_name: optionReunion[+id].reunion_name,
-                    };
-                    SaveValueToDB(result, bot, "Reunion", finalObjectEvent)
+                    bot.reunionData[+id].publish(message)
                         .then(async () => {
-                        const sujet = optionReunion[+id].sujet;
-                        const lieu = optionReunion[+id].lieu;
-                        const info_en_plus = optionReunion[+id].info_en_plus;
-                        CreateEvent(result, sujet, dateDebut, dateFin, lieu, info_en_plus, finalObjectEvent.reunion_name)
-                            .then(async (name) => {
-                            await displayEmbedsMessage(result, new EmbedBuilder()
-                                .setTitle("Reunion")
-                                .setDescription("La reunion a été crée. Elle se nomme : " + name)
-                                .setColor(Color.successColor), true);
-                        })
-                            .catch(async (e) => {
-                            console.log(e);
-                            await displayEmbedsMessage(result, new EmbedBuilder()
-                                .setTitle("Information")
-                                .setDescription("Une erreur a eu lieu :(")
-                                .setColor(Color.failureColor), true);
-                        });
+                        await displayEmbedsMessage(result, new EmbedBuilder()
+                            .setTitle("Reunion")
+                            .setDescription("La reunion a été crée. Elle se nomme : " + bot.reunionData[+id].name)
+                            .setColor(Color.successColor), true);
+                        await bot.reunionData[+id].saveToDB(message, bot);
+                        bot.clearReunion(+id);
                     })
-                        .catch(err => {
-                        throw err;
+                        .catch((e) => {
+                        throw e;
                     });
-                    bot.clearReunion(+id);
                 }
                 catch (error) {
                     console.log(error);
@@ -230,8 +192,21 @@ export default async function saveReunion(message, bot, phase = 1) {
                         handleError(result, error, true);
                 }
             }
+        })
+            .catch(async (e) => {
+            if (e instanceof InvalidDateError) {
+                await displayEmbedsMessage(mess2, new EmbedBuilder()
+                    .setColor(Color.failureColor)
+                    .setDescription("Les dates ne sont pas bonnes")
+                    .setTitle("Erreur"));
+                return;
+            }
+            else
+                throw e;
         });
     }
     catch (e) {
+        if (e instanceof Error && message instanceof CommandInteraction)
+            handleError(message, e);
     }
 }

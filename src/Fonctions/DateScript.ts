@@ -80,10 +80,29 @@ export function to_date_sql(date : string)
     
 }
  
-export function IsDate(date : string)
+export function IsDate(ndate : string)
 {
 
-
+    let jour : string = "";let mois : string = "";let annee : string = "";
+    if(ndate.includes("/"))
+    {
+        const split = ndate.split("/");
+        if(split.length !== 3)
+            return false;
+        [jour,mois,annee] = split;
+    }
+    else if(ndate.includes("-"))
+    {
+        const split = ndate.split("-");
+        if(split.length !== 3)
+            return false;
+        [jour,mois,annee] = split;
+    }
+    else
+    {
+        return false
+    }
+    return true
 }
 
 //Verifie que les dates soient cohérentes. Soit dateFin >= dateDebut et dateDebut => dateActu
@@ -100,7 +119,7 @@ export function verifLogicDateWithoutHour(dateDebut : date, dateFin : date) : bo
     const dateActu = new date();
     dateActu.setHours(0,0,0);
     console.log(dateActu);
-    console.log(dateActu);
+    console.log(dateDebut);
     console.log(dateFin);
     return dateFin.getTime() >= dateDebut.getTime() && dateDebut.getTime() >= dateActu.getTime();
 }

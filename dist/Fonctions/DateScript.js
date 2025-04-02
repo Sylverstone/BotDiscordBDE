@@ -60,7 +60,26 @@ export function to_date_sql(date) {
     console.log("la date qui doit être transfo", date);
     return `${annee}-${mois}-${jour}`;
 }
-export function IsDate(date) {
+export function IsDate(ndate) {
+    let jour = "";
+    let mois = "";
+    let annee = "";
+    if (ndate.includes("/")) {
+        const split = ndate.split("/");
+        if (split.length !== 3)
+            return false;
+        [jour, mois, annee] = split;
+    }
+    else if (ndate.includes("-")) {
+        const split = ndate.split("-");
+        if (split.length !== 3)
+            return false;
+        [jour, mois, annee] = split;
+    }
+    else {
+        return false;
+    }
+    return true;
 }
 //Verifie que les dates soient cohérentes. Soit dateFin >= dateDebut et dateDebut => dateActu
 export function verifLogicDate(dateDebut, dateFin) {
@@ -73,7 +92,7 @@ export function verifLogicDateWithoutHour(dateDebut, dateFin) {
     const dateActu = new date();
     dateActu.setHours(0, 0, 0);
     console.log(dateActu);
-    console.log(dateActu);
+    console.log(dateDebut);
     console.log(dateFin);
     return dateFin.getTime() >= dateDebut.getTime() && dateDebut.getTime() >= dateActu.getTime();
 }

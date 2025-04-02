@@ -92,6 +92,11 @@ export const  run = async(bot : CBot, message : CommandInteraction) => {
             time : 100_000
         })
 
+        collector.on("end", async(interaction) =>   {
+            selectMenu.setPlaceholder("Out of time");
+            selectMenu.setDisabled(true);
+            reply.edit({components : [actionRow]});
+        })
         collector.on("collect", async(interaction) => {
             if(!interaction.values.length){
                 await interaction.reply("OK");

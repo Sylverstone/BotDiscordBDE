@@ -16,7 +16,7 @@ const exec = async (bot : CBot, event : GuildScheduledEvent) =>  {
     {
         const tableName = event.name.startsWith("Reunion") ? Reunion.tableName : Event.tableName;
         const champName = tableName === Reunion.tableName ? Reunion.name : Event.name;
-    
+
         if(!event.guild) return;
         await deleteFromTableWithName(tableName,champName,event.name,bot,+event.guild.id);
         console.log("[LOG]",event.name, "was deleted");
