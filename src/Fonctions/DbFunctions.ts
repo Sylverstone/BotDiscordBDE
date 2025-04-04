@@ -96,11 +96,13 @@ export async function getMostRecentValueFromDB(message : CommandInteraction,cham
     });
 }
 
-export async function getValueFromDB(message : CommandInteraction,champ :string,table:string,champID : string,bot : CBot)
+export async function getValueFromDB(message : CommandInteraction,champ :string,table:string,champID : string,bot : CBot, orderChamp= "")
 {
     if(!message.guild) return;
+    if(orderChamp === "")
+        orderChamp = champID;
     const guildId = message.guild.id;
-    const commandSql = `SELECT ${champ} FROM ${table} WHERE guildId = ${guildId} ORDER BY ${champID} DESC`;
+    const commandSql = `SELECT ${champ} FROM ${table} WHERE guildId = ${guildId} ORDER BY ${orderChamp} DESC`;
     if(!testCo(bot.bd))
     {
         bot.bd = createConnection();

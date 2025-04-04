@@ -3,9 +3,9 @@ import handleError from "../Fonctions/handleError.js";
 import 'dotenv/config';
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 import { Color } from "../Enum/Color.js";
-export const description = "Cette commande vous permet de supprimer un évènement grâce a son nom";
+export const description = "Cette commande vous permet de supprimer un évènement en selectionnant";
 export const name = "sup_event";
-export const howToUse = "`/sup_event 'nom_reunion'` vous permet de supprimer un evènement grâce a son nom";
+export const howToUse = "`/sup_event Vous afficheras les évènements présent dans votre serveur, et vous pourrez les supprimés en les selectionnat";
 /*
 export const option = [
     new SlashCommandStringOption()

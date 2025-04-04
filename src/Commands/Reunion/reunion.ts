@@ -26,6 +26,31 @@ export const option =
         .addChoices({name : "Oui", value : "Oui"})
 ]
 
+export interface SqlReunion_t
+{
+    idReunion : number,
+    GuildId : string,
+    sujet : string,
+    lieu : string,
+    info_en_plus : string,
+    date : Date,
+    heuredebut : number,
+    heurefin : number,
+    reunion_name : string,
+}
+
+export const isSqlReunion_t = (value : unknown): value is SqlReunion_t =>
+{
+    return value !== null && typeof value === "object" && "idReunion" in value && "GuildId" in value && "sujet" in value
+        && "lieu" in value && "info_en_plus" in value && "date" in value && "heuredebut" in value && "heurefin" in value
+        && "reunion_name" in value;
+}
+
+export const isSqlReunion_tArray = (value : unknown): value is SqlReunion_t[] =>
+{
+    return Array.isArray(value) &&  value.every(val => isSqlReunion_t(val));
+}
+
 export interface reunion_t{
     date : Date | string | date,
     sujet : string,

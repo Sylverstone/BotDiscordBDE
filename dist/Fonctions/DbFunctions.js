@@ -75,11 +75,13 @@ export async function getMostRecentValueFromDB(message, champ, table, champID, b
         });
     });
 }
-export async function getValueFromDB(message, champ, table, champID, bot) {
+export async function getValueFromDB(message, champ, table, champID, bot, orderChamp = "") {
     if (!message.guild)
         return;
+    if (orderChamp === "")
+        orderChamp = champID;
     const guildId = message.guild.id;
-    const commandSql = `SELECT ${champ} FROM ${table} WHERE guildId = ${guildId} ORDER BY ${champID} DESC`;
+    const commandSql = `SELECT ${champ} FROM ${table} WHERE guildId = ${guildId} ORDER BY ${orderChamp} DESC`;
     if (!testCo(bot.bd)) {
         bot.bd = createConnection();
     }

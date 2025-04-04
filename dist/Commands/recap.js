@@ -1,12 +1,13 @@
-import { SlashCommandStringOption, MessageFlags, EmbedBuilder } from "discord.js";
-import { getMostRecentValueFromDB, SaveValueToDB } from "../Fonctions/DbFunctions.js";
+import { SlashCommandStringOption, MessageFlags, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, ComponentType } from "discord.js";
+import { getValueFromDB, SaveValueToDB } from "../Fonctions/DbFunctions.js";
 import "dotenv/config";
 import handleError from "../Fonctions/handleError.js";
 import make_log from "../Fonctions/makeLog.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
-export const description = "Cette commande permet de recuperer/set le dernier récap";
+import { Reunion } from "../Enum/Reunion.js";
+export const description = "Cette commande permet de recuperer les derniers récaps | set un récap";
 export const name = "recap";
-export const howToUse = "`/recap` vous permet de faire *2* choses.\nPremière utilisation : `/recap` en entrant cette commande il vous sera retourner le lien OneDrive du dernier récap de reunion.\nDeuxième utilisation : `/recap lien_recap` la commande sauvegarde le nouveau lien.";
+export const howToUse = "`/recap` vous permet de faire *2* choses.\nPremière utilisation : `/recap` en entrant cette commande Vous aurez le choix entre plusieurs date de récapitulatif. Les choix sont valables 100s.\nDeuxième utilisation : `/recap lien_recap` la commande sauvegarde le nouveau lien.";
 export const onlyGuild = true;
 export const option = [
     new SlashCommandStringOption()
@@ -14,6 +15,13 @@ export const option = [
         .setDescription("Paramètre permettant de mettre un nouveau recap")
         .setRequired(false),
 ];
+const isRecap_t = (value) => {
+    return value !== null && typeof value === "object" && "idRecap" in value
+        && "lien_recap" in value && "text_entier" in value && "GuildId" in value;
+};
+const isRecap_tArray = (value) => {
+    return Array.isArray(value) && value.every(val => isRecap_t(val));
+};
 export const run = async (bot, message) => {
     try {
         let haveParameters = false;
@@ -21,7 +29,7 @@ export const run = async (bot, message) => {
         if (haveParameters) {
             //saving value
             await message.deferReply({ flags: MessageFlags.Ephemeral });
-            SaveValueToDB(message, bot, "recapitulatif", undefined, true)
+            SaveValueToDB(message, bot, "recapitulatif", undefined)
                 .then(result => {
                 make_log(true, message);
                 displayEmbedsMessage(message, new EmbedBuilder()
@@ -32,20 +40,56 @@ export const run = async (bot, message) => {
                 .catch(err => { throw err; });
         }
         else {
-            //getting value
+            //getting values
             await message.deferReply();
-            await getMostRecentValueFromDB(message, "lien_recap", "recapitulatif", "idRecap", bot)
+            await getValueFromDB(message, "*", "recapitulatif", Reunion.id, bot, "date")
                 .then(async (result) => {
-                if (result) {
-                    make_log(true, message);
-                    return message.editReply(`Le lien du dernier récap est actuellement : ${result}`);
+                if (!result) {
+                    await message.editReply("Il n'y a aucun récap actuellement :(");
+                    return;
                 }
-                else {
-                    make_log(true, message);
-                    return message.editReply("Il n'y a pas de lien de recap actuellement :(");
+                if (!isRecap_tArray(result))
+                    return;
+                let listeRecap = [];
+                for (const recap of result) {
+                    if (!recap.date)
+                        continue;
+                    const day = recap.date.getDay() >= 11 ? `${recap.date.getDay() - 1}` : `0${recap.date.getDay() - 1}`;
+                    const month = recap.date.getMonth() >= 9 ? `${recap.date.getMonth() + 1}` : `0${recap.date.getMonth() + 1}`;
+                    const date = `${day}/${month}`;
+                    listeRecap.push({ label: date, value: recap.lien_recap, description: `Récapitulatif posté le ${date}` });
                 }
-            }).catch(async (err) => {
-                throw err;
+                const selectMenu = new StringSelectMenuBuilder()
+                    .setCustomId(message.id)
+                    .setPlaceholder("Choisissez une date de récap")
+                    .setMinValues(1)
+                    .setMaxValues(1)
+                    .setOptions(listeRecap.map(v => new StringSelectMenuOptionBuilder()
+                    .setDescription(v.description)
+                    .setValue(v.value)
+                    .setLabel(v.label)));
+                const actionRow = new ActionRowBuilder().addComponents(selectMenu);
+                const response = await message.editReply({ components: [actionRow] });
+                const collector = response.createMessageComponentCollector({
+                    componentType: ComponentType.StringSelect,
+                    time: 100000
+                });
+                collector.on("end", async (interaction) => {
+                    selectMenu.setPlaceholder("Out of time");
+                    selectMenu.setDisabled(true);
+                    await response.edit({ components: [actionRow] });
+                });
+                collector.on("collect", async (interaction) => {
+                    if (!interaction.values.length) {
+                        await interaction.reply("OK");
+                        return;
+                    }
+                    if (interaction.values.length > 1) {
+                        await interaction.reply("HOW");
+                        return;
+                    }
+                    interaction.reply("Le lien de ce récapitulatif est : " + interaction.values[0]);
+                });
             });
         }
     }

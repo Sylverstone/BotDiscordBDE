@@ -14,6 +14,14 @@ export const option = [
         .setRequired(false)
         .addChoices({ name: "Oui", value: "Oui" })
 ];
+export const isSqlReunion_t = (value) => {
+    return value !== null && typeof value === "object" && "idReunion" in value && "GuildId" in value && "sujet" in value
+        && "lieu" in value && "info_en_plus" in value && "date" in value && "heuredebut" in value && "heurefin" in value
+        && "reunion_name" in value;
+};
+export const isSqlReunion_tArray = (value) => {
+    return Array.isArray(value) && value.every(val => isSqlReunion_t(val));
+};
 export function isReunion(result) {
     return (result !== null && typeof result === "object"
         && "date" in result && "sujet" in result
