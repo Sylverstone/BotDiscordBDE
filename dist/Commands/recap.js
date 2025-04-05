@@ -4,7 +4,6 @@ import "dotenv/config";
 import handleError from "../Fonctions/handleError.js";
 import make_log from "../Fonctions/makeLog.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
-import { Reunion } from "../Enum/Reunion.js";
 export const description = "Cette commande permet de recuperer les derniers récaps | set un récap";
 export const name = "recap";
 export const howToUse = "`/recap` vous permet de faire *2* choses.\nPremière utilisation : `/recap` en entrant cette commande Vous aurez le choix entre plusieurs date de récapitulatif. Les choix sont valables 100s.\nDeuxième utilisation : `/recap lien_recap` la commande sauvegarde le nouveau lien.";
@@ -42,7 +41,7 @@ export const run = async (bot, message) => {
         else {
             //getting values
             await message.deferReply();
-            await getValueFromDB(message, "*", "recapitulatif", Reunion.id, bot, "date")
+            await getValueFromDB(message, "*", "recapitulatif", "idReunion", bot, "date")
                 .then(async (result) => {
                 if (!result) {
                     await message.editReply("Il n'y a aucun récap actuellement :(");
@@ -54,7 +53,7 @@ export const run = async (bot, message) => {
                 for (const recap of result) {
                     if (!recap.date)
                         continue;
-                    const day = recap.date.getDay() >= 11 ? `${recap.date.getDay() - 1}` : `0${recap.date.getDay() - 1}`;
+                    const day = recap.date.getDate() >= 11 ? `${recap.date.getDate()}` : `0${recap.date.getDate()}`;
                     const month = recap.date.getMonth() >= 9 ? `${recap.date.getMonth() + 1}` : `0${recap.date.getMonth() + 1}`;
                     const date = `${day}/${month}`;
                     listeRecap.push({ label: date, value: recap.lien_recap, description: `Récapitulatif posté le ${date}` });

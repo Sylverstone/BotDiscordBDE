@@ -7,14 +7,11 @@ import {
 } from "discord.js";
 import {getValueFromDB, SaveValueToDB} from "../Fonctions/DbFunctions.js";
 import "dotenv/config"
-import CBot, {isScript_t} from "../Class/CBot.js";
+import CBot from "../Class/CBot.js";
 import handleError from "../Fonctions/handleError.js";
 import make_log from "../Fonctions/makeLog.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 import {Reunion} from "../Enum/Reunion.js";
-import {isSqlReunion_t,SqlReunion_t,isSqlReunion_tArray} from "./Reunion/reunion.js";
-import {pathToFileURL} from "url";
-import {Color} from "../Enum/Color";
 
 export const description = "Cette commande permet de recuperer les derniers récaps | set un récap";
 export const name = "recap";
@@ -74,7 +71,7 @@ export const run = async(bot : CBot, message : CommandInteraction) => {
         {
             //getting values
             await message.deferReply();
-            await getValueFromDB(message,"*","recapitulatif",Reunion.id,bot,"date")
+            await getValueFromDB(message,"*","recapitulatif","idReunion",bot,"date")
                 .then(async result => {
                     if(!result)
                     {
@@ -88,7 +85,7 @@ export const run = async(bot : CBot, message : CommandInteraction) => {
                     {
                         if(!recap.date)
                             continue;
-                        const day : string = recap.date.getDay() >= 11 ? `${recap.date.getDay() - 1}` : `0${recap.date.getDay() - 1}`;
+                        const day : string = recap.date.getDate() >= 11 ? `${recap.date.getDate()}` : `0${recap.date.getDate()}`;
                         const month : string = recap.date.getMonth() >= 9 ? `${recap.date.getMonth() + 1}` : `0${recap.date.getMonth() + 1}`;
                         const date : string = `${day}/${month}`;
                         listeRecap.push({label : date, value : recap.lien_recap, description : `Récapitulatif posté le ${date}`});
