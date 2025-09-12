@@ -16,7 +16,7 @@ import {
     Guild,
     GuildScheduledEvent
 } from "discord.js"
-import { Connection,  } from "mysql2/typings/mysql/lib/Connection";
+import { Connection } from "mysql2";
 import {CEvenement} from "./Evenement/Evenement.js";
 import {CReunion} from "./Evenement/Reunion.js";
 

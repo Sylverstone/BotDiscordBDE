@@ -100,6 +100,7 @@ export function isEventArray(value: unknown): value is Evenement_t[] {
 export const  run = async(bot : CBot, message : CommandInteraction) => {
     
     try {
+        if(!message.isChatInputCommand()) return;
         const length = message.options.data.length;
         if( length <= 0 )
             await displayEvent(message,bot);

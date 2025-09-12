@@ -3,6 +3,7 @@ import { CommandInteraction } from "discord.js";
 export const messageCommandToString = (message : CommandInteraction) : string => 
 {
     let finalText : string = `${message.commandName} `;
+    if(!message.isChatInputCommand()) return "";
     message.options.data.forEach((option) => {
         finalText += `${option.name}:${option.value} `;
     });

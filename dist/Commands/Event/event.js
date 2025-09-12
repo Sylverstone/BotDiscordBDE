@@ -56,6 +56,8 @@ export function isEventArray(value) {
 }
 export const run = async (bot, message) => {
     try {
+        if (!message.isChatInputCommand())
+            return;
         const length = message.options.data.length;
         if (length <= 0)
             await displayEvent(message, bot);

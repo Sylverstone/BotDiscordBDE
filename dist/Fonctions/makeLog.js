@@ -1,5 +1,7 @@
 export const messageCommandToString = (message) => {
     let finalText = `${message.commandName} `;
+    if (!message.isChatInputCommand())
+        return "";
     message.options.data.forEach((option) => {
         finalText += `${option.name}:${option.value} `;
     });

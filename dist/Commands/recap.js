@@ -23,6 +23,8 @@ const isRecap_tArray = (value) => {
 };
 export const run = async (bot, message) => {
     try {
+        if (!message.isChatInputCommand())
+            return;
         let haveParameters = false;
         haveParameters = message.options.data.length >= 1;
         if (haveParameters) {

@@ -1,6 +1,6 @@
 import { CommandInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import "dotenv/config"
-import CBot from "../Class/CBot";
+import CBot from "../Class/CBot.js";
 import displayEmbedsMessage from "../Fonctions/displayEmbedsMessage.js";
 import { deleteFromTableWithName } from "../Fonctions/DbFunctions.js";
 import { Reunion } from "../Enum/Reunion.js";

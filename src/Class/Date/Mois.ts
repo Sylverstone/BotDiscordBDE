@@ -1,4 +1,4 @@
-import annee  from "./Annee";
+import annee  from "./Annee.js";
 export default class mois
 {
     private _numMois : number;

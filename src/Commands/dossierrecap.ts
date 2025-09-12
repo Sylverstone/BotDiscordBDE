@@ -21,6 +21,8 @@ export const howToUse = "Cette commande vous permet de récuper le dossier dans 
 
 export const  run = async(bot : CBot, message : CommandInteraction) => {
     try{
+        if(!message.isChatInputCommand()) return;
+        
         let haveParameters = false;
         haveParameters = message.options.data.length >= 1;
     

@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "discord.js";
-import CBot from "../Class/CBot";
+import CBot from "../Class/CBot.js";
 import { EVentType } from "../Enum/EventType.js";
 import splitNumber from "./splitHeure.js";
 import { NodeModuleEmitKind } from "ts-node";

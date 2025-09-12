@@ -15,6 +15,8 @@ export const optionUser = [
 export const run = async (bot, message) => {
     if (!message.guild)
         return;
+    if (!message.isChatInputCommand())
+        return;
     const param_name = message.options.get("cible");
     if (!param_name)
         return;

@@ -11,6 +11,7 @@ export type returnOptionToObj_t = {optionObject : listCommandObject_t, ObjectIsR
 export default function transfromOptionToObject(message : CommandInteraction) : listCommandObject_t {
     let optionObject : listCommandObject_t = {};
     
+    if(!message.isChatInputCommand()) return optionObject;
     let option = message.options.data;
     if(option !== null)
     {

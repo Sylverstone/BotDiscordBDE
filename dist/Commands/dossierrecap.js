@@ -16,6 +16,8 @@ export const option = [
 export const howToUse = "Cette commande vous permet de récuper le dossier dans lequel sont stocké les récap de réunion de votre serveur.\nPour simplement récuperer ce dossier vous devez entrer `/dossierrecap`.\n si vous voulez changer ce lien entrez la commande `/dossierrecap 'lien'` où lien est le nouveau lien du dossier.";
 export const run = async (bot, message) => {
     try {
+        if (!message.isChatInputCommand())
+            return;
         let haveParameters = false;
         haveParameters = message.options.data.length >= 1;
         if (!haveParameters) {

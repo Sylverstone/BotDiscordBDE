@@ -1,4 +1,4 @@
-import CBot from "../Class/CBot";
+import CBot from "../Class/CBot.js";
 
 export default async function actualise_events(bot : CBot)
 {

@@ -82,6 +82,7 @@ const run = async (bot : CBot, message : CommandInteraction) =>
 {
 
     try {
+        if(!message.isChatInputCommand()) return;
         const length : number = message.options.data.length;
         if(length <= 0)
             await displayReunion(message,bot)

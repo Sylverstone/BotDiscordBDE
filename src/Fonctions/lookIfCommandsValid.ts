@@ -4,7 +4,7 @@ import __dirname from '../dirname.js';
 import * as path from 'path';
 
 import { pathToFileURL } from 'url';
-import { capFirstLetter } from '../Events/CommandInteraction';
+import { capFirstLetter } from '../Events/CommandInteraction.js';
 export default function lookIfCommandsValid(commandName : string)
 {
     const specialFile = ["event",'reunion']

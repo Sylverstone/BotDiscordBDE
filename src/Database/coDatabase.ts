@@ -1,6 +1,6 @@
 import "dotenv/config"
 import * as mysql from "mysql2"
-import { Connection } from "mysql2/typings/mysql/lib/Connection";
+import { Connection } from "mysql2";
 
 let connection : Connection;
 const inServ = process.env.InSERV;

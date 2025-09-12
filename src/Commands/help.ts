@@ -1,6 +1,6 @@
 import { CommandInteraction, Message, MessageFlags } from "discord.js";
 import "dotenv/config"
-import CBot from "../Class/CBot";
+import CBot from "../Class/CBot.js";
 import make_log from "../Fonctions/makeLog.js";
 import handleError from "../Fonctions/handleError.js";
 import {Color} from "../Enum/Color.js";

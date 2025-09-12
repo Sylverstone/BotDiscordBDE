@@ -1,4 +1,4 @@
-import { Connection } from "mysql2/typings/mysql/lib/Connection";
+import { Connection } from "mysql2";
 
 export default function testCo(connection : Connection)
 {
