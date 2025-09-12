@@ -43,6 +43,7 @@ export const run = async (bot, message) => {
             await message.deferReply();
             await getValueFromDB(message, "*", "recapitulatif", "idReunion", bot, "date")
                 .then(async (result) => {
+                console.log(result);
                 if (!result) {
                     await message.editReply("Il n'y a aucun récap actuellement :(");
                     return;
@@ -57,6 +58,10 @@ export const run = async (bot, message) => {
                     const month = recap.date.getMonth() >= 9 ? `${recap.date.getMonth() + 1}` : `0${recap.date.getMonth() + 1}`;
                     const date = `${day}/${month}`;
                     listeRecap.push({ label: date, value: recap.lien_recap, description: `Récapitulatif posté le ${date}` });
+                }
+                if (listeRecap.length <= 0) {
+                    await message.editReply("Il n'y a aucun récap valide :(");
+                    return;
                 }
                 const selectMenu = new StringSelectMenuBuilder()
                     .setCustomId(message.id)

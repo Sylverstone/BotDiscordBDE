@@ -6,6 +6,8 @@ import { pathToFileURL } from "url";
 import "dotenv/config";
 const setupLoad = async (bot, guildIds) => {
     const ext = ".js";
+    const Guilds = bot.guilds.cache.get(guildIds[0]);
+    console.log(Guilds?.channels.cache.values());
     const listeFileCommands = readdirSync(path.join(__dirname, "Commands"))
         .filter(file => file.endsWith(ext))
         .map(file => path.join(__dirname, "Commands", file));
