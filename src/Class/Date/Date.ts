@@ -30,7 +30,8 @@ export default class date
             const dateSplit = strDate.split(" ");
             if(dateSplit.length === 1)
                 dateSplit.push("00:00:00");
-            
+
+            dateSplit[0] = dateSplit[0].replace("/","-");
             const datePart = dateSplit[0].split("-");
     
             if(datePart.length !== 3) throw new Error("Date invalide");

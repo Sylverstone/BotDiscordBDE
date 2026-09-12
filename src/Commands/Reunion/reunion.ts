@@ -52,6 +52,7 @@ export const isSqlReunion_tArray = (value : unknown): value is SqlReunion_t[] =>
 }
 
 export interface reunion_t{
+    idReunion : string
     date : Date | string | date,
     sujet : string,
     lieu : string,
@@ -59,6 +60,8 @@ export interface reunion_t{
     heuredebut : number,
     heurefin : number,
     reunion_name : string,
+    rappel_reunion : boolean,
+    rappel_matinal : boolean,
 }
 
 export function isReunion(result : unknown) : result is reunion_t

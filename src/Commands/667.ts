@@ -9,7 +9,7 @@ export const name = "667";
 
 export const onlyGuild = true;
 export const howToUse = "Vous ne pouvez pas savoir comment utiliser cette commande";
-
+export const adminOnly = true;
 export const optionUser = [
  
     new SlashCommandUserOption()

@@ -1,22 +1,23 @@
 import {
+    ButtonInteraction,
     Client,
     Collection,
-    GatewayIntentBits,
-    Partials,
-    SlashCommandStringOption,
-    SlashCommandIntegerOption,
-    SlashCommandUserOption,
-    SlashCommandNumberOption,
-    SlashCommandBooleanOption,
-    ModalSubmitInteraction,
-    ButtonInteraction,
-    Message,
     CommandInteraction,
     Events,
+    GatewayIntentBits,
     Guild,
-    GuildScheduledEvent
+    GuildScheduledEvent,
+    Message,
+    ModalSubmitInteraction,
+    Partials,
+    SlashCommandBooleanOption,
+    SlashCommandChannelOption,
+    SlashCommandIntegerOption,
+    SlashCommandNumberOption,
+    SlashCommandStringOption,
+    SlashCommandUserOption
 } from "discord.js"
-import { Connection } from "mysql2";
+import {Connection} from "mysql2";
 import {CEvenement} from "./Evenement/Evenement.js";
 import {CReunion} from "./Evenement/Reunion.js";
 
@@ -36,7 +37,9 @@ export type script_t =
     optionInt? : SlashCommandIntegerOption[] ;
     optionUser? : SlashCommandUserOption[] ;
     optionNum? : SlashCommandNumberOption[] ;
+    optionChannel? : SlashCommandChannelOption[];
     optionBoolean? : SlashCommandBooleanOption[] ;
+    adminOnly? : boolean;
 }
 
 export type interaction_t = CommandInteraction | Message | Guild | GuildScheduledEvent | ModalSubmitInteraction | ButtonInteraction;
@@ -74,13 +77,15 @@ export default class CBot extends Client{
                 GatewayIntentBits.Guilds,
                 GatewayIntentBits.GuildMembers,
                 GatewayIntentBits.GuildMessages,
+                GatewayIntentBits.GuildMessageReactions,
+
                 GatewayIntentBits.MessageContent,
                 GatewayIntentBits.DirectMessages,
                 GatewayIntentBits.DirectMessageTyping,
                 GatewayIntentBits.GuildModeration,
                 GatewayIntentBits.GuildScheduledEvents
             ],
-            partials : [Partials.Channel],
+            partials : [Partials.Channel, Partials.Reaction, Partials.Message, Partials.User],
         })
 
         this.commands = new Collection();

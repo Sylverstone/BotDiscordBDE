@@ -1,6 +1,6 @@
 import { readdirSync } from "fs";
 import  * as path from "path";
-import { SlashCommandBuilder, REST, Routes } from "discord.js";
+import {SlashCommandBuilder, REST, Routes, PermissionsBitField,PermissionFlagsBits} from "discord.js";
 import __dirname from "../../dirname.js";
 import { pathToFileURL } from "url";
 import CBot, { script_t } from "../../Class/CBot.js";
@@ -10,11 +10,11 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
 {
     const ext = ".js";
     const Guilds = bot.guilds.cache.get(guildIds[0]);
-    console.log(Guilds?.channels.cache.values());
     const listeFileCommands = readdirSync(path.join(__dirname,"Commands"))
         .filter(file => file.endsWith(ext))
         .map(file => path.join(__dirname,"Commands", file));
 
+    console.log(listeFileCommands);
     const additionalFile = ["Event","Reunion"];
     for(let dos of additionalFile)
     {
@@ -28,14 +28,19 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
     for(const file of listeFileCommands)
     {
         const fileUrl = pathToFileURL(file).href
+
         
         const commande : script_t = await import(fileUrl);
+        const adminOnly = commande.adminOnly ?? false;
         bot.commands.set(commande.name, commande)
         
         //creation de la slash commande
         let slashCommand = new SlashCommandBuilder()
             .setName(commande.name)
             .setDescription(commande.description)
+
+        if(adminOnly)
+            slashCommand.setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
         //Récupération des options de la slashCommand
         if(commande.option !== undefined)
@@ -70,6 +75,13 @@ const setupLoad = async (bot : CBot, guildIds : string[]) =>
             for (const option of commande.optionBoolean)
             {
                 slashCommand.addBooleanOption(option);
+            }
+        }
+        if(commande.optionChannel !== undefined)
+        {
+            for (const option of commande.optionChannel)
+            {
+                slashCommand.addChannelOption(option);
             }
         }
         SlashCommands.push(slashCommand);

@@ -4,11 +4,8 @@ export default function testCo(connection : Connection)
 {
     try
     {
-        connection.ping((err) => {
-            if(err) throw err;
-            console.log("[ConnectionTest] Connection test succed")
-            return true;
-        });
+        connection.ping();
+        //console.log("ping super");
     }
     catch(err)
     {

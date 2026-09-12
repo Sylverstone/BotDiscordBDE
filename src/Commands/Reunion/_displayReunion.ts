@@ -12,7 +12,7 @@ export default async function displayReunion(message : CommandInteraction, bot :
     await message.deferReply();
     await getValueFromDB(message,"date, heuredebut, heurefin, lieu, info_en_plus, sujet,reunion_name","Reunion","idReunion",bot)
     .then(async(result) => {            
-        if(result === null) return message.editReply("Il n'y a pas de reunion l'instant.");
+        if(result === null) return message.editReply("Il n'y a pas de reunion pour l'instant.");
         if(isReunionArray(result))
         {
             const allfuturReunion = filterFuturEvent(result);
